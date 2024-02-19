@@ -45,3 +45,4 @@ jobs:
       with:
         name: my-build-artifact
         path: ${{github.workspace}}/software/build/betterflight.bin
+        retain-artifact: true
