@@ -55,9 +55,7 @@ add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32F722xx -DDEBUG -DUSE_HAL_DRIVER 
 
 file(GLOB_RECURSE SOURCES "Core/*.*" "Drivers/*.*" "Core/*.*" "Drivers/*.*")
 
-set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F722RETX_FLASH.ld
-        Core/Src/misc.c
-        Core/Inc/misc.h)
+set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F722RETX_FLASH.ld)
 
 add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
 add_link_options(-mcpu=cortex-m7 -mthumb -mthumb-interwork)
