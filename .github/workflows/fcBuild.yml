@@ -45,10 +45,10 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: betterflight.bin
-        path: build/betterflight.bin
+        path: software/build/betterflight.bin
 
     - name: Upload Firmware Binary
       uses: actions/upload-artifact@v3
       with:
         name: betterflight.elf
-        path: build/betterflight.elf
+        path: software/build/betterflight.elf
