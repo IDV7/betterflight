@@ -8,17 +8,15 @@
 
 void myinit(void)
 {
-    //just sdfa test commit to test actions, test 4
 }
 
 
 void mymain(void)
 {
         while (1) {
-            printf("Hello, World!\n");
-            LED_Toggle();
+            //printf("Hello, World!\n");
+            HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
             HAL_Delay(1000);
-
         }
 }
 
