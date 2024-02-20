@@ -23,13 +23,13 @@ jobs:
     - name: Install GNU Arm Embedded Toolchain - ${{ matrix.gcc }}
       uses: carlosperate/arm-none-eabi-gcc-action@v1
     - run: arm-none-eabi-gcc --version
-     #²- uses: actions/checkout@v3
-
+    
+    - uses: actions/checkout@v3
+    
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/software/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${{github.workspace}}/software
-      
+      run: cmake ${{github.workspace}}/software -B ${{github.workspace}}/software/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
     - name: Build
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/software/build --config ${{env.BUILD_TYPE}}
@@ -39,3 +39,16 @@ jobs:
       # Execute tests defined by the CMake configuration.
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C ${{env.BUILD_TYPE}}
+
+
+    - name: Upload Firmware Package 
+      uses: actions/upload-artifact@v3
+      with:
+        name: betterflight.bin
+        path: software/build/betterflight.bin
+
+    - name: Upload Firmware Binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: betterflight.elf
+        path: software/build/betterflight.elf
