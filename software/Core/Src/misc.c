@@ -6,17 +6,25 @@
 #include "misc.h"
 #include "main.h"
 
-void LED_Toggle(void)
+void LED_toggle(void)
 {
     HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
 }
 
-void LED_On(void)
+void LED_on(void)
+{
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+}
+
+void LED_off(void)
 {
     HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
 }
 
-void LED_Off(void)
+void LED_set(bool state)
 {
-    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+    if (state)
+        LED_on();
+    else
+        LED_off();
 }

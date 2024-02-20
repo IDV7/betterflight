@@ -5,9 +5,11 @@
 #ifndef BETTERFLIGHT_MISC_H
 #define BETTERFLIGHT_MISC_H
 
-void LED_Toggle(void);
-void LED_On(void);
-void LED_Off(void);
+typedef enum {false = 0, true = 1} bool;
 
+void LED_toggle(void);
+void LED_on(void);
+void LED_off(void);
+void LED_set(bool state);
 
 #endif //BETTERFLIGHT_MISC_H
