@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "misc.h"
+#include <stdarg.h>
+
 
 log_t logging;
 
@@ -32,43 +34,83 @@ uint8_t * get_log_level_color_attr(log_level_t log_level) {
     }
 }
 
-void log_msg(log_level_t log_level,uint8_t *message) {
+void log_msg(log_level_t log_level, const uint8_t *format, ...) {
     if (log_level < logging.level) {
         return;
     }
+
+    va_list args;
+    va_start(args, format);
+
+    printf("%s", get_log_level_color_attr(log_level));
     switch (log_level) {
         case LOG_LEVEL_DEBUG:
-            printf("%s[DEBUG] %s%s\r\n",get_log_level_color_attr(log_level), message, ANSI_COLOR(COLOR_RESET));
+            printf("[DEBUG] ");
             break;
         case LOG_LEVEL_INFO:
-            printf("%s[INFO] %s%s\r\n",get_log_level_color_attr(log_level), message, ANSI_COLOR(COLOR_RESET));
+            printf("[INFO] ");
             break;
         case LOG_LEVEL_WARN:
-            printf("%s[WARN] %s%s\r\n",get_log_level_color_attr(log_level),message, ANSI_COLOR(COLOR_RESET));
+            printf("[WARN] ");
             break;
         case LOG_LEVEL_ERROR:
-            printf("%s[ERR] %s%s\r\n",get_log_level_color_attr(log_level),message, ANSI_COLOR(COLOR_RESET));
+            printf("[ERR] ");
             break;
         default:
             break;
     }
+    vprintf((char*)format, args);
+    printf("%s\r\n", ANSI_COLOR(COLOR_RESET));
+
+    va_end(args);
 }
 
-void LOGD(uint8_t *message) {
-    log_msg(LOG_LEVEL_DEBUG, message);
+void LOGD(const uint8_t *format, ...) {
+    va_list args;
+    va_start(args, format);
+    log_msg(LOG_LEVEL_DEBUG, format, args);
+    va_end(args);
 }
-void LOGI(uint8_t *message) {
-    log_msg(LOG_LEVEL_INFO, message);
+
+void LOGI(const uint8_t *format, ...) {
+    va_list args;
+    va_start(args, format);
+    log_msg(LOG_LEVEL_INFO, format, args);
+    va_end(args);
 }
-void LOGW(uint8_t *message) {
-    log_msg(LOG_LEVEL_WARN, message);
+
+void LOGW(const uint8_t *format, ...) {
+    va_list args;
+    va_start(args, format);
+    log_msg(LOG_LEVEL_WARN, format, args);
+    va_end(args);
 }
-void LOGE(uint8_t *message) {
-    log_msg(LOG_LEVEL_ERROR, message);
+
+void LOGE(const uint8_t *format, ...) {
+    va_list args;
+    va_start(args, format);
+    log_msg(LOG_LEVEL_ERROR, format, args);
+    va_end(args);
 }
-void LOGH(uint8_t *message) {
-    printf("%s%s%s\n", ANSI_COLOR(COLOR_HIGHLIGHT), message, ANSI_COLOR(COLOR_RESET));
+
+void LOGH(const uint8_t *format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    printf("%s", ANSI_COLOR(COLOR_HIGHLIGHT));
+    vprintf((char*)format, args);
+    printf("%s\n", ANSI_COLOR(COLOR_RESET));
+
+    va_end(args);
 }
-void LOG(uint8_t *message) {
-    printf("%s%s\n", ANSI_COLOR(COLOR_RESET), message);
+
+void LOG(const uint8_t *format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    printf(ANSI_COLOR(COLOR_RESET));
+    vprintf((char*)format, args);
+    printf("\n");
+
+    va_end(args);
 }

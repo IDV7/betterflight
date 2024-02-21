@@ -38,12 +38,12 @@ typedef enum {
 } type_color_t;
 
 void log_init(log_level_t log_level, bool color);
-void log_msg(log_level_t log_level,uint8_t *message);
-void LOGD(uint8_t *message);
-void LOGI(uint8_t *message);
-void LOGW(uint8_t *message);
-void LOGE(uint8_t *message);
-void LOGH(uint8_t *message);
-void LOG(uint8_t *message);
+void log_msg(log_level_t log_level, const uint8_t *format, ...);
+void LOGD(const uint8_t *format, ...);
+void LOGI(const uint8_t *format, ...);
+void LOGW(const uint8_t *format, ...);
+void LOGE(const uint8_t *format, ...);
+void LOGH(const uint8_t *format, ...);
+void LOG(const uint8_t *format, ...);
 
 #endif //BETTERFLIGHT_LOG_H
