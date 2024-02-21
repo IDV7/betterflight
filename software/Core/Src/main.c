@@ -29,6 +29,7 @@
 
 #include "mymain.h"
 #include "log.h"
+#include "misc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -72,7 +73,6 @@ static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USART6_UART_Init(void);
 /* USER CODE BEGIN PFP */
-extern uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -139,16 +139,16 @@ int main(void)
   MX_USART6_UART_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
+
   myinit();
   mymain();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint8_t buffer[]="Hello World!";
+
   while (1)
   {
-      //CDC_Transmit_FS(buffer, sizeof(buffer));
       LOGW("In final loop, should not be here!");
       HAL_Delay(1000);
     /* USER CODE END WHILE */

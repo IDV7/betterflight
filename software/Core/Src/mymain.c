@@ -6,14 +6,15 @@
 #include <stdio.h>
 
 
-
 void myinit(void)
 {
+    printf("Hello World!\n");
     log_init(LOG_LEVEL_DEBUG, true);
-    LOGI("Initializing...");
+    LOGI("Starting Initialization...");
     LED_on();
 
-    LOGI("Initialized.");
+
+    LOGI("Finished Initialization");
     for (int i = 0; i < 20; i++) {
         HAL_Delay(50);
         LED_toggle();
@@ -24,9 +25,8 @@ void myinit(void)
 
 void mymain(void)
 {
-    uint8_t buffer[]="Hello World!";
     while (1) {
-        LOGD("Hello World!");
+        printf("Hello World!\n");
         HAL_Delay(1000);
         LED_toggle();
     }
