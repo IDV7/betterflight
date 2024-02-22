@@ -26,9 +26,9 @@ void myinit(void)
 void mymain(void)
 {
     while (1) {
-        uint32_t brr_value = huart2.Instance->BRR;
+        uint32_t brr_value = huart2.Instance->GTPR;
         LOGD("BRR: %d\n", brr_value);
-        LOGD("Test value: %d\n", 1234);
+
         HAL_Delay(1000);
         LED_toggle();
     }
