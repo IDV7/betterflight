@@ -38,7 +38,6 @@ typedef enum {
 } type_color_t;
 
 void log_init(log_level_t log_level, bool color);
-void log_msg(log_level_t log_level, const uint8_t *format, ...);
 void LOGD(const uint8_t *format, ...);
 void LOGI(const uint8_t *format, ...);
 void LOGW(const uint8_t *format, ...);

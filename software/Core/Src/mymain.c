@@ -1,14 +1,15 @@
 #include "mymain.h"
+
+#include <stdio.h>
+
 #include "gyro.h"
 #include "main.h"
 #include "misc.h"
 #include "log.h"
-#include <stdio.h>
 
 
 void myinit(void)
 {
-    printf("Hello World!\n");
     log_init(LOG_LEVEL_DEBUG, true);
     LOGI("Starting Initialization...");
     LED_on();
@@ -23,12 +24,12 @@ void myinit(void)
 }
 
 
-void mymain(void)
-{
+void mymain(void) {
     while (1) {
-        printf("Hello World!\n");
+
+        LOGD("Hello from mymain!");
+
         HAL_Delay(1000);
         LED_toggle();
     }
 }
-
