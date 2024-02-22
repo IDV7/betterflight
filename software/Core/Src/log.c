@@ -34,13 +34,10 @@ uint8_t * get_log_level_color_attr(log_level_t log_level) {
     }
 }
 
-void log_msg(log_level_t log_level, const uint8_t *format, ...) {
+void log_msg(log_level_t log_level, const uint8_t *format, va_list args) {
     if (log_level < logging.level) {
         return;
     }
-
-    va_list args;
-    va_start(args, format);
 
     printf("%s", get_log_level_color_attr(log_level));
     switch (log_level) {
@@ -61,8 +58,6 @@ void log_msg(log_level_t log_level, const uint8_t *format, ...) {
     }
     vprintf((char*)format, args);
     printf("%s\r\n", ANSI_COLOR(COLOR_RESET));
-
-    va_end(args);
 }
 
 void LOGD(const uint8_t *format, ...) {

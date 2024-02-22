@@ -26,7 +26,9 @@ void myinit(void)
 void mymain(void)
 {
     while (1) {
-        printf("Hello World!\n");
+        uint32_t brr_value = huart2.Instance->BRR;
+        LOGD("BRR: %d\n", brr_value);
+        LOGD("Test value: %d\n", 1234);
         HAL_Delay(1000);
         LED_toggle();
     }
