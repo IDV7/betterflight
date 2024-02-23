@@ -11,7 +11,7 @@ typedef struct {
     int patch;
 } version_t;
 
-#define version_to_string(version, version_string) sprintf((char*)version_string, "%d.%d.%d", version.major, version.minor, version.patch)
+#define VERSION_TO_STRING(version, version_string) sprintf((char*)version_string, "%d.%d.%d", version.major, version.minor, version.patch)
 
 #define CLI_VERSION (version_t){0, 1, 0}
 #define FW_VERSION (version_t){0, 1, 0}

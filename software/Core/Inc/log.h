@@ -19,7 +19,7 @@ typedef enum {
 typedef struct {
     log_level_t level;
     bool color;
-} log_t;
+} log_handle_t;
 
 typedef enum {
     COLOR_RESET = 0,
@@ -38,11 +38,12 @@ typedef enum {
 } type_color_t;
 
 void log_init(log_level_t log_level, bool color);
+log_level_t get_log_level();
 void LOGD(const uint8_t *format, ...);
 void LOGI(const uint8_t *format, ...);
 void LOGW(const uint8_t *format, ...);
 void LOGE(const uint8_t *format, ...);
 void LOGH(const uint8_t *format, ...);
-void LOG(const uint8_t *format, ...);
+void LOG(uint8_t *format, ...);
 
 #endif //BETTERFLIGHT_LOG_H

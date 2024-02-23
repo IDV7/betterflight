@@ -20,4 +20,7 @@ typedef struct {
     version_t version;
 } cli_t;
 
+void cli_process();
+void cli_rx_callback();
+
 #endif //BETTERFLIGHT_CLI_H
