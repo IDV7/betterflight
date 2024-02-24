@@ -14,7 +14,7 @@
 uint8_t cli_rx_buffer[64];
 bool new_data_flag = false;
 
-void cli_handle_cmd(cli_cmd_t cmd);
+void cli_handle_cmd(uint8_t *cmd_str);
 cli_cmd_t str_to_cmd(uint8_t *msg);
 
 void cli_init(cli_t cli) {
@@ -29,13 +29,20 @@ void cli_init(cli_t cli) {
 void cli_process() {
     if (new_data_flag) {
         new_data_flag = false;
-        cli_handle_cmd(str_to_cmd(cli_rx_buffer));
+        cli_handle_cmd(cli_rx_buffer);
     }
 }
 
 
 
-void cli_handle_cmd(cli_cmd_t cmd) {
+void cli_handle_cmd(uint8_t * cmd_str) {
+    cli_cmd_t cmd = str_to_cmd(cmd_str);
+
+    if (cmd != CLI_CMD_NONE) {
+        LOG("-> %s", cmd_str);
+    }
+
+
     switch (cmd) {
         case CLI_CMD_HELP:
             LOGI("Help command received");
@@ -57,13 +64,12 @@ void cli_handle_cmd(cli_cmd_t cmd) {
             LOGI("Save command received");
             break;
         case CLI_CMD_DFU:
-            LOGI("DFU command received");
+            LOGW("Reseting into DFU mode...");
+            HAL_Delay(100);
+            reboot_into_dfu();
             break;
         case CLI_CMD_NONE:
             LOGI("Unknown command received");
-            break;
-        default:
-            LOGW("Unknown command received, this should have been cought by str_to_cmd...");
             break;
     }
 }

@@ -103,3 +103,9 @@ int8_t strcmp_ign(const uint8_t *str1, const uint8_t *str2) {
     return result;
 }
 
+/* will write DEADBEEE on a known location in RAM, and reset the MCU */
+/* it requires you to have code in the startup file to check for this magic data and if present goto the bootloader */
+void reboot_into_dfu() {
+    *((uint32_t *)0x20000000) = 0xDEADBEEE; // magic data that is checked for in startup code
+    NVIC_SystemReset(); // reset mcu
+}

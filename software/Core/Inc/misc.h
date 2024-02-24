@@ -22,5 +22,7 @@ void none_blocking_delay(uint32_t ms, callback_t callback, uint64_t *last_millis
 void clean_str(uint8_t *str);
 int8_t strcmp_ign(const uint8_t *str1, const uint8_t *str2);
 
+void reboot_into_dfu();
+
 
 #endif //BETTERFLIGHT_MISC_H
