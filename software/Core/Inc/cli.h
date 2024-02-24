@@ -13,11 +13,15 @@ typedef enum {
     CLI_CMD_STATUS,
     CLI_CMD_VERSION,
     CLI_CMD_CONNECT,
+    CLI_CMD_DFU,
     CLI_CMD_SAVE,
 } cli_cmd_t;
 
 typedef struct {
     version_t version;
 } cli_t;
+
+void cli_process();
+void cli_rx_callback();
 
 #endif //BETTERFLIGHT_CLI_H

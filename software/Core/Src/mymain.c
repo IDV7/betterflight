@@ -6,30 +6,43 @@
 #include "main.h"
 #include "misc.h"
 #include "log.h"
+#include "cli.h"
 
+/* SETTINGS */
+#define LOG_LEVEL LOG_LEVEL_DEBUG
+// check version.h for version settings
 
-void myinit(void)
-{
-    log_init(LOG_LEVEL_DEBUG, true);
+/* EOF SETTINGS */
+
+extern uint8_t cli_rx_buffer[64];
+
+uint64_t led_toggle_last_ms = 0;
+uint64_t cli_process_last_ms = 0;
+
+void myinit(void) {
+    log_init(LOG_LEVEL, true);
+    if (get_log_level() == LOG_LEVEL_DEBUG) { // give dev time to open serial monitor when debugging
+        LED_blink_pattern(5, 4 ,50, 75, 50, 825);
+    }
+
     LOGI("Starting Initialization...");
     LED_on();
 
 
+
     LOGI("Finished Initialization");
-    for (int i = 0; i < 20; i++) {
-        HAL_Delay(50);
-        LED_toggle();
-    }
+
+
+    LED_blink_pattern(20, 2, 50, 50);
     LED_off();
 }
 
 
 void mymain(void) {
     while (1) {
-
-        LOGD("Hello from mymain!");
-
-        HAL_Delay(1000);
-        LED_toggle();
+        none_blocking_delay(1000, (callback_t) LED_toggle, &led_toggle_last_ms);
+        none_blocking_delay(25, (callback_t) cli_process, &cli_process_last_ms);
     }
 }
+
+

@@ -57,7 +57,16 @@ defined in linker script */
     .section  .text.Reset_Handler
   .weak  Reset_Handler
   .type  Reset_Handler, %function
-Reset_Handler:  
+Reset_Handler:
+/* check for magic bootloader flag in RAM, if it has been set goto Reboot_Loader section */
+  ldr r0, =0x20000000
+  ldr r1, =0xDEADBEEE
+  ldr r2, [r0, #0]
+  ldr r0, [r0, #0]
+  cmp r0, r1
+  beq Reboot_Loader
+/* EOF check for magic bootloader flag*/
+
   ldr   sp, =_estack      /* set stack pointer */
 
 /* Copy the data segment initializers from flash to SRAM */  
@@ -66,6 +75,14 @@ Reset_Handler:
   ldr r2, =_sidata
   movs r3, #0
   b LoopCopyDataInit
+
+/* Jump to DFU, will put the stackpointer on the location of the bootloader (0x1FF00000)*/
+Reboot_Loader:
+  ldr r0, =0x1FF00000
+  ldr sp, [r0, #0]
+  ldr r0, [r0, #4]
+  bx r0
+/* EOF Jump to DFU */
 
 CopyDataInit:
   ldr r4, [r2, r3]

@@ -2,17 +2,23 @@
 // Created by Isaak on 2/20/2024.
 //
 #include "log.h"
+
 #include <stdint.h>
 #include <stdio.h>
-#include "misc.h"
 #include <stdarg.h>
+#include <string.h>
 
+#include "misc.h"
 
-log_t logging;
+log_handle_t logging;
 
 void log_init(log_level_t log_level, bool color) {
     logging.level = log_level;
     logging.color = color;
+}
+
+log_level_t get_log_level() {
+    return logging.level;
 }
 
 uint8_t * get_log_level_color_attr(log_level_t log_level) {
@@ -99,13 +105,22 @@ void LOGH(const uint8_t *format, ...) {
     va_end(args);
 }
 
-void LOG(const uint8_t *format, ...) {
+void LOG(uint8_t *format, ...) {
     va_list args;
     va_start(args, format);
 
-    printf(ANSI_COLOR(COLOR_RESET));
+    //printf(ANSI_COLOR(COLOR_RESET));
     vprintf((char*)format, args);
     printf("\n");
 
     va_end(args);
+}
+
+// for debugging ascii buffers / strings
+void LOG_ascii_hex_dump(uint8_t *data) {
+    printf("[DEBUG] ASCII HEX DUMP: ");
+    for (int i = 0; i < strlen((char*)data); i++) {
+        printf("%02X ", data[i]);
+    }
+    printf("\n");
 }
