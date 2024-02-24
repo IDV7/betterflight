@@ -45,5 +45,6 @@ void LOGW(const uint8_t *format, ...);
 void LOGE(const uint8_t *format, ...);
 void LOGH(const uint8_t *format, ...);
 void LOG(uint8_t *format, ...);
+void LOG_ascii_hex_dump(uint8_t *data);
 
 #endif //BETTERFLIGHT_LOG_H

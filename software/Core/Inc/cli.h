@@ -13,6 +13,7 @@ typedef enum {
     CLI_CMD_STATUS,
     CLI_CMD_VERSION,
     CLI_CMD_CONNECT,
+    CLI_CMD_DFU,
     CLI_CMD_SAVE,
 } cli_cmd_t;
 

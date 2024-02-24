@@ -2,10 +2,13 @@
 // Created by Isaak on 2/20/2024.
 //
 #include "log.h"
+
 #include <stdint.h>
 #include <stdio.h>
-#include "misc.h"
 #include <stdarg.h>
+#include <string.h>
+
+#include "misc.h"
 
 log_handle_t logging;
 
@@ -111,4 +114,13 @@ void LOG(uint8_t *format, ...) {
     printf("\n");
 
     va_end(args);
+}
+
+// for debugging ascii buffers / strings
+void LOG_ascii_hex_dump(uint8_t *data) {
+    printf("[DEBUG] ASCII HEX DUMP: ");
+    for (int i = 0; i < strlen((char*)data); i++) {
+        printf("%02X ", data[i]);
+    }
+    printf("\n");
 }

@@ -7,6 +7,7 @@
 
 #include <stdarg.h>
 #include <malloc.h>
+#include <string.h>
 
 #include "main.h"
 #include "log.h"
@@ -72,3 +73,33 @@ void none_blocking_delay(uint32_t ms, callback_t callback, uint64_t *last_millis
         *last_millis = 0; // reset last_millis
     }
 }
+
+
+void clean_str(uint8_t *str) {
+    uint8_t *src, *dst;
+    for (src = dst = str; *src != '\0'; src++) {
+        if (*src != '\n' && *src != '\r') {
+            *dst++ = *src;
+        }
+    }
+    *dst = '\0';
+}
+
+// strcmp_ign (ign -> ignore) compares two strings, ignoring newlines and carriage returns
+int8_t strcmp_ign(const uint8_t *str1, const uint8_t *str2) {
+    // make copy to avoid modifying original strings
+    uint8_t *copy1 = (uint8_t *)strdup((char *)str1);
+    uint8_t *copy2 = (uint8_t *)strdup((char *)str2);
+
+    // remove newlines and carriage returns
+    clean_str(copy1);
+    clean_str(copy2);
+
+    int8_t result = (int8_t)strcmp((char *)copy1, (char *)copy2);
+
+    free(copy1);
+    free(copy2);
+
+    return result;
+}
+

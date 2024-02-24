@@ -22,7 +22,7 @@ uint64_t cli_process_last_ms = 0;
 void myinit(void) {
     log_init(LOG_LEVEL, true);
     if (get_log_level() == LOG_LEVEL_DEBUG) { // give dev time to open serial monitor when debugging
-        LED_blink_pattern(5, 5 ,50, 75, 50, 825);
+        LED_blink_pattern(5, 4 ,50, 75, 50, 825);
     }
 
     LOGI("Starting Initialization...");
