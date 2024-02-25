@@ -7,6 +7,8 @@
 
 #include "version.h"
 
+
+
 typedef enum {
     CLI_CMD_NONE,
     CLI_CMD_HELP,
@@ -15,11 +17,20 @@ typedef enum {
     CLI_CMD_CONNECT,
     CLI_CMD_DFU,
     CLI_CMD_SAVE,
+    CLI_CMD_REBOOT,
+    CLI_CMD_DEV1,
+    CLI_CMD_DEV2,
+    CLI_CMD_DEV3,
 } cli_cmd_t;
+
+
 
 typedef struct {
     version_t version;
 } cli_t;
+
+
+
 
 void cli_process();
 void cli_rx_callback();

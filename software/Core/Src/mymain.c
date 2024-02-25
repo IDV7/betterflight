@@ -45,4 +45,14 @@ void mymain(void) {
     }
 }
 
+/* dev callbacks for testing purpose, type devx in the cli and the corresponding function will be called */
+
+void dev1_callback(void) {
+}
+
+void dev2_callback(void) {
+}
+
+void dev3_callback(void) {
+}
 

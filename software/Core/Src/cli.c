@@ -11,11 +11,36 @@
 #include "log.h"
 #include "version.h"
 
+#define CMD_COUNT (sizeof(cli_cmd_table) / sizeof(cli_cmd_table[0]))
+
+typedef struct {
+    const char* cmd_str;
+    cli_cmd_t cmd_enum;
+} cli_cmd_info_t;
+
+const cli_cmd_info_t cli_cmd_table[] = {
+        {"help",    CLI_CMD_HELP},
+        {"status",  CLI_CMD_STATUS},
+        {"version", CLI_CMD_VERSION},
+        {"connect", CLI_CMD_CONNECT},
+        {"dfu",     CLI_CMD_DFU},
+        {"save",    CLI_CMD_SAVE},
+        {"reboot",  CLI_CMD_REBOOT},
+        {"dev1", CLI_CMD_DEV1},
+        {"dev2", CLI_CMD_DEV2},
+        {"dev3", CLI_CMD_DEV3}
+};
+
 uint8_t cli_rx_buffer[64];
 bool new_data_flag = false;
 
 void cli_handle_cmd(uint8_t *cmd_str);
-cli_cmd_t str_to_cmd(uint8_t *msg);
+cli_cmd_t str_to_cmd(const uint8_t *msg);
+
+extern void dev1_callback(void);
+extern void dev2_callback(void);
+extern void dev3_callback(void);
+
 
 void cli_init(cli_t cli) {
     LOGD("CLI Init...");
@@ -68,28 +93,33 @@ void cli_handle_cmd(uint8_t * cmd_str) {
             HAL_Delay(100);
             reboot_into_dfu();
             break;
+        case CLI_CMD_REBOOT:
+            LOGW("Rebooting...");
+            HAL_Delay(100);
+            NVIC_SystemReset();
+            break;
+        case CLI_CMD_DEV1:
+            dev1_callback();
+            break;
+        case CLI_CMD_DEV2:
+            dev2_callback();
+            break;
+        case CLI_CMD_DEV3:
+            dev3_callback();
+            break;
         case CLI_CMD_NONE:
             LOGI("Unknown command received");
             break;
     }
 }
 
-cli_cmd_t str_to_cmd(uint8_t *msg) {
-    if (strcmp_ign(msg, "help") == 0) {
-        return CLI_CMD_HELP;
-    } else if (strcmp_ign(msg, "status") == 0) {
-        return CLI_CMD_STATUS;
-    } else if (strcmp_ign(msg, "version") == 0) {
-        return CLI_CMD_VERSION;
-    } else if (strcmp_ign(msg, "connect") == 0) {
-        return CLI_CMD_CONNECT;
-    }else if (strcmp_ign(msg, "save") == 0) {
-        return CLI_CMD_SAVE;
-    } else if (strcmp_ign(msg, "dfu") == 0) {
-        return CLI_CMD_DFU;
-    } else {
-        return CLI_CMD_NONE;
+cli_cmd_t str_to_cmd(const uint8_t *msg) {
+    for (size_t i = 0; i < CMD_COUNT; i++) {
+        if (strcmp_ign(msg, (uint8_t *)cli_cmd_table[i].cmd_str) == 0) {
+            return cli_cmd_table[i].cmd_enum;
+        }
     }
+    return CLI_CMD_NONE;
 }
 
 // cli_rx_callback gets called when cli_rx_buffer gets updated with new data
