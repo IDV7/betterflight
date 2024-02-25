@@ -13,11 +13,10 @@
 // check version.h for version settings
 
 /* EOF SETTINGS */
-
-extern uint8_t cli_rx_buffer[64];
-
 uint64_t led_toggle_last_ms = 0;
 uint64_t cli_process_last_ms = 0;
+
+gyro_t gyro;
 
 void myinit(void) {
     log_init(LOG_LEVEL, true);
@@ -48,6 +47,7 @@ void mymain(void) {
 /* dev callbacks for testing purpose, type devx in the cli and the corresponding function will be called */
 
 void dev1_callback(void) {
+    gyro_init(&gyro);
 }
 
 void dev2_callback(void) {

@@ -99,12 +99,24 @@ void cli_handle_cmd(uint8_t * cmd_str) {
             NVIC_SystemReset();
             break;
         case CLI_CMD_DEV1:
-            dev1_callback();
+            if (get_log_level() != LOG_LEVEL_DEBUG) {
+                LOGE("Can't run dev command in non-debug mode. (Use `set loglevel debug` to go into debugging mode).");
+                return;
+            }
+                dev1_callback();
             break;
         case CLI_CMD_DEV2:
+            if (get_log_level() != LOG_LEVEL_DEBUG) {
+                LOGE("Can't run dev command in non-debug mode. (Use `set loglevel debug` to go into debugging mode).");
+                return;
+            }
             dev2_callback();
             break;
         case CLI_CMD_DEV3:
+            if (get_log_level() != LOG_LEVEL_DEBUG) {
+                LOGE("Can't run dev command in non-debug mode. (Use `set loglevel debug` to go into debugging mode).");
+                return;
+            }
             dev3_callback();
             break;
         case CLI_CMD_NONE:

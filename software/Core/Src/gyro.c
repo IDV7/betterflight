@@ -1,24 +1,31 @@
 #include "gyro.h"
-#include "BMI270_CONFIG.h"
-#include "main.h"
-#include "stm32f7xx_hal.h"
-#include "stm32f7xx_hal_spi.h"
+
 #include <stdio.h>
 
+#include "stm32f7xx_hal.h"
+#include "stm32f7xx_hal_spi.h"
 
-#define BMI270_CHIP_ID_REG 0x00
-#define BMI270_PWR_CONF_REG 0x7C
-#define BMI270_INIT_CTRL_REG 0x59
-#define BMI270_INTERNAL_STATUS_REG 0x21
-#define BMI270_PWR_CTRL_REG 0x7D
-#define BMI270_ACC_CONF_REG 0x40
-#define BMI270_GYR_CONF_REG 0x42
-#define BMI270_DATA_8_TO_19 0x41
-#define BMI270_DATA_START_REG 0x0C
+#include "main.h"
+#include "BMI270_CONFIG.h"
+#include "log.h"
+
+typedef enum {
+    CHIP_ID = 0x24,
+    PWR_CONF = 0x7C,
+    INIT_CTRL = 0x59,
+    INTERNAL_STATUS = 0x21,
+    PWR_CTRL = 0x7D,
+    ACC_CONF = 0x40,
+    GYR_CONF = 0x42,
+    DATA_8_TO_19 = 0x41,
+    DATA_START = 0x0C,
+} BMI270_REG_t;
+
 #define NUM_BYTES_TO_READ 12
 
 void gyro_cs_enable(void);
 void gyro_cs_disable(void);
+void gyro_send_spi(BMI270_REG_t reg, uint8_t *rx_data_ptr, uint8_t size);
 
 gyro_err_t gyro_init(gyro_t *gyro)
 {
@@ -26,49 +33,51 @@ gyro_err_t gyro_init(gyro_t *gyro)
     HAL_Delay(1000); // wait for gyro to power up
     gyro_cs_enable(); // enable chip select
 
-    //dummy read
-    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *) BMI270_CHIP_ID_REG, NULL, 1, HAL_MAX_DELAY);
+    //dummy read - configures the spi (its i2c by default)
+    gyro_send_spi(CHIP_ID, NULL, 1);
 
-    // read chip id to init spi on the BMI270
-    HAL_SPI_TransmitReceive(&hspi1, BMI270_CHIP_ID_REG, &gyro->chip_id, 1, HAL_MAX_DELAY);
-    printf("[debug] chip id: %x\n", gyro->chip_id);
+    // read chip id to verify communication
+    gyro_send_spi(CHIP_ID, &gyro->chip_id, 1);
+
+    LOGD("chip id: %x\n", gyro->chip_id);
     if (gyro->chip_id != 0x24) {
         gyro_cs_disable();
         return GYRO_ERR_CHIP_ID;
     }
 
+    gyro_cs_disable();
+    return GYRO_OK; //debugging
     // disable power save mode
-    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *) BMI270_PWR_CONF_REG, 0x00, 1, HAL_MAX_DELAY);
+    gyro_send_spi(PWR_CONF, 0x00, 1);
     HAL_Delay(1);
 
     // prepare config load
-    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *) BMI270_INIT_CTRL_REG, 0x00, 1, HAL_MAX_DELAY);
+    gyro_send_spi(INIT_CTRL, 0x00, 1);
 
 
     //burst write to reg INIT_DATA Start with byte 0
     HAL_SPI_Transmit(&hspi1, (uint8_t *) bmi270_config_file, sizeof(bmi270_config_file), HAL_MAX_DELAY);
-
     // enable power save mode
-    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *) BMI270_PWR_CONF_REG, (uint8_t*) 0x01, 1, HAL_MAX_DELAY);
+    gyro_send_spi(PWR_CONF, (uint8_t*) 0x01, 1);
 
     // check internal status
     uint8_t status = 0;
-    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *) BMI270_INTERNAL_STATUS_REG, &status, 1, HAL_MAX_DELAY);
+    gyro_send_spi(INTERNAL_STATUS, &status, 1);
     if (status != 0x01) {
         gyro_cs_disable();
         return GYRO_ERR_INTERNAL_STATUS;
     }
     //enable acquisiton of acceleration; gyroscope and temperature sensor data; disable the auxiliary interface.
-    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *) BMI270_PWR_CTRL_REG, (uint8_t*) 0x0E, 1, HAL_MAX_DELAY);
+    gyro_send_spi(PWR_CTRL, (uint8_t*) 0x0E, 1);
 
     //enable the acc_filter_perf bit; set acc_bwp to normal mode; set acc_odr to 100 Hz
-    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *) BMI270_ACC_CONF_REG, (uint8_t*) 0xA8, 1, HAL_MAX_DELAY);
+    gyro_send_spi(ACC_CONF, (uint8_t*) 0xA8, 1);
 
     //enable the gyr_filter_perf bit; enable; gyr_noise_perf bit; set gyr_bwp to normal mode; set gyr_odr to 200 Hz
-    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *) BMI270_GYR_CONF_REG, (uint8_t*) 0xE9, 1, HAL_MAX_DELAY);
+    gyro_send_spi(GYR_CONF, (uint8_t*) 0xE9, 1);
 
     //disable the adv_power_save bit; leave the fifo_self_wakeup enabled
-    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *) BMI270_PWR_CONF_REG, (uint8_t*) 0x02, 1, HAL_MAX_DELAY);
+    gyro_send_spi(PWR_CONF, (uint8_t*) 0x02, 1);
 
 
 
@@ -79,7 +88,7 @@ gyro_err_t gyro_init(gyro_t *gyro)
 gyro_err_t gyro_read(gyro_t *gyro)
 {   
     gyro_cs_enable();
-    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *) (BMI270_DATA_START_REG | 0x80), &gyro->raw_data, NUM_BYTES_TO_READ, HAL_MAX_DELAY);
+    gyro_send_spi(DATA_START | 0x80, &gyro->raw_data, NUM_BYTES_TO_READ);
     gyro_cs_disable();
     return GYRO_OK;
 }
@@ -87,29 +96,33 @@ gyro_err_t gyro_read(gyro_t *gyro)
 void gyro_cs_enable(void)
 {
     HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_SET);
-    printf("[debug] gyro cs enabled\n");
+    LOGD("gyro cs enabled\n");
 }
 
 void gyro_cs_disable(void)
 {
     HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_RESET);
-    printf("[debug] gyro cs disabled\n");
+    LOGD("gyro cs disabled\n");
 }
 
-void print_gyro_err_t (gyro_err_t err)
+void log_gyro_err_t(gyro_err_t err)
 {
     switch (err) {
         case GYRO_OK:
-            printf("[ERR] GYRO_OK\n");
+            LOGE("[ERR] GYRO_OK\n");
             break;
         case GYRO_ERR_CHIP_ID:
-            printf("[ERR] GYRO_ERR_CHIP_ID\n");
+            LOGE("[ERR] GYRO_ERR_CHIP_ID\n");
             break;
         case GYRO_ERR_INTERNAL_STATUS:
-            printf("[ERR] GYRO_ERR_INTERNAL_STATUS\n");
+            LOGE("[ERR] GYRO_ERR_INTERNAL_STATUS\n");
             break;
         default:
-            printf("[ERR] UNKNOWN GYRO_ERR\n");
+            LOGE("[ERR] UNKNOWN GYRO_ERR\n");
             break;
     }
+}
+
+void gyro_send_spi(BMI270_REG_t reg, uint8_t *rx_data_ptr, uint8_t size) {
+    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *)reg, rx_data_ptr, size, HAL_MAX_DELAY);
 }

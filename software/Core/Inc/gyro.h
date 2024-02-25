@@ -25,6 +25,6 @@ typedef struct
 
 gyro_err_t gyro_init(gyro_t *gyro);
 gyro_err_t gyro_read(gyro_t *gyro);
-void print_gyro_err_t(gyro_err_t err);
+void log_gyro_err_t(gyro_err_t err);
 
 #endif //BETTERFLIGHT_GYRO_H

@@ -105,7 +105,7 @@ void LOGH(const uint8_t *format, ...) {
     va_end(args);
 }
 
-void LOG(uint8_t *format, ...) {
+void LOG( const uint8_t *format, ...) {
     va_list args;
     va_start(args, format);
 
