@@ -6,33 +6,28 @@
 #define BETTERFLIGHT_CLI_H
 
 #include "version.h"
+#include "misc.h"
 
-
-
-typedef enum {
-    CLI_CMD_NONE,
-    CLI_CMD_HELP,
-    CLI_CMD_STATUS,
-    CLI_CMD_VERSION,
-    CLI_CMD_CONNECT,
-    CLI_CMD_DFU,
-    CLI_CMD_SAVE,
-    CLI_CMD_REBOOT,
-    CLI_CMD_DEV1,
-    CLI_CMD_DEV2,
-    CLI_CMD_DEV3,
-} cli_cmd_t;
-
-
+#define MAX_CMD_COUNT 64
 
 typedef struct {
+    uint8_t *cmd_str;
+    callback_t cmd_callback;
+}cli_cmd_t;
+
+typedef struct {
+    cli_cmd_t cmd_list[MAX_CMD_COUNT];
     version_t version;
-} cli_t;
+    bool new_data_flag;
+    uint8_t cli_rx_buffer[64];
+    uint8_t last_cmd_index;
+} cli_handle_t;
 
-
-
-
+void cli_init(cli_handle_t *cli_h);
 void cli_process();
-void cli_rx_callback();
+
+void cli_rx_callback(cli_handle_t* cli_h);
+void cli_add_cmd(cli_handle_t* cli_h, uint8_t *cmd_str, callback_t cmd_callback);
+
 
 #endif //BETTERFLIGHT_CLI_H

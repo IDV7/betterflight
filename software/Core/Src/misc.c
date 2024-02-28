@@ -63,12 +63,12 @@ void LED_blink_pattern(uint8_t count, int num_durations, ...) {
 }
 
 // none_blocking_delay has to be polled, and calls the given function (without parameters) when x ms have passed.
-void none_blocking_delay(uint32_t ms, callback_t callback, uint64_t *last_millis) {
+void none_blocking_delay(uint32_t ms, uint64_t *last_millis, callback_t callback, void *arg) {
     if (*last_millis == 0) { // if not set, set last_millis
         *last_millis = millis;
     } else if ((millis - *last_millis) >= ms) { // if enough time has passed
         if (callback != NULL) { // if callback is valid
-            callback(NULL);
+            callback(arg);
         }
         *last_millis = 0; // reset last_millis
     }

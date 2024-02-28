@@ -16,18 +16,18 @@
 uint64_t led_toggle_last_ms = 0;
 uint64_t cli_process_last_ms = 0;
 
-gyro_t gyro;
+gyro_t gyro_h;
+cli_handle_t cli_h;
 
 void myinit(void) {
     log_init(LOG_LEVEL, true);
-    if (get_log_level() == LOG_LEVEL_DEBUG) { // give dev time to open serial monitor when debugging
+    if (get_log_level() == LOG_LEVEL_DEBUG) // give dev time to open serial monitor when debugging
         LED_blink_pattern(5, 4 ,50, 75, 50, 825);
-    }
 
     LOGI("Starting Initialization...");
     LED_on();
 
-
+    cli_init(&cli_h);
 
     LOGI("Finished Initialization");
 
@@ -39,20 +39,8 @@ void myinit(void) {
 
 void mymain(void) {
     while (1) {
-        none_blocking_delay(1000, (callback_t) LED_toggle, &led_toggle_last_ms);
-        none_blocking_delay(25, (callback_t) cli_process, &cli_process_last_ms);
+        none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
+        none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
     }
-}
-
-/* dev callbacks for testing purpose, type devx in the cli and the corresponding function will be called */
-
-void dev1_callback(void) {
-    gyro_init(&gyro);
-}
-
-void dev2_callback(void) {
-}
-
-void dev3_callback(void) {
 }
 
