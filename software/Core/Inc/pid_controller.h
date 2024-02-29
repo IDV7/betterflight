@@ -1,0 +1,8 @@
+//
+// Created by Maarten on 29-2-2024.
+//
+
+#ifndef BETTERFLIGHT_PID_CONTROLLER_H
+#define BETTERFLIGHT_PID_CONTROLLER_H
+
+#endif //BETTERFLIGHT_PID_CONTROLLER_H
