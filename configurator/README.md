@@ -3,5 +3,6 @@ The configurator is PC software, written in C++ using the [QT Framework](https:/
 It is also used for development, with tools (comming soon), featuring a CLI to talk with the fc, a more intuitive upload button (that handles going and leaving dfu mode for you!), Gyro & PID debugging, ...
 
 ### Current preview of the GUI style & layout:
-![image](https://github.com/IDV7/betterflight/assets/42512031/5ba5016f-eb7b-46b2-b3e6-28d8b08c44e3)
+
+![image](https://github.com/IDV7/betterflight/assets/42512031/98d98acf-a987-4232-8247-ef7ce359c2c5)
 
