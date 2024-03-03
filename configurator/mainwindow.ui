@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>799</width>
-    <height>591</height>
+    <width>801</width>
+    <height>544</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,6 +34,25 @@
        </spacer>
       </item>
       <item>
+       <widget class="QComboBox" name="cbPorts"/>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>30</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QPushButton" name="pbConnect">
         <property name="minimumSize">
          <size>
@@ -44,7 +63,26 @@
         <property name="text">
          <string>Connect</string>
         </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
@@ -59,12 +97,17 @@
         </item>
         <item>
          <property name="text">
-          <string>Settings</string>
+          <string>Monitor</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Monitor</string>
+          <string>Flash</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Settings</string>
          </property>
         </item>
        </widget>
@@ -72,7 +115,7 @@
       <item>
        <widget class="QStackedWidget" name="swContent">
         <property name="currentIndex">
-         <number>2</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="pWelcome">
          <widget class="QLabel" name="label_2">
@@ -86,6 +129,62 @@
           </property>
           <property name="text">
            <string>Welcome</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="pMonitor">
+         <widget class="QWidget" name="verticalLayoutWidget">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>20</y>
+            <width>621</width>
+            <height>251</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="vlSerialMonitor">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetMaximumSize</enum>
+           </property>
+           <item>
+            <widget class="QTextBrowser" name="tbMonitor"/>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="hlCLI_Input">
+             <item>
+              <widget class="QLineEdit" name="leCLI"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pbClearCLI">
+               <property name="text">
+                <string>Clear</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pbSend">
+               <property name="text">
+                <string>Send</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="page">
+         <widget class="QLabel" name="label_3">
+          <property name="geometry">
+           <rect>
+            <x>130</x>
+            <y>60</y>
+            <width>49</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Flash</string>
           </property>
          </widget>
         </widget>
@@ -104,44 +203,6 @@
           </property>
          </widget>
         </widget>
-        <widget class="QWidget" name="pMonitor">
-         <widget class="QTextEdit" name="teMonitor">
-          <property name="geometry">
-           <rect>
-            <x>20</x>
-            <y>20</y>
-            <width>601</width>
-            <height>281</height>
-           </rect>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="leCLI">
-          <property name="geometry">
-           <rect>
-            <x>20</x>
-            <y>310</y>
-            <width>511</width>
-            <height>24</height>
-           </rect>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbSend">
-          <property name="geometry">
-           <rect>
-            <x>540</x>
-            <y>310</y>
-            <width>80</width>
-            <height>24</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Send</string>
-          </property>
-         </widget>
-        </widget>
        </widget>
       </item>
      </layout>
@@ -153,7 +214,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>799</width>
+     <width>801</width>
      <height>21</height>
     </rect>
    </property>
@@ -206,5 +267,57 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pbConnect</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onConnectPushButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>748</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pbClearCLI</sender>
+   <signal>clicked()</signal>
+   <receiver>tbMonitor</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>647</x>
+     <y>370</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>465</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pbSend</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onSendPushButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>733</x>
+     <y>370</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>onConnectPushButtonClicked()</slot>
+  <slot>onSendPushButtonClicked()</slot>
+ </slots>
 </ui>
