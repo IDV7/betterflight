@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "./../build-configurator-Desktop_Qt_6_6_2_MinGW_64_bit-Debug/configurator_autogen/include/ui_mainwindow.h"
+#include "ui_mainwindow.h"
 #include <QDebug>
 #include <QScrollBar>
 
@@ -7,15 +7,11 @@
 #define QLISTWIDGET_STYLE "QListWidget { background-color: #444; border: 1px solid #666; color: #fff; }"
 #define QSTACKEDWIDGET_STYLE "QStackedWidget { background-color: #333; }"
 #define QLINEEDIT_STYLE "QLineEdit { background-color: #555; border: 1px solid #666; color: #fff; }"
-#define QTEXTBROWSER_STYLE "QTextBrowser { background-color: #444; color: #fff; }"
-
-
-
-void set_style_sheets();
+#define QTEXTBROWSER_STYLE "QTextBrowser { background-color: #444; color: #fff }"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+        : QMainWindow(parent)
+        , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     this->setWindowTitle("BeterFlight Configurator");
@@ -27,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     updateSerialPorts();
     ui->pbConnect->setEnabled(true);
+
 
     mSerialScanTimer = new QTimer(this);
     mSerialScanTimer->setInterval(5000);

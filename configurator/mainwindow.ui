@@ -90,6 +90,9 @@
      <layout class="QHBoxLayout" name="hlMainContent" stretch="1,5">
       <item>
        <widget class="QListWidget" name="lwTabs">
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
         <item>
          <property name="text">
           <string>Welcome</string>
@@ -115,7 +118,7 @@
       <item>
        <widget class="QStackedWidget" name="swContent">
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="pWelcome">
          <widget class="QLabel" name="label_2">
@@ -173,14 +176,40 @@
           </layout>
          </widget>
         </widget>
-        <widget class="QWidget" name="page">
-         <widget class="QLabel" name="label_3">
+        <widget class="QWidget" name="pFlash">
+         <widget class="QLineEdit" name="leBinaryPath">
           <property name="geometry">
            <rect>
-            <x>130</x>
-            <y>60</y>
-            <width>49</width>
-            <height>16</height>
+            <x>30</x>
+            <y>80</y>
+            <width>361</width>
+            <height>24</height>
+           </rect>
+          </property>
+          <property name="readOnly">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pbSelectBin">
+          <property name="geometry">
+           <rect>
+            <x>420</x>
+            <y>80</y>
+            <width>81</width>
+            <height>24</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Select Bineary</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pbFlash">
+          <property name="geometry">
+           <rect>
+            <x>230</x>
+            <y>190</y>
+            <width>80</width>
+            <height>71</height>
            </rect>
           </property>
           <property name="text">
@@ -215,7 +244,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -315,9 +344,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pbSelectBin</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onSelectBinaryClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>605</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onConnectPushButtonClicked()</slot>
   <slot>onSendPushButtonClicked()</slot>
+  <slot>onSelectBinaryClicked()</slot>
  </slots>
 </ui>
