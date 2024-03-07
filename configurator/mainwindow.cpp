@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QScrollBar>
+#include <QFileDialog>
+#include <QProcess>
 
 #define PBCONNECT_STYLE(color) ("QPushButton { background-color: " color "; color: #fff; border-radius: 37px; }")
 #define QLISTWIDGET_STYLE "QListWidget { background-color: #444; border: 1px solid #666; color: #fff; }"
@@ -124,3 +126,56 @@ void MainWindow::setStyleSheets() {
                         "QMenu { background-color: #222; color: #fff; }"
                         "QMenu::item:selected { background-color: #555; }");
 };
+
+void MainWindow::onPbSelectBinClicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Firmware File"), "", tr("Firmware Files (*.hex)"));
+    if (fileName.isEmpty()) {
+        return;
+    }
+    ui->leBinaryPath->setText(fileName);
+}
+
+void MainWindow::onPbFlashClicked()
+{
+    qDebug("flash button pressed");
+    QString path = ui->leBinaryPath->text();
+    qDebug() << "Path: " << path;
+    if (path.isEmpty()) {
+        qDebug("No file selected");
+        return;
+    }
+    // check and parse the device list
+    QProcess pDeviceList;
+    QString args_pDeviceList = "-l";
+    pDeviceList.start("C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe", args_pDeviceList.split(" "));
+    pDeviceList.waitForFinished();
+
+    QString output = pDeviceList.readAllStandardOutput();
+    QStringList lines = output.split("\n");
+
+    QString deviceIndex;
+    for (const QString &line : lines) {
+        if (line.contains("Device Index")) {
+            QStringList parts = line.split(":");
+            if (parts.size() > 1) {
+                deviceIndex = parts[1].trimmed();
+                break;
+            }
+        }
+    }
+    qDebug() << "Device Index: " << deviceIndex;
+
+            //writing the firware file to the microcontroller
+    QProcess p;
+    QString args = "-c port=" + deviceIndex + " --write \"" + path + "\" --verify -rst";
+    p.start("C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe", args.split(" "));
+    bool ready = p.waitForFinished();
+    qDebug() << "Ready: " << ready;
+    qDebug() << p.readAllStandardOutput();
+//    connect(&p, &QProcess::readyReadStandardOutput, [=](){
+//        qDebug() << p.readAllStandardOutput();
+//    });
+}
+
+

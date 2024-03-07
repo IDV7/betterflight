@@ -180,7 +180,7 @@
          <widget class="QLineEdit" name="leBinaryPath">
           <property name="geometry">
            <rect>
-            <x>30</x>
+            <x>40</x>
             <y>80</y>
             <width>361</width>
             <height>24</height>
@@ -206,8 +206,8 @@
          <widget class="QPushButton" name="pbFlash">
           <property name="geometry">
            <rect>
-            <x>230</x>
-            <y>190</y>
+            <x>420</x>
+            <y>120</y>
             <width>80</width>
             <height>71</height>
            </rect>
@@ -348,7 +348,7 @@
    <sender>pbSelectBin</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>onSelectBinaryClicked()</slot>
+   <slot>onPbSelectBinClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>605</x>
@@ -360,10 +360,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pbFlash</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onPbFlashClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>604</x>
+     <y>270</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onConnectPushButtonClicked()</slot>
   <slot>onSendPushButtonClicked()</slot>
-  <slot>onSelectBinaryClicked()</slot>
+  <slot>onPbSelectBinClicked()</slot>
+  <slot>onPbFlashClicked()</slot>
  </slots>
 </ui>

@@ -25,12 +25,13 @@
             mainwindow.ui
     )
 
-    qt6_wrap_ui(SOURCES mainwindow.ui)
+    #qt6_wrap_ui(SOURCES mainwindow.ui)
 
     qt_add_executable(configurator
             MANUAL_FINALIZATION
             ${PROJECT_SOURCES} ${SOURCES} ${UI_HEADERS}
     )
+
 
     target_link_libraries(configurator PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
     target_link_libraries(configurator PRIVATE Qt${QT_VERSION_MAJOR}::SerialPort)
@@ -58,3 +59,4 @@
     if(QT_VERSION_MAJOR EQUAL 6)
         qt_finalize_executable(configurator)
     endif()
+

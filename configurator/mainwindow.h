@@ -25,6 +25,8 @@ private slots:
     void onConnectPushButtonClicked();
     void onSendPushButtonClicked();
     void serialReadyRead();
+    void onPbSelectBinClicked();
+    void onPbFlashClicked();
 
 private:
     Ui::MainWindow *ui;
