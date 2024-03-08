@@ -202,6 +202,74 @@ GenerateClassCluster=0
 DocumentUniqueId=ZJQWJOMY
 
 [Document10]
+DocumentPath=..\Lib\STM32F722RET6.PcbLib
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=0
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=QUWYRJII
+
+[Document11]
+DocumentPath=..\Lib\blackbox.PcbLib
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=0
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=OKLWLDTC
+
+[Document12]
+DocumentPath=..\Lib\microusb.PcbLib
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=0
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=QTWYYLTY
+
+[Document13]
+DocumentPath=..\Lib\passiveComps.PcbLib
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=0
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=NJHRJTCA
+
+[Document14]
 DocumentPath=..\Lib\AP63205WU-7.PcbLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -218,7 +286,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=TJCOFCWG
 
-[Document11]
+[Document15]
 DocumentPath=..\Lib\plugs.PcbLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -235,7 +303,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=VVSEYCBJ
 
-[Document12]
+[Document16]
 DocumentPath=..\Lib\bmi270.PcbLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -252,7 +320,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=IADERSME
 
-[Document13]
+[Document17]
 DocumentPath=..\Lib\bmp280.PcbLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -269,7 +337,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=THAYTHVX
 
-[Document14]
+[Document18]
 DocumentPath=..\Lib\microUSB.SchLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -286,7 +354,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=CYSWTBQB
 
-[Document15]
+[Document19]
 DocumentPath=..\Lib\blackbox.SchLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -303,7 +371,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=IVFBCFOO
 
-[Document16]
+[Document20]
 DocumentPath=STM32F722RET6.PcbLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -319,6 +387,23 @@ ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=QUWYRJII
+
+[Document21]
+DocumentPath=PCB1.PcbDoc
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=0
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=SWREOCCL
 
 [Configuration1]
 Name=Sources
@@ -643,6 +728,18 @@ OutputDocumentPath1=
 OutputVariantName1=[No Variations]
 OutputDefault1=0
 PageOptions1=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
+Configuration1_Name1=ColumnNameFormat
+Configuration1_Item1=CaptionAsName
+Configuration1_Name2=ForceUpdateSettings
+Configuration1_Item2=False
+Configuration1_Name3=General
+Configuration1_Item3=OpenExported=False|AddToProject=False|ReportBOMViolationsInMessages=False|ForceFit=False|NotFitted=False|Database=False|DatabasePriority=False|IncludePcbData=False|IncludeVaultData=False|IncludeCloudData=False|IncludeDocumentData=True|IncludeAlternatives=False|ShowExportOptions=True|TemplateFilename=|TemplateVaultGuid=|TemplateItemGuid=|TemplateRevisionGuid=|BatchMode=5|FormWidth=1200|FormHeight=710|SupplierProdQty=1|SupplierAutoQty=False|SupplierUseCachedPricing=False|SupplierCurrency=USD|SolutionsPerItem=1|SuppliersPerSolution=1|ViewType=0|UseDirectApi=False|BomSetName=
+Configuration1_Name4=GroupOrder
+Configuration1_Item4=Comment=True|Footprint=True
+Configuration1_Name5=SortOrder
+Configuration1_Item5=Designator=Up|Comment=Up|Footprint=Up
+Configuration1_Name6=VisibleOrder
+Configuration1_Item6=Comment=120|Description=120|Designator=120|Footprint=120|LibRef=120|Quantity=120
 OutputType2=BOM_ReportCompare
 OutputName2=BOM Compare
 OutputDocumentPath2=
@@ -1277,16 +1374,130 @@ NetClassManualEnabled=1
 NetClassSeparateForBusSections=0
 
 [LibraryUpdateOptions]
-SelectedOnly=1
+SelectedOnly=0
 UpdateVariants=1
 UpdateToLatestRevision=1
 PartTypes=0
 ComponentLibIdentifierKind0=Library Name And Type
-ComponentLibraryIdentifier0=passive_components.SchLib
-ComponentDesignItemID0=LED
-ComponentSymbolReference0=LED
+ComponentLibraryIdentifier0=AP63205WU-7.SchLib
+ComponentDesignItemID0=AP63205WU-7
+ComponentSymbolReference0=AP63205WU-7
 ComponentUpdate0=1
 ComponentIsDeviceSheet0=0
+ComponentLibIdentifierKind1=Library Name And Type
+ComponentLibraryIdentifier1=blackbox.SchLib
+ComponentDesignItemID1=blackbox
+ComponentSymbolReference1=blackbox
+ComponentUpdate1=1
+ComponentIsDeviceSheet1=0
+ComponentLibIdentifierKind2=Library Name And Type
+ComponentLibraryIdentifier2=bmi270.SchLib
+ComponentDesignItemID2=BMI270
+ComponentSymbolReference2=BMI270
+ComponentUpdate2=1
+ComponentIsDeviceSheet2=0
+ComponentLibIdentifierKind3=Library Name And Type
+ComponentLibraryIdentifier3=microUSB.SchLib
+ComponentDesignItemID3=MicroUSB
+ComponentSymbolReference3=MicroUSB
+ComponentUpdate3=1
+ComponentIsDeviceSheet3=0
+ComponentLibIdentifierKind4=Library Name And Type
+ComponentLibraryIdentifier4=pad.SchLib
+ComponentDesignItemID4=PAD
+ComponentSymbolReference4=PAD
+ComponentUpdate4=1
+ComponentIsDeviceSheet4=0
+ComponentLibIdentifierKind5=Library Name And Type
+ComponentLibraryIdentifier5=passive_components.SchLib
+ComponentDesignItemID5=button
+ComponentSymbolReference5=button
+ComponentUpdate5=1
+ComponentIsDeviceSheet5=0
+ComponentLibIdentifierKind6=Library Name And Type
+ComponentLibraryIdentifier6=passive_components.SchLib
+ComponentDesignItemID6=C
+ComponentSymbolReference6=C
+ComponentUpdate6=1
+ComponentIsDeviceSheet6=0
+ComponentLibIdentifierKind7=Library Name And Type
+ComponentLibraryIdentifier7=passive_components.SchLib
+ComponentDesignItemID7=coil
+ComponentSymbolReference7=coil
+ComponentUpdate7=1
+ComponentIsDeviceSheet7=0
+ComponentLibIdentifierKind8=Library Name And Type
+ComponentLibraryIdentifier8=passive_components.SchLib
+ComponentDesignItemID8=Crystal
+ComponentSymbolReference8=Crystal
+ComponentUpdate8=1
+ComponentIsDeviceSheet8=0
+ComponentLibIdentifierKind9=Library Name And Type
+ComponentLibraryIdentifier9=passive_components.SchLib
+ComponentDesignItemID9=LDO
+ComponentSymbolReference9=LDO
+ComponentUpdate9=1
+ComponentIsDeviceSheet9=0
+ComponentLibIdentifierKind10=Library Name And Type
+ComponentLibraryIdentifier10=passive_components.SchLib
+ComponentDesignItemID10=LED
+ComponentSymbolReference10=LED
+ComponentUpdate10=1
+ComponentIsDeviceSheet10=0
+ComponentLibIdentifierKind11=Library Name And Type
+ComponentLibraryIdentifier11=passive_components.SchLib
+ComponentDesignItemID11=mosfet
+ComponentSymbolReference11=mosfet
+ComponentUpdate11=1
+ComponentIsDeviceSheet11=0
+ComponentLibIdentifierKind12=Library Name And Type
+ComponentLibraryIdentifier12=passive_components.SchLib
+ComponentDesignItemID12=polorized C
+ComponentSymbolReference12=polorized C
+ComponentUpdate12=1
+ComponentIsDeviceSheet12=0
+ComponentLibIdentifierKind13=Library Name And Type
+ComponentLibraryIdentifier13=passive_components.SchLib
+ComponentDesignItemID13=R
+ComponentSymbolReference13=R
+ComponentUpdate13=1
+ComponentIsDeviceSheet13=0
+ComponentLibIdentifierKind14=Library Name And Type
+ComponentLibraryIdentifier14=passive_components.SchLib
+ComponentDesignItemID14=ScottyDiode
+ComponentSymbolReference14=ScottyDiode
+ComponentUpdate14=1
+ComponentIsDeviceSheet14=0
+ComponentLibIdentifierKind15=Library Name And Type
+ComponentLibraryIdentifier15=passive_components.SchLib
+ComponentDesignItemID15=Zenerdiode
+ComponentSymbolReference15=Zenerdiode
+ComponentUpdate15=1
+ComponentIsDeviceSheet15=0
+ComponentLibIdentifierKind16=Library Name And Type
+ComponentLibraryIdentifier16=plugs.SchLib
+ComponentDesignItemID16=ESCplug
+ComponentSymbolReference16=ESCplug
+ComponentUpdate16=1
+ComponentIsDeviceSheet16=0
+ComponentLibIdentifierKind17=Library Name And Type
+ComponentLibraryIdentifier17=plugs.SchLib
+ComponentDesignItemID17=RXplug
+ComponentSymbolReference17=RXplug
+ComponentUpdate17=1
+ComponentIsDeviceSheet17=0
+ComponentLibIdentifierKind18=Library Name And Type
+ComponentLibraryIdentifier18=plugs.SchLib
+ComponentDesignItemID18=VTXplug
+ComponentSymbolReference18=VTXplug
+ComponentUpdate18=1
+ComponentIsDeviceSheet18=0
+ComponentLibIdentifierKind19=Library Name And Type
+ComponentLibraryIdentifier19=stm32f722RE.SchLib
+ComponentDesignItemID19=stm32f722
+ComponentSymbolReference19=stm32f722
+ComponentUpdate19=1
+ComponentIsDeviceSheet19=0
 FullReplace=1
 UpdateDesignatorLock=1
 UpdatePartIDLock=1
@@ -1313,6 +1524,45 @@ ModelTypeUpdate0=1
 ModelType0=PCBLIB
 ModelName0=0603
 ModelUpdate0=1
+ModelType1=PCBLIB
+ModelName1=AP63205WU-7
+ModelUpdate1=1
+ModelType2=PCBLIB
+ModelName2=blackbox
+ModelUpdate2=1
+ModelType3=PCBLIB
+ModelName3=bmi270
+ModelUpdate3=1
+ModelType4=PCBLIB
+ModelName4=button
+ModelUpdate4=1
+ModelType5=PCBLIB
+ModelName5=coil
+ModelUpdate5=1
+ModelType6=PCBLIB
+ModelName6=crystal
+ModelUpdate6=1
+ModelType7=PCBLIB
+ModelName7=ESCplug
+ModelUpdate7=1
+ModelType8=PCBLIB
+ModelName8=LDO
+ModelUpdate8=1
+ModelType9=PCBLIB
+ModelName9=microUSB
+ModelUpdate9=1
+ModelType10=PCBLIB
+ModelName10=RXplug
+ModelUpdate10=1
+ModelType11=PCBLIB
+ModelName11=scottydiode
+ModelUpdate11=1
+ModelType12=PCBLIB
+ModelName12=STM32F722RET6
+ModelUpdate12=1
+ModelType13=PCBLIB
+ModelName13=VTXplug
+ModelUpdate13=1
 
 [DatabaseUpdateOptions]
 SelectedOnly=0
