@@ -25,4 +25,6 @@ typedef struct {
 } set_point_t;
 
 void limits_init(set_point_t *set_point, float min_imu_output, float max_imu_output);
+float set_point_calculation(set_point_t *set_point, float stick_output);
+
 #endif //BETTERFLIGHT_SET_POINT_H

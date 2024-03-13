@@ -17,6 +17,14 @@ void limits_init(set_point_t *set_point, float min_imu_output, float max_imu_out
 
 float set_point_calculation(set_point_t *set_point, float stick_output){
     set_point->stick_output = stick_output;
-    set_point->set_point = (stick_output-1500) * set_point->imu_limits.max_imu_output;
+
+    //limits the stick output
+    if(stick_output> 1515 && stick_output < set_point->stick_limits.max_stick_output){
+        set_point->set_point = (stick_output-1515) * set_point->imu_limits.max_imu_output;
+    }
+    if(stick_output < 1485 && stick_output > set_point->stick_limits.min_stick_output){
+        set_point->set_point = (stick_output-1485) * set_point->imu_limits.max_imu_output;
+    }
+
     return set_point->set_point;
 }
