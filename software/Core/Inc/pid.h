@@ -15,10 +15,10 @@ typedef struct{
 
 typedef struct {
     // PID limits
-    float min_output;
-    float max_output;                       //limits of the motor output
-    float min_input;
-    float max_input;                        //limits of the input sticks
+    int16_t min_output;
+    int16_t max_output;                       //limits of the motor output
+    int16_t min_input;
+    int16_t max_input;                        //limits of the input sticks
 }pid_limits_t;
 
 typedef struct{
@@ -38,15 +38,15 @@ typedef struct{
 
 
 
-    float output;
+    int16_t output;
 
 
 
 }pid_handle_t;
 
-void  pid_controller_init(pid_handle_t *pid_h, float Kp, float Ki, float Kd, float T, float min_output, float max_output, float min_input, float max_input);      //initializes the pid controller
+void  pid_controller_init(pid_handle_t *pid_h, float Kp, float Ki, float Kd, float T, int16_t min_output, int16_t max_output, int16_t min_input, int16_t max_input);      //initializes the pid controller
 void  pid_controller_clear(pid_handle_t *pid_h);        //clears the calculations
-float pid_controller_update(pid_handle_t *pid_h, float setp, float measurement);         //updates the pid controller with user input
+int16_t pid_controller_update(pid_handle_t *pid_h, int16_t setp, int16_t measurement);         //updates the pid controller with user input
 
 
 

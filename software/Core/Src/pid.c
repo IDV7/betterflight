@@ -10,7 +10,7 @@
 
 
 
-void  pid_controller_init(pid_handle_t *pid_h, float Kp, float Ki, float Kd, float T, float min_output, float max_output, float min_input, float max_input)
+void  pid_controller_init(pid_handle_t *pid_h, float Kp, float Ki, float Kd, float T, int16_t min_output, int16_t max_output, int16_t min_input, int16_t max_input)
 {
     pid_h->gains.Kp = Kp;
     pid_h->gains.Ki = Ki;
@@ -42,28 +42,28 @@ void  pid_controller_clear(pid_handle_t *pid_h)
     pid_h->output = 0;
 }
 
-float pid_controller_update(pid_handle_t *pid_h, float setp, float measurement){
+int16_t pid_controller_update(pid_handle_t *pid_h, int16_t setp, int16_t measurement){
 
-            float error = setp - measurement;
+    int16_t error = setp - measurement;
 
-            float proportional = pid_h->gains.Kp * error; //p[n]
+    int16_t proportional =  (int16_t )(pid_h->gains.Kp *(float) error); //p[n]
 
 
-            pid_h->integrator = pid_h->integrator + 0.5f * pid_h->gains.Ki * pid_h->T * (error + pid_h->prev_error);             //i[n]
+            pid_h->integrator = pid_h->integrator + 0.5f * pid_h->gains.Ki * pid_h->T * ((float)error + pid_h->prev_error);             //i[n]
 
-            if (pid_h->integrator > pid_h->limits.max_input){
+            if (pid_h->integrator > (float)pid_h->limits.max_input){
                 pid_h->integrator = pid_h->limits.max_input;
             }
-            else if (pid_h->integrator < pid_h->limits.min_input){
+            else if (pid_h->integrator < (float)pid_h->limits.min_input){
                         pid_h->integrator = pid_h->limits.min_input;
             }
 
 
-            pid_h->differentiator = -(2.0f * pid_h->gains.Kd * (measurement - pid_h->prev_measurement) + (2.0f * pid_h->tau - pid_h->T)*pid_h->differentiator); //d[n]
+            pid_h->differentiator = -(2.0f * pid_h->gains.Kd * ( (float)measurement - pid_h->prev_measurement) + (2.0f * pid_h->tau - pid_h->T)*pid_h->differentiator); //d[n]
 
 
-            pid_h->output = proportional + pid_h->integrator + pid_h->differentiator; //u[n]
-
+            pid_h->output = (int16_t) ((float)proportional + (float) pid_h->integrator + (float)pid_h->differentiator); //u[n]
+            LOGD("PID output(before limited): %d", pid_h->output);
             if (pid_h->output > pid_h->limits.max_output){
                 pid_h->output = pid_h->limits.max_output;
             }

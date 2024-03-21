@@ -12,9 +12,9 @@ set_point_t pitch_set_point;
 }set_points_t;
 
 typedef struct{
-    float yaw_stick_output;
-    float roll_stick_output;
-    float pitch_stick_output;
+    int16_t yaw_stick_output;
+    int16_t roll_stick_output;
+    int16_t pitch_stick_output;
 }stick_output_t;
 
 typedef struct{
@@ -32,4 +32,5 @@ typedef struct{
 void get_set_points(drone_pids_t *drone_pids);
 void set_pids(drone_pids_t *drone_pids);
 void test_pid_controller(void);
+void set_pids_change_test(drone_pids_t *drone_pids);
 #endif //BETTERFLIGHT_PID_CONTROLLER_H
