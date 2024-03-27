@@ -88,6 +88,9 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="hlMainContent" stretch="1,5">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMaximumSize</enum>
+      </property>
       <item>
        <widget class="QListWidget" name="lwTabs">
         <property name="lineWidth">
@@ -136,99 +139,118 @@
          </widget>
         </widget>
         <widget class="QWidget" name="pMonitor">
-         <widget class="QWidget" name="verticalLayoutWidget">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>20</y>
-            <width>621</width>
-            <height>251</height>
-           </rect>
-          </property>
-          <layout class="QVBoxLayout" name="vlSerialMonitor">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMaximumSize</enum>
-           </property>
-           <item>
-            <widget class="QTextBrowser" name="tbMonitor"/>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="hlCLI_Input">
-             <item>
-              <widget class="QLineEdit" name="leCLI"/>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pbClearCLI">
-               <property name="text">
-                <string>Clear</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pbSend">
-               <property name="text">
-                <string>Send</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QTextBrowser" name="tbMonitor">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="hlCLI_Input">
+            <item>
+             <widget class="QLineEdit" name="leCLI"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbClearCLI">
+              <property name="text">
+               <string>Clear</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbSend">
+              <property name="text">
+               <string>Send</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="pFlash">
-         <widget class="QLineEdit" name="leBinaryPath">
-          <property name="geometry">
-           <rect>
-            <x>40</x>
-            <y>80</y>
-            <width>361</width>
-            <height>24</height>
-           </rect>
-          </property>
-          <property name="readOnly">
-           <bool>false</bool>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbSelectBin">
-          <property name="geometry">
-           <rect>
-            <x>420</x>
-            <y>80</y>
-            <width>81</width>
-            <height>24</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Select Bineary</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbFlash">
-          <property name="geometry">
-           <rect>
-            <x>420</x>
-            <y>120</y>
-            <width>80</width>
-            <height>71</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Flash</string>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLineEdit" name="leBinaryPath">
+              <property name="readOnly">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbSelectBin">
+              <property name="text">
+               <string>Select Bineary</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QProgressBar" name="prFlashing">
+              <property name="value">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbFlash">
+              <property name="text">
+               <string>Flash</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="pSettings">
-         <widget class="QLabel" name="label">
+         <widget class="QCheckBox" name="cbOptRebootConnect">
           <property name="geometry">
            <rect>
-            <x>30</x>
-            <y>30</y>
-            <width>49</width>
-            <height>16</height>
+            <x>110</x>
+            <y>60</y>
+            <width>76</width>
+            <height>20</height>
            </rect>
           </property>
           <property name="text">
-           <string>Settings</string>
+           <string>Reboot MCU after </string>
           </property>
          </widget>
         </widget>

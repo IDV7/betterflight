@@ -6,6 +6,8 @@
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include <QTimer>
+#include <QProcess>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -27,15 +29,30 @@ private slots:
     void serialReadyRead();
     void onPbSelectBinClicked();
     void onPbFlashClicked();
+    void readProgressData();
+    void progressFinished();
+    void progressError();
 
 private:
     Ui::MainWindow *ui;
+    QProcess * m_p;
 
     QSerialPort *mSerial;
     QList<QSerialPortInfo> mSerialPorts;
     QTimer *mSerialScanTimer;
 
+
+
     void updateSerialPorts();
     void setStyleSheets();
+
+
+    void writeColoredMessage(const QString &logMessage);
+
+    void loadSettings();
+
+    void saveSettings();
+
+    void handleSerialError(QSerialPort::SerialPortError error);
 };
 #endif // MAINWINDOW_H
