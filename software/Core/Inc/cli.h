@@ -21,6 +21,8 @@ typedef struct {
     bool new_data_flag;
     uint8_t cli_rx_buffer[64];
     uint8_t last_cmd_index;
+    bool cli_connected_flag;
+    bool halt_until_connected_flag;
 } cli_handle_t;
 
 void cli_init(cli_handle_t *cli_h);

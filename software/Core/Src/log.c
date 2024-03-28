@@ -45,7 +45,6 @@ void log_msg(log_level_t log_level, const uint8_t *format, va_list args) {
         return;
     }
 
-    printf("%s", get_log_level_color_attr(log_level));
     switch (log_level) {
         case LOG_LEVEL_DEBUG:
             printf("[DEBUG] ");
@@ -63,7 +62,7 @@ void log_msg(log_level_t log_level, const uint8_t *format, va_list args) {
             break;
     }
     vprintf((char*)format, args);
-    printf("%s\r\n", ANSI_COLOR(COLOR_RESET));
+    printf("\n");
 }
 
 void LOGD(const uint8_t *format, ...) {
@@ -94,24 +93,12 @@ void LOGE(const uint8_t *format, ...) {
     va_end(args);
 }
 
-void LOGH(const uint8_t *format, ...) {
-    va_list args;
-    va_start(args, format);
-
-    printf("%s", ANSI_COLOR(COLOR_HIGHLIGHT));
-    vprintf((char*)format, args);
-    printf("%s\n", ANSI_COLOR(COLOR_RESET));
-
-    va_end(args);
-}
-
 void LOG( const uint8_t *format, ...) {
     va_list args;
     va_start(args, format);
 
-    //printf(ANSI_COLOR(COLOR_RESET));
     vprintf((char*)format, args);
-    printf("\n");
+    printf("\r\n");
 
     va_end(args);
 }

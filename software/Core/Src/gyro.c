@@ -46,7 +46,7 @@ gyro_err_t gyro_init(gyro_t *gyro)
     }
 
     gyro_cs_disable();
-    return GYRO_OK; //debugging
+    //return GYRO_OK; //debugging
     // disable power save mode
     gyro_send_spi(PWR_CONF, 0x00, 1);
     HAL_Delay(1);

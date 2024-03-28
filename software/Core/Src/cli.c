@@ -38,6 +38,8 @@ void cli_process(void *arg) {
 void cli_init(cli_handle_t *cli_h) {
     LOGD("CLI Init...");
 
+    cli_h->cli_connected_flag = false;
+
     uint8_t version_string[10];
     VERSION_TO_STRING(CLI_VERSION, version_string);
     LOGD("CLI is on version %s", version_string);
@@ -50,6 +52,24 @@ void cli_init(cli_handle_t *cli_h) {
     cli_h->new_data_flag = false;
 
     add_commands(cli_h);
+
+    //wait for connection
+    if (cli_h->cli_connected_flag == false && cli_h->halt_until_connected_flag == true) {
+        LOGD("Waiting for connection...");
+        while (cli_h->cli_connected_flag == false) {
+            LED_toggle();
+            delay(100);
+            if (cli_h->new_data_flag == true) {
+                cli_h->new_data_flag = false;
+
+                // check for "connect" cmd
+                if (strcmp_ign(cli_h->cli_rx_buffer, (uint8_t *)"connect") == 0) {
+                    cli_h->cli_connected_flag = true;
+                    LOGD("Connection confirmed");
+                }
+            }
+        }
+    }
 }
 
 void cli_handle_cmd(cli_handle_t *cli_h) {
