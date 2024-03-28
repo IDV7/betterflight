@@ -109,3 +109,7 @@ void reboot_into_dfu() {
     *((uint32_t *)0x20000000) = 0xDEADBEEE; // magic data that is checked for in startup code
     NVIC_SystemReset(); // reset mcu
 }
+
+void delay(uint32_t ms) {
+    HAL_Delay(ms);
+}

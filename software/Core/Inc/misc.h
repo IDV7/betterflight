@@ -24,5 +24,7 @@ int8_t strcmp_ign(const uint8_t *str1, const uint8_t *str2);
 
 void reboot_into_dfu();
 
+void delay(uint32_t ms);
+
 
 #endif //BETTERFLIGHT_MISC_H

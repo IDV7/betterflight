@@ -22,11 +22,15 @@
 #include "main.h"
 
 
+void cli_cb_status(cli_handle_t *cli_h) {
+    LOGI("Status: OK");
+}
+
 void cli_cb_help(cli_handle_t *cli_h) {
-    LOGI("Available commands:");
+    LOG("[RSP] Available commands:");
     for (uint8_t i = 0; i < MAX_CMD_COUNT; i++) {
         if (cli_h->cmd_list[i].cmd_str != NULL) {
-            LOGI("%s", cli_h->cmd_list[i].cmd_str);
+            LOG("%s", cli_h->cmd_list[i].cmd_str);
         }
     }
 }
@@ -48,6 +52,24 @@ void cli_cb_version(cli_handle_t *cli_h) {
     LOG("[RSP] %s", version_string);
 }
 
+void cli_cb_connect(cli_handle_t *cli_h) {
+    LOG((uint8_t *) "[RSP] Confirm Connection");
+    cli_h->cli_connected_flag = true;
+}
+
+void cli_cb_disconnect(cli_handle_t *cli_h) {
+    LOG((uint8_t *) "[RSP] Confirm Disconnection");
+    cli_h->cli_connected_flag = false;
+}
+
+void cli_cb_clidemo(cli_handle_t *cli_h) {
+    LOGD("This is a Debug message");
+    LOGI("This is an Info message");
+    LOGW("This is a Warning message");
+    LOGE("This is an Error message");
+    LOG("This is a normal message (should not be used...)");
+    LOG("[RSP] This is a response message to a cli command");
+}
 
 callback_t cli_cb_none(cli_handle_t *cli_h) {
     LOGI("Command not implemented yet");
@@ -55,10 +77,12 @@ callback_t cli_cb_none(cli_handle_t *cli_h) {
 
 void add_commands(cli_handle_t *cli_h) {
     cli_add_cmd(cli_h, (uint8_t *)"help", (callback_t) cli_cb_help);
-    cli_add_cmd(cli_h, (uint8_t *)"status", NULL);
+    cli_add_cmd(cli_h, (uint8_t *)"status", (callback_t) cli_cb_status);
     cli_add_cmd(cli_h, (uint8_t *)"version", (callback_t) cli_cb_version);
-    cli_add_cmd(cli_h, (uint8_t *)"connect", NULL);
+    cli_add_cmd(cli_h, (uint8_t *)"connect", (callback_t) cli_cb_connect);
     cli_add_cmd(cli_h, (uint8_t *)"save", NULL);
     cli_add_cmd(cli_h, (uint8_t *)"dfu", (callback_t) cli_cb_dfu);
-    cli_add_cmd(cli_h, (uint8_t *)"reboot", (callback_t) cli_cb_none);
+    cli_add_cmd(cli_h, (uint8_t *)"reboot", (callback_t) cli_cb_reboot);
+    cli_add_cmd(cli_h, (uint8_t *)"disconnect", (callback_t) cli_cb_disconnect);
+    cli_add_cmd(cli_h, (uint8_t *)"demo", (callback_t) cli_cb_clidemo);
 }

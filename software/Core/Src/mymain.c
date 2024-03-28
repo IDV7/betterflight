@@ -20,15 +20,22 @@ gyro_t gyro_h;
 cli_handle_t cli_h;
 
 void myinit(void) {
+    cli_h.halt_until_connected_flag = true; //set to false if you don't want to wait for a connection
+
     log_init(LOG_LEVEL, true);
     if (get_log_level() == LOG_LEVEL_DEBUG) // give dev time to open serial monitor when debugging
         LED_blink_pattern(5, 4 ,50, 75, 50, 825);
 
-    LOGI("Starting Initialization...");
     LED_on();
 
-    cli_init(&cli_h);
+    cli_init(&cli_h); //will block if halt_until_connected_flag is true
 
+    LOGI("Starting Initialization...");
+    // ----- all initialization code goes here ----- //
+
+
+
+    // ----- end initialization code ----- //
     LOGI("Finished Initialization");
 
 
@@ -43,4 +50,11 @@ void mymain(void) {
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
     }
 }
+
+
+
+
+
+
+
 
