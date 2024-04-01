@@ -10,7 +10,7 @@
 #include "log.h"
 
 typedef enum {
-    CHIP_ID = 0x24,
+    CHIP_ID = 0x00,
     PWR_CONF = 0x7C,
     INIT_CTRL = 0x59,
     INTERNAL_STATUS = 0x21,
@@ -31,22 +31,23 @@ gyro_err_t gyro_init(gyro_t *gyro)
 {
     while (HAL_SPI_GetState(&hspi1) != HAL_SPI_STATE_READY); // wait for spi to be ready
     HAL_Delay(1000); // wait for gyro to power up
-    gyro_cs_enable(); // enable chip select
 
     //dummy read - configures the spi (its i2c by default)
-    gyro_send_spi(CHIP_ID, NULL, 1);
+    gyro_send_spi(CHIP_ID | 0x80, &gyro->chip_id, 1);
+
+    delay(1000);
 
     // read chip id to verify communication
-    gyro_send_spi(CHIP_ID, &gyro->chip_id, 1);
+    gyro_send_spi(CHIP_ID | 0x80, &gyro->chip_id, 1);
 
     LOGD("chip id: %x\n", gyro->chip_id);
     if (gyro->chip_id != 0x24) {
-        gyro_cs_disable();
+        LOGE("gyro chip id not correct, gyro init not complete");
         return GYRO_ERR_CHIP_ID;
     }
 
-    gyro_cs_disable();
-    //return GYRO_OK; //debugging
+
+    return GYRO_OK; //debugging
     // disable power save mode
     gyro_send_spi(PWR_CONF, 0x00, 1);
     HAL_Delay(1);
@@ -95,34 +96,44 @@ gyro_err_t gyro_read(gyro_t *gyro)
 
 void gyro_cs_enable(void)
 {
-    HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_SET);
-    LOGD("gyro cs enabled\n");
+    HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_RESET);
 }
 
 void gyro_cs_disable(void)
 {
-    HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_RESET);
-    LOGD("gyro cs disabled\n");
+    HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_SET);
 }
 
 void log_gyro_err_t(gyro_err_t err)
 {
     switch (err) {
         case GYRO_OK:
-            LOGE("[ERR] GYRO_OK\n");
+            LOGE("[ERR] GYRO_OK");
             break;
         case GYRO_ERR_CHIP_ID:
-            LOGE("[ERR] GYRO_ERR_CHIP_ID\n");
+            LOGE("[ERR] GYRO_ERR_CHIP_ID");
             break;
         case GYRO_ERR_INTERNAL_STATUS:
-            LOGE("[ERR] GYRO_ERR_INTERNAL_STATUS\n");
+            LOGE("[ERR] GYRO_ERR_INTERNAL_STATUS");
             break;
         default:
-            LOGE("[ERR] UNKNOWN GYRO_ERR\n");
+            LOGE("[ERR] UNKNOWN GYRO_ERR");
             break;
     }
 }
 
 void gyro_send_spi(BMI270_REG_t reg, uint8_t *rx_data_ptr, uint8_t size) {
-    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *)reg, rx_data_ptr, size, HAL_MAX_DELAY);
+    uint8_t buffer[size+2];
+    gyro_cs_enable();
+    HAL_Delay(10);
+    HAL_SPI_TransmitReceive(&hspi1, (uint8_t *)reg, buffer, size+2, HAL_MAX_DELAY);
+    gyro_cs_disable();
+    for (uint8_t i = 0; i < size; i++) {
+        rx_data_ptr[i] = buffer[i+2];
+    }
+//    for (uint8_t i = 0; i < size+2; i++) {
+//        delay(250);
+//        LOGD("rx_data_ptr[%d]: %x\n", i, rx_data_ptr[i]);
+//        delay(250);
+//    }
 }

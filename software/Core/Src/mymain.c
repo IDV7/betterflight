@@ -23,9 +23,6 @@ void myinit(void) {
     cli_h.halt_until_connected_flag = true; //set to false if you don't want to wait for a connection
 
     log_init(LOG_LEVEL, true);
-    if (get_log_level() == LOG_LEVEL_DEBUG) // give dev time to open serial monitor when debugging
-        LED_blink_pattern(5, 4 ,50, 75, 50, 825);
-
     LED_on();
 
     cli_init(&cli_h); //will block if halt_until_connected_flag is true
@@ -33,7 +30,7 @@ void myinit(void) {
     LOGI("Starting Initialization...");
     // ----- all initialization code goes here ----- //
 
-
+    gyro_init(&gyro_h);
 
     // ----- end initialization code ----- //
     LOGI("Finished Initialization");

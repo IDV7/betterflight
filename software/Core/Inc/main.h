@@ -72,6 +72,10 @@ void Error_Handler(void);
 #define GYRO_CS_GPIO_Port GPIOB
 #define FLASH_CS_Pin GPIO_PIN_12
 #define FLASH_CS_GPIO_Port GPIOB
+#define MOTOR_4_Pin GPIO_PIN_8
+#define MOTOR_4_GPIO_Port GPIOC
+#define MOTOR_3_Pin GPIO_PIN_9
+#define MOTOR_3_GPIO_Port GPIOC
 #define MOTOR_2_Pin GPIO_PIN_8
 #define MOTOR_2_GPIO_Port GPIOA
 #define MOTOR_1_Pin GPIO_PIN_9
