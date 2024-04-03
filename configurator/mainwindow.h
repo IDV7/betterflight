@@ -40,7 +40,7 @@ private:
     QSerialPort *mSerial;
     QList<QSerialPortInfo> mSerialPorts;
     QTimer *mSerialScanTimer;
-
+    QTimer *auto_connect_timer;
 
 
     void updateSerialPorts();
@@ -54,5 +54,9 @@ private:
     void saveSettings();
 
     void handleSerialError(QSerialPort::SerialPortError error);
+
+    void disable_tabs_by_nr(int tab_nr, bool enable);
+
+    void auto_connect();
 };
 #endif // MAINWINDOW_H

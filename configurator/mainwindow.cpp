@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QProcess>
 #include <QSettings>
+#include <QTest>
 
 #define PBCONNECT_STYLE(color) ("QPushButton { background-color: " color "; color: #fff; border-radius: 37px; }")
 #define QLISTWIDGET_STYLE "QListWidget { background-color: #444; border: 1px solid #666; color: #fff; }"
@@ -17,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
         , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->setWindowTitle("BeterFlight Configurator");
+    this->setWindowTitle("BetterFlight Configurator");
     loadSettings();
     setStyleSheets();
 
@@ -44,6 +45,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(mSerial, &QSerialPort::errorOccurred,
             this, &MainWindow::handleSerialError);
+
+    auto_connect_timer = new QTimer(this);
+    auto_connect_timer->setInterval(1000);
+    auto_connect_timer->start();
+
+    connect(auto_connect_timer, &QTimer::timeout,
+            this, &MainWindow::auto_connect);
 }
 
 
@@ -72,29 +80,33 @@ void MainWindow::onConnectPushButtonClicked()
     QString serialName =  ui->cbPorts->currentText();
     QString serialLoc  =  ui->cbPorts->currentData().toString();
 
-    if (mSerial->isOpen()) {
+    if (mSerial->isOpen()) { // if connected
         qDebug() << "Serial already connected, disconnecting!";
+        mSerial->write("disconnect");
         mSerial->close();
         ui->pbConnect->setText("Connect");
         ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#004011"));
+//        disable_tabs_by_nr(1, false);
         return;
     }
-    else {
-        qDebug() << "Serial not connected, connecting!";
-        ui->pbConnect->setText("Disconnect");
-        ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#7a0101"));
-    }
+
+    // else, if not connected, connect
+    qDebug() << "Serial not connected, connecting!";
 
 
     mSerial->setPortName(serialLoc);
-    mSerial->setBaudRate(QSerialPort::Baud9600);
+    mSerial->setBaudRate(QSerialPort::Baud115200);
     mSerial->setDataBits(QSerialPort::Data8);
     mSerial->setParity(QSerialPort::NoParity);
     mSerial->setStopBits(QSerialPort::OneStop);
     mSerial->setFlowControl(QSerialPort::NoFlowControl);
 
-    if(mSerial->open(QIODevice::ReadWrite)) {
+    if(mSerial->open(QIODevice::ReadWrite)) { // only change the button if the connection was successful
         qDebug() << "SERIAL: OK!";
+        ui->pbConnect->setText("Disconnect");
+        ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#7a0101"));
+        mSerial->write("connect"); // send connection command
+//        disable_tabs_by_nr(1, true);
     } else {
         qDebug() << "SERIAL: ERROR!";
     }
@@ -107,11 +119,29 @@ void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
         mSerial->close();
         ui->pbConnect->setText("Connect");
         ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#004011"));
+//        disable_tabs_by_nr(1, false);
     }
 }
 
-// ------------------- EOF Tool bar ------------------- //
+//this function is called every so often to check if a new device has been connected, and if so, connect to it
+void MainWindow::auto_connect() {
 
+    if (mSerial->isOpen()) {
+        return;
+    }
+
+    for (QSerialPortInfo port: mSerialPorts) {
+        mSerial->setPort(port);
+        if (mSerial->open(QIODevice::ReadWrite)) {
+            qDebug() << "Auto connected to " << port.portName();
+            ui->pbConnect->setText("Disconnect");
+            ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#7a0101"));
+            mSerial->write("connect"); // send connection command
+        }
+    }
+}
+// ------------------- EOF Tool bar ------------------- //
+// =====================================================//
 // ------------------- CLI tab ------------------- //
 
 void MainWindow::writeColoredMessage(const QString& logMessage) {
@@ -134,7 +164,7 @@ void MainWindow::writeColoredMessage(const QString& logMessage) {
     if (logLevel.contains("[DEBUG]")) {
         color = "gray"; // Set debug messages to gray
     } else if (logLevel.contains("[INFO]")) {
-        color = "blue"; // Set info messages to blue
+        color = "cyan"; // Set info messages to blue
     } else if (logLevel.contains("[WARN]")) {
         color = "orange"; // Set warn messages to orange
     } else if (logLevel.contains("[ERR]")) {
@@ -144,9 +174,15 @@ void MainWindow::writeColoredMessage(const QString& logMessage) {
     } else {
         color = "white"; // Default color
     }
+    int padding = 8 - logLevel.length();
+
+    QString paddingSpaces;
+    for (int i = 0; i < padding; ++i) {
+        paddingSpaces += "&nbsp;";
+    }
 
     // Append the message with HTML formatting to the QTextBrowser
-    QString formattedMessage = "<font color=\"" + color + "\">" + logLevel + "</font>" + message + "<br>";
+    QString formattedMessage = "<font color=\"" + color + "\">" + logLevel + paddingSpaces  + "</font>" + message + "<br>";
     ui->tbMonitor->insertHtml(formattedMessage);
 
     // Scroll to the bottom
@@ -194,7 +230,7 @@ void MainWindow::serialReadyRead()
 }
 
 // ------------------- EOF CLI tab ------------------- //
-
+// =====================================================//
 // ------------------- Firmware Flash tab ------------------- //
 
 void MainWindow::onPbSelectBinClicked()
@@ -208,8 +244,12 @@ void MainWindow::onPbSelectBinClicked()
 }
 
 void MainWindow::onPbFlashClicked() {
+
     //put mcu in dfu
     mSerial->write("dfu");
+    qDebug() << "Send dfu command, waiting for it to enter dfu";
+    QTest::qWait(750);
+    qDebug() << "Assuming its in dfu";
 
     QString path = ui->leBinaryPath->text();
     qDebug() << "Path: " << path;
@@ -237,14 +277,33 @@ void MainWindow::onPbFlashClicked() {
         }
     }
 
+
+    // assure user that flashing will start soon
+    ui->prFlashing->setValue(1);
+
+
     //writing the firware file to the microcontroller
     m_p = new QProcess(this);
-    QString args = "-c port=" + deviceIndex + " --write \"" + path + "\" --verify -rst";
+    QString args = "-c port=" + deviceIndex + " --write \"" + path + "\" --verify";
     connect(m_p, &QProcess::readyReadStandardOutput, this, &MainWindow::readProgressData);
     connect(m_p, &QProcess::finished, this, &MainWindow::readProgressData);
     connect(m_p, &QProcess::errorOccurred, this, &MainWindow::progressError);
 
     m_p->start("C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe", args.split(" "));
+
+    QTest::qWait(10000);
+
+    //send command to leave dfu
+    QString leave_dfu_args = "-c port=" + deviceIndex + " -s DFU_DNLOAD";
+    m_p->start("C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe", leave_dfu_args.split(" "));
+
+    QTest::qWait(500);
+
+    //reset progress bar
+    ui->prFlashing->setValue(0);
+
+    //go to monitor tab
+    ui->lwTabs->setCurrentRow(1);
 }
 
 void MainWindow::readProgressData() {
@@ -272,7 +331,7 @@ void MainWindow::progressError() {
 }
 
 // ------------------- EOF Firmware Flash tab ------------------- //
-
+// =====================================================//
 // ------------------- Q Settings ------------------- //
 
 void MainWindow::loadSettings() {
@@ -290,7 +349,7 @@ void MainWindow::saveSettings() {
 }
 
 // ------------------- EOF Q Settings ------------------- //
-
+// =====================================================//
 // ------------------- Misc ------------------- //
 
 void MainWindow::setStyleSheets() {
@@ -308,3 +367,19 @@ void MainWindow::setStyleSheets() {
                         "QMenu::item:selected { background-color: #555; }");
 };
 
+// allows the disabling of tabs (QStackedWidget children) by name
+void MainWindow::disable_tabs_by_nr(int tab_nr, bool enable) {
+    QWidget* tabWidget = ui->swContent->widget(tab_nr);
+    if(tabWidget) {
+        QList<QWidget*> childWidgets = tabWidget->findChildren<QWidget*>();
+        for(QWidget* childWidget : childWidgets) {
+            if (!enable) {
+                childWidget->setEnabled(false);
+                childWidget->setStyleSheet("opacity: 0.25;");
+                return;
+            }
+            childWidget->setEnabled(true);
+            childWidget->setStyleSheet("opacity: 1;");
+        }
+    }
+}
