@@ -405,8 +405,135 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=SWREOCCL
 
+[Document22]
+DocumentPath=CAMtastic1.Cam
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=
+
+[Document23]
+DocumentPath=CAMtastic2.Cam
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=
+
+[Document24]
+DocumentPath=CAMtastic3.Cam
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=
+
 [GeneratedDocument1]
 DocumentPath=Project Outputs for BetterFC\Design Rule Check - PCB1.html
+DItemRevisionGUID=
+
+[GeneratedDocument2]
+DocumentPath=Project Outputs for BetterFC\PCB1.DRR
+DItemRevisionGUID=
+
+[GeneratedDocument3]
+DocumentPath=Project Outputs for BetterFC\PCB1.EXTREP
+DItemRevisionGUID=
+
+[GeneratedDocument4]
+DocumentPath=Project Outputs for BetterFC\PCB1.GBL
+DItemRevisionGUID=
+
+[GeneratedDocument5]
+DocumentPath=Project Outputs for BetterFC\PCB1.GBO
+DItemRevisionGUID=
+
+[GeneratedDocument6]
+DocumentPath=Project Outputs for BetterFC\PCB1.GBP
+DItemRevisionGUID=
+
+[GeneratedDocument7]
+DocumentPath=Project Outputs for BetterFC\PCB1.GBS
+DItemRevisionGUID=
+
+[GeneratedDocument8]
+DocumentPath=Project Outputs for BetterFC\PCB1.GD1
+DItemRevisionGUID=
+
+[GeneratedDocument9]
+DocumentPath=Project Outputs for BetterFC\PCB1.GG1
+DItemRevisionGUID=
+
+[GeneratedDocument10]
+DocumentPath=Project Outputs for BetterFC\PCB1.GM
+DItemRevisionGUID=
+
+[GeneratedDocument11]
+DocumentPath=Project Outputs for BetterFC\PCB1.GM2
+DItemRevisionGUID=
+
+[GeneratedDocument12]
+DocumentPath=Project Outputs for BetterFC\PCB1.GP1
+DItemRevisionGUID=
+
+[GeneratedDocument13]
+DocumentPath=Project Outputs for BetterFC\PCB1.GP2
+DItemRevisionGUID=
+
+[GeneratedDocument14]
+DocumentPath=Project Outputs for BetterFC\PCB1.GTL
+DItemRevisionGUID=
+
+[GeneratedDocument15]
+DocumentPath=Project Outputs for BetterFC\PCB1.GTO
+DItemRevisionGUID=
+
+[GeneratedDocument16]
+DocumentPath=Project Outputs for BetterFC\PCB1.GTP
+DItemRevisionGUID=
+
+[GeneratedDocument17]
+DocumentPath=Project Outputs for BetterFC\PCB1.GTS
+DItemRevisionGUID=
+
+[GeneratedDocument18]
+DocumentPath=Project Outputs for BetterFC\PCB1.LDP
+DItemRevisionGUID=
+
+[GeneratedDocument19]
+DocumentPath=Project Outputs for BetterFC\PCB1.REP
+DItemRevisionGUID=
+
+[GeneratedDocument20]
+DocumentPath=Project Outputs for BetterFC\PCB1.TXT
 DItemRevisionGUID=
 
 [Configuration1]
@@ -654,72 +781,100 @@ Name=Fabrication Outputs
 Description=
 TargetPrinter=MF-Print [Abel](Mobility)
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
-OutputType1=Board Stack Report
-OutputName1=Report Board Stack
+OutputType1=NC Drill
+OutputName1=NC Drill Files
 OutputDocumentPath1=
 OutputVariantName1=
 OutputDefault1=0
-PageOptions1=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType2=CompositeDrill
-OutputName2=Composite Drill Drawing
+Configuration1_Name1=ForceUpdateSettings
+Configuration1_Item1=False
+Configuration1_Name2=OutputConfigurationParameter1
+Configuration1_Item2=BoardEdgeRoutToolDia=2000000|GenerateBoardEdgeRout=False|GenerateDrilledSlotsG85=False|GenerateEIADrillFile=False|GenerateSeparatePlatedNonPlatedFiles=False|GenerateSeparateViaTypeFiles=False|GenerateToolsByDrillSymbols=False|NumberOfDecimals=4|NumberOfUnits=4|OptimizeChangeLocationCommands=True|OriginPosition=Relative|Record=DrillView|Units=Metric|ZeroesMode=SuppressTrailingZeroes|DocumentPath=C:\Users\Isaak\Dropbox\pc\Documents\School_TM\2ES_Sem3\PE2\betterflight\hardware\hardware\Betterfc\PCB1.PcbDoc
+OutputType2=Mask
+OutputName2=Solder/Paste Mask Prints
 OutputDocumentPath2=
 OutputVariantName2=[No Variations]
 OutputDefault2=0
 PageOptions2=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType3=Drill
-OutputName3=Drill Drawing/Guides
+OutputType3=IPC2581
+OutputName3=IPC-2581 Files
 OutputDocumentPath3=
 OutputVariantName3=[No Variations]
 OutputDefault3=0
-PageOptions3=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType4=Final
-OutputName4=Final Artwork Prints
+OutputType4=Test Points
+OutputName4=Test Point Report
 OutputDocumentPath4=
-OutputVariantName4=[No Variations]
+OutputVariantName4=
 OutputDefault4=0
-PageOptions4=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType5=Gerber
-OutputName5=Gerber Files
+OutputType5=Plane
+OutputName5=Power-Plane Prints
 OutputDocumentPath5=
 OutputVariantName5=[No Variations]
 OutputDefault5=0
-OutputType6=Gerber X2
-OutputName6=Gerber X2 Files
+PageOptions5=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
+OutputType6=ODB
+OutputName6=ODB++ Files
 OutputDocumentPath6=
 OutputVariantName6=[No Variations]
 OutputDefault6=0
-OutputType7=IPC2581
-OutputName7=IPC-2581 Files
+OutputType7=Drill
+OutputName7=Drill Drawing/Guides
 OutputDocumentPath7=
 OutputVariantName7=[No Variations]
 OutputDefault7=0
-OutputType8=Mask
-OutputName8=Solder/Paste Mask Prints
+PageOptions7=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=6.82|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
+Configuration7_Name1=ForceUpdateSettings
+Configuration7_Item1=False
+Configuration7_Name2=OutputConfigurationParameter1
+Configuration7_Item2=DesignatorDisplayMode=Physical|PrintArea=DesignExtent|PrintAreaLowerLeftCornerX=0|PrintAreaLowerLeftCornerY=0|PrintAreaUpperRightCornerX=0|PrintAreaUpperRightCornerY=0|Record=PcbPrintView|DocumentPath=C:\Users\Isaak\Dropbox\pc\Documents\School_TM\2ES_Sem3\PE2\betterflight\hardware\hardware\Betterfc\PCB1.PcbDoc
+Configuration7_Name3=OutputConfigurationParameter2
+Configuration7_Item3=IncludeBoardCutouts=False|IncludeBottomLayerComponents=True|IncludeMultiLayerComponents=True|IncludeTopLayerComponents=True|IncludeViewports=True|Index=0|Mirror=False|Name=Drill Drawing For (Top Layer - Bottom Layer)|PadNumberFontSize=14|Record=PcbPrintOut|ShowHoles=False|ShowPadNets=False|ShowPadNumbers=False|SubstituteFonts=False|DocumentPath=C:\Users\Isaak\Dropbox\pc\Documents\School_TM\2ES_Sem3\PE2\betterflight\hardware\hardware\Betterfc\PCB1.PcbDoc
+Configuration7_Name4=OutputConfigurationParameter3
+Configuration7_Item4=CArc=Full|CFill=Full|Comment=Full|Coordinate=Full|CPad=Full|CRegion=Full|CText=Full|CTrack=Full|CVia=Full|Designator=Full|Dimension=Full|DLayer1=TopLayer|DLayer2=BottomLayer|DrillType=Regular|FArc=Full|FFill=Full|FPad=Full|FRegion=Full|FText=Full|FTrack=Full|FVia=Full|Layer=DrillDrawing|Polygon=Full|PrintOutIndex=0|Record=PcbPrintLayer|DocumentPath=C:\Users\Isaak\Dropbox\pc\Documents\School_TM\2ES_Sem3\PE2\betterflight\hardware\hardware\Betterfc\PCB1.PcbDoc
+Configuration7_Name5=OutputConfigurationParameter4
+Configuration7_Item5=CArc=Full|CFill=Full|Comment=Full|Coordinate=Full|CPad=Full|CRegion=Full|CText=Full|CTrack=Full|CVia=Full|Designator=Full|Dimension=Full|DLayer1=TopLayer|DLayer2=BottomLayer|DrillType=Regular|FArc=Full|FFill=Full|FPad=Full|FRegion=Full|FText=Full|FTrack=Full|FVia=Full|Layer=Mechanical2|Polygon=Full|PrintOutIndex=0|Record=PcbPrintLayer|DocumentPath=C:\Users\Isaak\Dropbox\pc\Documents\School_TM\2ES_Sem3\PE2\betterflight\hardware\hardware\Betterfc\PCB1.PcbDoc
+Configuration7_Name6=OutputConfigurationParameter5
+Configuration7_Item6=CArc=Full|CFill=Full|Comment=Full|Coordinate=Full|CPad=Full|CRegion=Full|CText=Full|CTrack=Full|CVia=Full|Designator=Full|Dimension=Full|DLayer1=TopLayer|DLayer2=BottomLayer|DrillType=Regular|FArc=Full|FFill=Full|FPad=Full|FRegion=Full|FText=Full|FTrack=Full|FVia=Full|Layer=Mechanical15|Polygon=Full|PrintOutIndex=0|Record=PcbPrintLayer|DocumentPath=C:\Users\Isaak\Dropbox\pc\Documents\School_TM\2ES_Sem3\PE2\betterflight\hardware\hardware\Betterfc\PCB1.PcbDoc
+Configuration7_Name7=OutputConfigurationParameter6
+Configuration7_Item7=IncludeBoardCutouts=False|IncludeBottomLayerComponents=True|IncludeMultiLayerComponents=True|IncludeTopLayerComponents=True|IncludeViewports=True|Index=1|Mirror=False|Name=Drill Guide For (Top Layer - Bottom Layer)|PadNumberFontSize=14|Record=PcbPrintOut|ShowHoles=False|ShowPadNets=False|ShowPadNumbers=False|SubstituteFonts=False|DocumentPath=C:\Users\Isaak\Dropbox\pc\Documents\School_TM\2ES_Sem3\PE2\betterflight\hardware\hardware\Betterfc\PCB1.PcbDoc
+Configuration7_Name8=OutputConfigurationParameter7
+Configuration7_Item8=CArc=Full|CFill=Full|Comment=Full|Coordinate=Full|CPad=Full|CRegion=Full|CText=Full|CTrack=Full|CVia=Full|Designator=Full|Dimension=Full|DLayer1=TopLayer|DLayer2=BottomLayer|DrillType=Regular|FArc=Full|FFill=Full|FPad=Full|FRegion=Full|FText=Full|FTrack=Full|FVia=Full|Layer=DrillGuide|Polygon=Full|PrintOutIndex=1|Record=PcbPrintLayer|DocumentPath=C:\Users\Isaak\Dropbox\pc\Documents\School_TM\2ES_Sem3\PE2\betterflight\hardware\hardware\Betterfc\PCB1.PcbDoc
+Configuration7_Name9=OutputConfigurationParameter8
+Configuration7_Item9=CArc=Full|CFill=Full|Comment=Full|Coordinate=Full|CPad=Full|CRegion=Full|CText=Full|CTrack=Full|CVia=Full|Designator=Full|Dimension=Full|DLayer1=TopLayer|DLayer2=BottomLayer|DrillType=Regular|FArc=Full|FFill=Full|FPad=Full|FRegion=Full|FText=Full|FTrack=Full|FVia=Full|Layer=Mechanical2|Polygon=Full|PrintOutIndex=1|Record=PcbPrintLayer|DocumentPath=C:\Users\Isaak\Dropbox\pc\Documents\School_TM\2ES_Sem3\PE2\betterflight\hardware\hardware\Betterfc\PCB1.PcbDoc
+Configuration7_Name10=OutputConfigurationParameter9
+Configuration7_Item10=CArc=Full|CFill=Full|Comment=Full|Coordinate=Full|CPad=Full|CRegion=Full|CText=Full|CTrack=Full|CVia=Full|Designator=Full|Dimension=Full|DLayer1=TopLayer|DLayer2=BottomLayer|DrillType=Regular|FArc=Full|FFill=Full|FPad=Full|FRegion=Full|FText=Full|FTrack=Full|FVia=Full|Layer=Mechanical15|Polygon=Full|PrintOutIndex=1|Record=PcbPrintLayer|DocumentPath=C:\Users\Isaak\Dropbox\pc\Documents\School_TM\2ES_Sem3\PE2\betterflight\hardware\hardware\Betterfc\PCB1.PcbDoc
+OutputType8=CompositeDrill
+OutputName8=Composite Drill Drawing
 OutputDocumentPath8=
 OutputVariantName8=[No Variations]
 OutputDefault8=0
 PageOptions8=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType9=NC Drill
-OutputName9=NC Drill Files
+OutputType9=Board Stack Report
+OutputName9=Report Board Stack
 OutputDocumentPath9=
 OutputVariantName9=
 OutputDefault9=0
-OutputType10=ODB
-OutputName10=ODB++ Files
+PageOptions9=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
+OutputType10=Gerber X2
+OutputName10=Gerber X2 Files
 OutputDocumentPath10=
 OutputVariantName10=[No Variations]
 OutputDefault10=0
-OutputType11=Plane
-OutputName11=Power-Plane Prints
+OutputType11=Final
+OutputName11=Final Artwork Prints
 OutputDocumentPath11=
 OutputVariantName11=[No Variations]
 OutputDefault11=0
 PageOptions11=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType12=Test Points
-OutputName12=Test Point Report
+OutputType12=Gerber
+OutputName12=Gerber Files
 OutputDocumentPath12=
-OutputVariantName12=
+OutputVariantName12=[No Variations]
 OutputDefault12=0
+Configuration12_Name1=ForceUpdateSettings
+Configuration12_Item1=False
+Configuration12_Name2=OutputConfigurationParameter1
+Configuration12_Item2=AddToAllLayerClasses.Set= |AddToAllPlots.Set=SerializeLayerHash.Version~2,ClassName~TPlotLayerStateArray|BoardID=SWREOCCL|CentrePlots=False|DrillDrawingSymbol=GraphicsSymbol|DrillDrawingSymbolSize=500000|EmbeddedApertures=True|FilmBorderSize=10000000|FilmXSize=200000000|FilmYSize=160000000|FlashAllFills=False|FlashPadShapes=True|G54OnApertureChange=False|GenerateDRCRulesFile=False|GenerateDRCRulesFile=False|GenerateReliefShapes=True|GenerateReports=True|GerberUnit=Metric|GerberUnit=Metric|IncludeUnconnectedMidLayerPads=True|LayerClassesMirror.Set= |LayerClassesPlot.Set= |LeadingAndTrailingZeroesMode=SuppressLeadingZeroes|MaxApertureSize=2500000|MergePadAndRegion=False|MinusApertureTolerance=50|MinusApertureTolerance=50|Mirror.Set=SerializeLayerHash.Version~2,ClassName~TPlotLayerStateArray|MirrorDrillDrawingPlots=False|MirrorDrillGuidePlots=False|NoRegularPolygons=False|NumberOfDecimals=4|NumberOfDecimals=4|OptimizeChangeLocationCommands=True|OptimizeChangeLocationCommands=True|OriginPosition=Relative|Panelize=False|Plot.Set=SerializeLayerHash.Version~2,ClassName~TPlotLayerStateArray,16777217~1,16842753~1,16842754~1,16842751~1,16973830~1,16973831~1,16908290~1,16973832~1,16973833~1,16973834~1,16973835~1|PlotBoardProfile=True|PlotBoardProfileFileName=PCB1.GM|PlotDrillDrawingLayerPair0_Backdrill=False|PlotDrillDrawingLayerPair0_Checked=True|PlotDrillDrawingLayerPair0_DrillType=Regular|PlotDrillDrawingLayerPair0_FileName=PCB1.GD1|PlotDrillDrawingLayerPair0_HighLayer=Bottom Layer|PlotDrillDrawingLayerPair0_LowLayer=Top Layer|PlotDrillGuideLayerPair0_Backdrill=False|PlotDrillGuideLayerPair0_Checked=True|PlotDrillGuideLayerPair0_DrillType=Regular|PlotDrillGuideLayerPair0_FileName=PCB1.GG1|PlotDrillGuideLayerPair0_HighLayer=Bottom Layer|PlotDrillGuideLayerPair0_LowLayer=Top Layer|PlotPositivePlaneLayers=False|PlotUsedDrillDrawingLayerPairs=False|PlotUsedDrillGuideLayerPairs=False|PlusApertureTolerance=50|PlusApertureTolerance=50|Record=GerberView|SoftwareArcs=False|Sorted=False|Sorted=False|UserLayerName.Caption0=PCB1.GBO|UserLayerName.Caption1=PCB1.GTP|UserLayerName.Caption10=PCB1.GBS|UserLayerName.Caption11=PCB1.GP2|UserLayerName.Caption12=PCB1.GM1|UserLayerName.Caption13=PCB1.GBL|UserLayerName.Caption14=PCB1.GM15|UserLayerName.Caption15=PCB1.GTL|UserLayerName.Caption16=PCB1.GKO|UserLayerName.Caption2=PCB1.GTO|UserLayerName.Caption3=PCB1.GTS|UserLayerName.Caption4=PCB1.GM13|UserLayerName.Caption5=PCB1.GM2|UserLayerName.Caption6=PCB1.GPT|UserLayerName.Caption7=PCB1.GPB|UserLayerName.Caption8=PCB1.GBP|UserLayerName.Caption9=PCB1.GP1|UserLayerName.Count=17|UserLayerName.Layer0=16973831|UserLayerName.Layer1=16973832|UserLayerName.Layer10=16973835|UserLayerName.Layer11=16842754|UserLayerName.Layer12=16908289|UserLayerName.Layer13=16842751|UserLayerName.Layer14=16908303|UserLayerName.Layer15=16777217|UserLayerName.Layer16=16973837|UserLayerName.Layer2=16973830|UserLayerName.Layer3=16973834|UserLayerName.Layer4=16908301|UserLayerName.Layer5=16908290|UserLayerName.Layer6=16973848|UserLayerName.Layer7=16973849|UserLayerName.Layer8=16973833|UserLayerName.Layer9=16842753|DocumentPath=C:\Users\Isaak\Dropbox\pc\Documents\School_TM\2ES_Sem3\PE2\betterflight\hardware\hardware\Betterfc\PCB1.PcbDoc
 
 [OutputGroup6]
 Name=Report Outputs
