@@ -52,6 +52,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(auto_connect_timer, &QTimer::timeout,
             this, &MainWindow::auto_connect);
+
+    connect(ui->pbQuickFlash, &QPushButton::clicked,
+            this, &MainWindow::onPbQuickFlashClicked);
+
+    connect(ui->cbOptAutoConnect, &QCheckBox::stateChanged, this, &MainWindow::handleAutoConnectCB);
 }
 
 
@@ -127,6 +132,10 @@ void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
 void MainWindow::auto_connect() {
 
     if (mSerial->isOpen()) {
+        return;
+    }
+
+    if (!cb_auto_connect) {
         return;
     }
 
@@ -303,6 +312,7 @@ void MainWindow::onPbFlashClicked() {
     ui->prFlashing->setValue(0);
 
     //go to monitor tab
+    ui->tbMonitor->clear();
     ui->lwTabs->setCurrentRow(1);
 }
 
@@ -330,6 +340,13 @@ void MainWindow::progressError() {
     ui->prFlashing->setFormat("Error :");
 }
 
+void MainWindow::onPbQuickFlashClicked() {
+    // set flash tab
+    ui->lwTabs->setCurrentRow(2);
+    // flash function
+    onPbFlashClicked();
+}
+
 // ------------------- EOF Firmware Flash tab ------------------- //
 // =====================================================//
 // ------------------- Q Settings ------------------- //
@@ -337,16 +354,39 @@ void MainWindow::progressError() {
 void MainWindow::loadSettings() {
     QSettings settings("BetterFlight", "Configurator");
 
+    if (!settings.contains("initialized")) {
+        saveSettings(); // Save the default settings if the app is ran for the first time to prevent crash.
+    }
+
     //Load the last binary path
     ui->leBinaryPath->setText(settings.value("lastBinPath").toString());
+
+    //Load the auto connect checkbox
+    cb_auto_connect = settings.value("autoConnect").toBool();
+    ui->cbOptAutoConnect->setChecked(cb_auto_connect ? Qt::Checked : Qt::Unchecked);
+    handleAutoConnectCB(cb_auto_connect);
 }
 
 void MainWindow::saveSettings() {
     QSettings settings("BetterFlight", "Configurator");
 
+    settings.setValue("initialized", true);
+
     //Save the last binary path
     settings.setValue("lastBinPath", ui->leBinaryPath->text());
+
+    //Save the auto connect checkbox
+    settings.setValue("autoConnect", cb_auto_connect);
 }
+
+    void MainWindow::handleAutoConnectCB(int state) {
+        if (state == Qt::Checked) {
+            cb_auto_connect = true;
+        } else {
+            cb_auto_connect = false;
+        }
+        saveSettings();
+    }
 
 // ------------------- EOF Q Settings ------------------- //
 // =====================================================//
@@ -360,6 +400,7 @@ void MainWindow::setStyleSheets() {
     ui->lwTabs->setStyleSheet(QLISTWIDGET_STYLE);
     ui->swContent->setStyleSheet(QSTACKEDWIDGET_STYLE);
     ui->tbMonitor->setStyleSheet(QTEXTBROWSER_STYLE);
+    ui->pbQuickFlash->setStyleSheet(PBCONNECT_STYLE("#948715"));
 
     qApp->setStyleSheet("QMainWindow { background-color: #333; color: #fff; }"
                         "QMenuBar { background-color: #222; color: #fff; }"

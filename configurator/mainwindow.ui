@@ -69,6 +69,35 @@
        </widget>
       </item>
       <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbQuickFlash">
+        <property name="minimumSize">
+         <size>
+          <width>75</width>
+          <height>75</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Quick Flash</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -121,7 +150,7 @@
       <item>
        <widget class="QStackedWidget" name="swContent">
         <property name="currentIndex">
-         <number>1</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="pWelcome">
          <widget class="QLabel" name="label_2">
@@ -240,17 +269,30 @@
          </layout>
         </widget>
         <widget class="QWidget" name="pSettings">
-         <widget class="QCheckBox" name="cbOptRebootConnect">
+         <widget class="QCheckBox" name="cbOptAutoConnect">
           <property name="geometry">
            <rect>
             <x>110</x>
             <y>60</y>
-            <width>76</width>
+            <width>121</width>
             <height>20</height>
            </rect>
           </property>
           <property name="text">
-           <string>Reboot MCU after </string>
+           <string>Auto Connect</string>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="cbOptClearAfterFlash">
+          <property name="geometry">
+           <rect>
+            <x>110</x>
+            <y>80</y>
+            <width>121</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Clear After Flash</string>
           </property>
          </widget>
         </widget>
@@ -319,22 +361,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>pbConnect</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onConnectPushButtonClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>748</x>
-     <y>68</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>400</x>
-     <y>271</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>pbClearCLI</sender>
    <signal>clicked()</signal>
    <receiver>tbMonitor</receiver>
@@ -391,6 +417,38 @@
     <hint type="sourcelabel">
      <x>604</x>
      <y>270</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pbConnect</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onConnectPushButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>748</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pbQuickFlash</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onPbFlashClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>175</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
      <x>400</x>

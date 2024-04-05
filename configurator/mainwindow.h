@@ -29,9 +29,13 @@ private slots:
     void serialReadyRead();
     void onPbSelectBinClicked();
     void onPbFlashClicked();
+    void onPbQuickFlashClicked();
     void readProgressData();
     void progressFinished();
     void progressError();
+    void updateSerialPorts();
+
+
 
 private:
     Ui::MainWindow *ui;
@@ -42,21 +46,18 @@ private:
     QTimer *mSerialScanTimer;
     QTimer *auto_connect_timer;
 
+    bool cb_auto_connect = false;
+    bool cb_clear_after_flash = false;
 
-    void updateSerialPorts();
+
     void setStyleSheets();
-
-
     void writeColoredMessage(const QString &logMessage);
-
     void loadSettings();
-
     void saveSettings();
-
     void handleSerialError(QSerialPort::SerialPortError error);
-
     void disable_tabs_by_nr(int tab_nr, bool enable);
-
     void auto_connect();
+
+    void handleAutoConnectCB(int state);
 };
 #endif // MAINWINDOW_H
