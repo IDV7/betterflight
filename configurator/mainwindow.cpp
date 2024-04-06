@@ -33,6 +33,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->pbQuickFlash, &QPushButton::clicked,
             this, &MainWindow::onPbQuickFlashClicked);
+
+    connect(ui->actionFlash, &QAction::triggered, this, &MainWindow::changeStackedWidgetIndex);
+    connect(ui->actionMonitor, &QAction::triggered, this, &MainWindow::changeStackedWidgetIndex);
+    connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::changeStackedWidgetIndex);
+
 }
 
 
@@ -45,7 +50,6 @@ MainWindow::~MainWindow()
 
 }
 
-// ------------------- Tool bar ------------------- //
 
 void MainWindow::onConnectPushButtonClicked()
 {
@@ -53,24 +57,15 @@ void MainWindow::onConnectPushButtonClicked()
 }
 
 void MainWindow::onPbQuickFlashClicked() {
-    ui->lwTabs->setCurrentRow(2);
+    ui->swContent->setCurrentIndex(2);
     flashManager->flashFW();
 }
-
-// ------------------- EOF Tool bar ------------------- //
-// =====================================================//
-// ------------------- CLI tab ------------------- //
-
 
 void MainWindow::onSendPushButtonClicked()
 {
     serialManager->sendCommand(ui->leCLI->text());
     ui->leCLI->clear();
 }
-
-// ------------------- EOF CLI tab ------------------- //
-// =====================================================//
-// ------------------- Firmware Flash tab ------------------- //
 
 void MainWindow::onPbSelectBinClicked()
 {
@@ -81,12 +76,24 @@ void MainWindow::onPbFlashClicked() {
     flashManager->flashFW();
 }
 
+void MainWindow::changeStackedWidgetIndex() {
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (action) {
+        QString actionName = action->text();
+        int index = -1;
+        if (actionName == "Monitor") {
+            index = 1;
+        } else if (actionName == "Flash") {
+            index = 2;
+        } else if (actionName == "Settings") {
+            index = 3;
+        }
+        ui->swContent->setCurrentIndex(index);
+    }
+}
 
 
 
-// ------------------- EOF Firmware Flash tab ------------------- //
-// =====================================================//
-// ------------------- Misc ------------------- //
 
 void MainWindow::setStyleSheets() {
 

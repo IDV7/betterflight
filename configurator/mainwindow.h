@@ -45,6 +45,7 @@ private slots:
     void onPbSelectBinClicked();
     void onPbFlashClicked();
     void onPbQuickFlashClicked();
+    void changeStackedWidgetIndex();
 
 
 

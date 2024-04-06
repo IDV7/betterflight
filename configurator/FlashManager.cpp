@@ -80,7 +80,7 @@ void FlashManager::flashFW() {
 
     //go to monitor tab
     mw->ui->tbMonitor->clear();
-    mw->ui->lwTabs->setCurrentRow(1);
+    mw->ui->swContent->setCurrentIndex(1);
 }
 
 void FlashManager::readProgressData() {

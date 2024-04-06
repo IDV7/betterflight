@@ -154,40 +154,10 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="hlMainContent" stretch="1,7">
+     <layout class="QHBoxLayout" name="hlMainContent" stretch="7">
       <property name="sizeConstraint">
        <enum>QLayout::SetMaximumSize</enum>
       </property>
-      <item>
-       <widget class="QListWidget" name="lwTabs">
-        <property name="styleSheet">
-         <string notr="true">border: 0px; color: #fff; font-size:15px;selected {background-color: #333}</string>
-        </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <item>
-         <property name="text">
-          <string>Welcome</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Monitor</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Flash</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Settings</string>
-         </property>
-        </item>
-       </widget>
-      </item>
       <item>
        <widget class="QStackedWidget" name="swContent">
         <property name="currentIndex">
@@ -368,9 +338,18 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionSettings"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuMonitor">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionMonitor"/>
+    <addaction name="actionFlash"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuMonitor"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
@@ -378,25 +357,30 @@
     <string>Exit</string>
    </property>
   </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionMonitor">
+   <property name="text">
+    <string>Monitor</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionFlash">
+   <property name="text">
+    <string>Flash</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>lwTabs</sender>
-   <signal>currentRowChanged(int)</signal>
-   <receiver>swContent</receiver>
-   <slot>setCurrentIndex(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>90</x>
-     <y>134</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>429</x>
-     <y>160</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>actionExit</sender>
    <signal>triggered()</signal>
