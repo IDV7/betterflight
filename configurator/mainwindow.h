@@ -7,6 +7,17 @@
 #include <QSerialPortInfo>
 #include <QTimer>
 #include <QProcess>
+class SettingsManager;
+class SerialManager;
+class FlashManager;
+
+
+
+#define PBCONNECT_STYLE(color) ("QPushButton { background-color: " color "; color: #fff; border-radius: 37px; }")
+#define QLISTWIDGET_STYLE "QListWidget { background-color: #444; border: 1px solid #666; color: #fff; }"
+#define QSTACKEDWIDGET_STYLE "QStackedWidget { background-color: #333; }"
+#define QLINEEDIT_STYLE "QLineEdit { background-color: #555; border: 1px solid #666; color: #fff; }"
+#define QTEXTBROWSER_STYLE "QTextBrowser { background-color: #444; color: #fff }"
 
 
 QT_BEGIN_NAMESPACE
@@ -23,41 +34,26 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    SettingsManager *settingsManager;
+    SerialManager *serialManager;
+    FlashManager *flashManager;
+
+    Ui::MainWindow *ui;
 private slots:
     void onConnectPushButtonClicked();
     void onSendPushButtonClicked();
-    void serialReadyRead();
     void onPbSelectBinClicked();
     void onPbFlashClicked();
     void onPbQuickFlashClicked();
-    void readProgressData();
-    void progressFinished();
-    void progressError();
-    void updateSerialPorts();
+
 
 
 
 private:
-    Ui::MainWindow *ui;
-    QProcess * m_p;
-
-    QSerialPort *mSerial;
-    QList<QSerialPortInfo> mSerialPorts;
-    QTimer *mSerialScanTimer;
-    QTimer *auto_connect_timer;
-
-    bool cb_auto_connect = false;
-    bool cb_clear_after_flash = false;
 
 
     void setStyleSheets();
-    void writeColoredMessage(const QString &logMessage);
-    void loadSettings();
-    void saveSettings();
-    void handleSerialError(QSerialPort::SerialPortError error);
     void disable_tabs_by_nr(int tab_nr, bool enable);
-    void auto_connect();
 
-    void handleAutoConnectCB(int state);
 };
 #endif // MAINWINDOW_H

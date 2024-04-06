@@ -24,6 +24,14 @@
             mainwindow.cpp
             mainwindow.h
             mainwindow.ui
+            SettingsManager.cpp
+            SettingsManager.h
+            FlashManager.cpp
+            FlashManager.h
+            SerialManager.cpp
+            SerialManager.h
+            StyleManager.cpp
+            StyleManager.h
     )
 
     #qt6_wrap_ui(SOURCES mainwindow.ui)

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>801</width>
-    <height>544</height>
+    <height>580</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,38 @@
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #333; color: #fff;</string>
+  </property>
   <widget class="QWidget" name="vlAllContent">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
     <item>
      <layout class="QHBoxLayout" name="hlTopBar">
+      <property name="spacing">
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="QTextBrowser" name="tbDebug">
+        <property name="minimumSize">
+         <size>
+          <width>400</width>
+          <height>75</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>10000</width>
+          <height>74</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border: 1px</string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
       <item>
        <spacer name="hsForTopBar">
         <property name="orientation">
@@ -28,13 +56,17 @@
         <property name="sizeHint" stdset="0">
          <size>
           <width>40</width>
-          <height>20</height>
+          <height>75</height>
          </size>
         </property>
        </spacer>
       </item>
       <item>
-       <widget class="QComboBox" name="cbPorts"/>
+       <widget class="QComboBox" name="cbPorts">
+        <property name="styleSheet">
+         <string notr="true">background-color: #444; color: #fff</string>
+        </property>
+       </widget>
       </item>
       <item>
        <spacer name="horizontalSpacer">
@@ -59,6 +91,9 @@
           <width>75</width>
           <height>75</height>
          </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: #004011; color: #fff; border-radius: 37px;</string>
         </property>
         <property name="text">
          <string>Connect</string>
@@ -92,6 +127,9 @@
           <height>75</height>
          </size>
         </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: #948715; color: #fff; border-radius: 37px;</string>
+        </property>
         <property name="text">
          <string>Quick Flash</string>
         </property>
@@ -116,12 +154,15 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="hlMainContent" stretch="1,5">
+     <layout class="QHBoxLayout" name="hlMainContent" stretch="1,7">
       <property name="sizeConstraint">
        <enum>QLayout::SetMaximumSize</enum>
       </property>
       <item>
        <widget class="QListWidget" name="lwTabs">
+        <property name="styleSheet">
+         <string notr="true">border: 0px; color: #fff; font-size:15px;selected {background-color: #333}</string>
+        </property>
         <property name="lineWidth">
          <number>0</number>
         </property>
@@ -150,7 +191,7 @@
       <item>
        <widget class="QStackedWidget" name="swContent">
         <property name="currentIndex">
-         <number>3</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="pWelcome">
          <widget class="QLabel" name="label_2">
@@ -177,15 +218,25 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: #444; color: #fff</string>
+            </property>
            </widget>
           </item>
           <item>
            <layout class="QHBoxLayout" name="hlCLI_Input">
             <item>
-             <widget class="QLineEdit" name="leCLI"/>
+             <widget class="QLineEdit" name="leCLI">
+              <property name="styleSheet">
+               <string notr="true">background-color: #444; color: #fff</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pbClearCLI">
+              <property name="styleSheet">
+               <string notr="true">background-color: #444; color: #fff</string>
+              </property>
               <property name="text">
                <string>Clear</string>
               </property>
@@ -193,6 +244,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="pbSend">
+              <property name="styleSheet">
+               <string notr="true">background-color: #444; color: #fff</string>
+              </property>
               <property name="text">
                <string>Send</string>
               </property>
@@ -205,22 +259,19 @@
         <widget class="QWidget" name="pFlash">
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
+           <widget class="QTextBrowser" name="tbFlashLog">
+            <property name="styleSheet">
+             <string notr="true">background-color: #444; color: #fff</string>
             </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
+           </widget>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <widget class="QLineEdit" name="leBinaryPath">
+              <property name="styleSheet">
+               <string notr="true">background-color: #444; color: #fff</string>
+              </property>
               <property name="readOnly">
                <bool>false</bool>
               </property>
@@ -228,6 +279,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="pbSelectBin">
+              <property name="styleSheet">
+               <string notr="true">background-color: #444; color: #fff</string>
+              </property>
               <property name="text">
                <string>Select Bineary</string>
               </property>
@@ -239,6 +293,9 @@
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QProgressBar" name="prFlashing">
+              <property name="styleSheet">
+               <string notr="true">background-color: #444;</string>
+              </property>
               <property name="value">
                <number>0</number>
               </property>
@@ -246,25 +303,15 @@
             </item>
             <item>
              <widget class="QPushButton" name="pbFlash">
+              <property name="styleSheet">
+               <string notr="true">background-color: #444; color: #fff</string>
+              </property>
               <property name="text">
                <string>Flash</string>
               </property>
              </widget>
             </item>
            </layout>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </widget>
@@ -311,7 +358,13 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: #222; color: #fff;</string>
+   </property>
    <widget class="QMenu" name="menuFile">
+    <property name="styleSheet">
+     <string notr="true">background-color: #222; color: #fff;</string>
+    </property>
     <property name="title">
      <string>File</string>
     </property>
