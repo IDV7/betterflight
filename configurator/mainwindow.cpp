@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->pbConnect->setEnabled(true);
 
+    ui->swContent->setCurrentIndex(1);
 
     connect(ui->leCLI, &QLineEdit::returnPressed,
             this, &MainWindow::onSendPushButtonClicked);
