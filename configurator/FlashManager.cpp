@@ -12,6 +12,7 @@
 #include "ui_mainwindow.h"
 #include "SerialManager.h"
 #include "SettingsManager.h"
+#include "DebugBoxManager.h"
 
 FlashManager::FlashManager(MainWindow *mw)
         : QObject((QObject *)mw), mw(mw) {
@@ -22,7 +23,43 @@ FlashManager::FlashManager(MainWindow *mw)
 
 void FlashManager::flashFW() {
 
-    mw->serialManager->sendCommand("dfu");
+    mw->ui->tbFlashLog->clear();
+    mw->ui->tbFlashLog->append("Starting firmware flash...");
+
+    //first check if a dfu device is connected
+    mw->ui->tbFlashLog->append("Checking for DFU device...");
+    QString deviceIndex = getDfuDevice();
+    if (deviceIndex.isEmpty()) {
+        mw->ui->tbFlashLog->append("No DFU device found, attempting to command mcu to enter DFU mode...");
+        if (!mw->serialManager->mSerial->isOpen()) {
+            mw->ui->tbFlashLog->append("Unable to conact mcu, Serial port is not open, please connect first\nExiting...");
+            mw->db->loge("Flash failed");
+            return;
+        }
+        mw->ui->tbFlashLog->append("Entering DFU mode...");
+        mw->serialManager->sendCommand("dfu");
+
+        mw->ui->tbFlashLog->append("Checking for DFU device again...");
+
+        //check for 10 seconds if the device entered DFU mode
+        for (int i = 0; i < 10; i++) {
+            QTest::qWait(1000);
+            deviceIndex = getDfuDevice();
+            if (!deviceIndex.isEmpty()) {
+                break;
+            }
+        }
+
+
+        if (deviceIndex.isEmpty()) {
+            mw->ui->tbFlashLog->append("No DFU device found, exiting...");
+            mw->db->loge("Flash failed");
+            return;
+        }
+
+        mw->ui->tbFlashLog->append("DFU device found: " + deviceIndex);
+
+    }
     QTest::qWait(750); // Wait for the device to enter DFU mode
 
     QString binaryPath = mw->ui->leBinaryPath->text();
@@ -32,54 +69,39 @@ void FlashManager::flashFW() {
 
     QString path = mw->ui->leBinaryPath->text();
     if (path.isEmpty()) {
+        mw->db->loge("Flashing failed, no firmware file selected");
         return;
     }
 
-    QProcess pDeviceList;
-    QString args_pDeviceList = "-l";
-    pDeviceList.start("C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe", args_pDeviceList.split(" "));
-    pDeviceList.waitForFinished();
-
-    QString output = pDeviceList.readAllStandardOutput();
-    QStringList lines = output.split("\n");
-
-    QString deviceIndex;
-    for (const QString &line : lines) {
-        if (line.contains("Device Index")) {
-            QStringList parts = line.split(":");
-            if (parts.size() > 1) {
-                deviceIndex = parts[1].trimmed();
-                break;
-            }
-        }
-    }
+    mw->ui->tbFlashLog->append("Flashing firmware from: " + path);
 
     // assure user that flashing will start soon
     mw->ui->prFlashing->setValue(1);
 
-    //writing the firware file to the microcontroller
-    m_p = new QProcess(this);
-    QString args = "-c port=" + deviceIndex + " --write \"" + path + "\" --verify";
-    connect(m_p, &QProcess::readyReadStandardOutput, this, &FlashManager::readProgressData);
-    connect(m_p, &QProcess::finished, this, &FlashManager::readProgressData);
-    connect(m_p, &QProcess::errorOccurred, this, &FlashManager::progressError);
+    deviceIndex = getDfuDevice();
+    flashFromFile(path, deviceIndex);
 
-    m_p->start("C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe", args.split(" "));
+    while (m_p->state() == QProcess::Running) {
+        QTest::qWait(1000);
+    }
 
-    QTest::qWait(10000);
+    mw->ui->tbFlashLog->append("Exiting DFU mode...");
+    exitDFU(deviceIndex);
 
-
-    //send command to leave dfu
-    QString leave_dfu_args = "-c port=" + deviceIndex + " -s DFU_DNLOAD";
-    m_p->start("C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe", leave_dfu_args.split(" "));
-
-    QTest::qWait(500);
-
+    while (m_p->state() == QProcess::Running) {
+        QTest::qWait(100);
+    }
+    mw->ui->tbFlashLog->append("All done, sending you back to the monitor tab.");
+    mw->db->logs("Firmware flashed successfully");
     //reset progress bar
     mw->ui->prFlashing->setValue(0);
 
     //go to monitor tab
     mw->ui->tbMonitor->clear();
+
+    if (mw->ui->optClearAfterFlash->isChecked()) {
+        mw->ui->tbMonitor->clear();
+    }
     mw->ui->swContent->setCurrentIndex(1);
 }
 
@@ -120,4 +142,46 @@ void FlashManager::selectBinary() {
     }
     mw->ui->leBinaryPath->setText(fileName);
     mw->settingsManager->saveSettings();
+}
+
+QString FlashManager::getDfuDevice() {
+    QProcess pDeviceList;
+    QString args_pDeviceList = "-l";
+    pDeviceList.start("C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe", args_pDeviceList.split(" "));
+    pDeviceList.waitForFinished();
+
+    QString output = pDeviceList.readAllStandardOutput();
+    QStringList lines = output.split("\n");
+
+    QString deviceIndex;
+    for (const QString &line : lines) {
+        if (line.contains("Device Index")) {
+            QStringList parts = line.split(":");
+            if (parts.size() > 1) {
+                deviceIndex = parts[1].trimmed();
+                break;
+            }
+        }
+    }
+
+    return deviceIndex;
+}
+
+void FlashManager::flashFromFile(QString pathToBinary, QString deviceIndex) {
+    //writing the firware file to the microcontroller
+    m_p = new QProcess(this);
+    QString args = "-c port=" + deviceIndex + " --write \"" + pathToBinary + "\" --verify";
+    connect(m_p, &QProcess::readyReadStandardOutput, this, &FlashManager::readProgressData);
+    connect(m_p, &QProcess::finished, this, &FlashManager::readProgressData);
+    connect(m_p, &QProcess::errorOccurred, this, &FlashManager::progressError);
+
+    m_p->start("C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe", args.split(" "));
+
+}
+
+void FlashManager::exitDFU(QString deviceIndex) {
+    //send command to leave dfu
+    QString leave_dfu_args = "-c port=" + deviceIndex + " -s DFU_DNLOAD";
+    m_p->start("C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe", leave_dfu_args.split(" "));
+
 }

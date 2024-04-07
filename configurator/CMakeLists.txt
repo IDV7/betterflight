@@ -32,6 +32,8 @@
             SerialManager.h
             StyleManager.cpp
             StyleManager.h
+            DebugBoxManager.cpp
+            DebugBoxManager.h
     )
 
     #qt6_wrap_ui(SOURCES mainwindow.ui)

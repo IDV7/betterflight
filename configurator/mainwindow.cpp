@@ -8,7 +8,9 @@
 #include "SerialManager.h"
 #include "SettingsManager.h"
 #include "FlashManager.h"
+#include "DebugBoxManager.h"
 
+#define VERSION "0.1.3"
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent)
@@ -16,14 +18,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    settingsManager = new SettingsManager(this, ui);
-    serialManager = new SerialManager(this, ui);
+    settingsManager = new SettingsManager(this);
+    serialManager = new SerialManager(this);
     flashManager = new FlashManager(this);
+    db = new DebugBoxManager(this);
 
-
-    this->setWindowTitle("BetterFlight Configurator");
+    this->setWindowTitle("BetterFlight Configurator - v" VERSION);
     setStyleSheets();
-
 
     ui->pbConnect->setEnabled(true);
 
@@ -47,7 +48,7 @@ MainWindow::~MainWindow()
     delete settingsManager;
     delete serialManager;
     delete flashManager;
-
+    delete db;
 }
 
 
@@ -58,7 +59,7 @@ void MainWindow::onConnectPushButtonClicked()
 
 void MainWindow::onPbQuickFlashClicked() {
     ui->swContent->setCurrentIndex(2);
-    flashManager->flashFW();
+    onPbFlashClicked();
 }
 
 void MainWindow::onSendPushButtonClicked()

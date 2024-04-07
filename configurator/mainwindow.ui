@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
-    <height>580</height>
+    <width>749</width>
+    <height>458</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,11 +20,14 @@
    <string notr="true">background-color: #333; color: #fff;</string>
   </property>
   <widget class="QWidget" name="vlAllContent">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0">
     <item>
      <layout class="QHBoxLayout" name="hlTopBar">
       <property name="spacing">
        <number>6</number>
+      </property>
+      <property name="sizeConstraint">
+       <enum>QLayout::SetFixedSize</enum>
       </property>
       <item>
        <widget class="QTextBrowser" name="tbDebug">
@@ -41,10 +44,19 @@
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">border: 1px</string>
+         <string notr="true">border: 1px; color: gray;</string>
         </property>
         <property name="lineWidth">
          <number>0</number>
+        </property>
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="placeholderText">
+         <string/>
         </property>
        </widget>
       </item>
@@ -154,14 +166,37 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="hlMainContent" stretch="7">
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Fixed</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>5</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="hlMainContent" stretch="0">
       <property name="sizeConstraint">
        <enum>QLayout::SetMaximumSize</enum>
       </property>
       <item>
        <widget class="QStackedWidget" name="swContent">
         <property name="currentIndex">
-         <number>2</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="pWelcome">
          <widget class="QLabel" name="label_2">
@@ -181,6 +216,16 @@
         <widget class="QWidget" name="pMonitor">
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
+           <widget class="QLabel" name="laMonitor">
+            <property name="text">
+             <string>Monitor</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QTextBrowser" name="tbMonitor">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -198,7 +243,7 @@
             <item>
              <widget class="QLineEdit" name="leCLI">
               <property name="styleSheet">
-               <string notr="true">background-color: #444; color: #fff</string>
+               <string notr="true">background-color: #444; color: #FFF;</string>
               </property>
              </widget>
             </item>
@@ -227,7 +272,26 @@
          </layout>
         </widget>
         <widget class="QWidget" name="pFlash">
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QLabel" name="laFlash">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Flash</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
           <item>
            <widget class="QTextBrowser" name="tbFlashLog">
             <property name="styleSheet">
@@ -285,34 +349,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="pSettings">
-         <widget class="QCheckBox" name="cbOptAutoConnect">
-          <property name="geometry">
-           <rect>
-            <x>110</x>
-            <y>60</y>
-            <width>121</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Auto Connect</string>
-          </property>
-         </widget>
-         <widget class="QCheckBox" name="cbOptClearAfterFlash">
-          <property name="geometry">
-           <rect>
-            <x>110</x>
-            <y>80</y>
-            <width>121</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Clear After Flash</string>
-          </property>
-         </widget>
-        </widget>
+        <widget class="QWidget" name="pSettings"/>
        </widget>
       </item>
      </layout>
@@ -324,7 +361,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>801</width>
+     <width>749</width>
      <height>22</height>
     </rect>
    </property>
@@ -338,7 +375,6 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionSettings"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuMonitor">
@@ -348,8 +384,24 @@
     <addaction name="actionMonitor"/>
     <addaction name="actionFlash"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="optAutoConnect"/>
+    <addaction name="optClearAfterFlash"/>
+    <addaction name="optDebugMode"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuMonitor"/>
+   <addaction name="menuSettings"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
@@ -361,6 +413,9 @@
    <property name="text">
     <string>Settings</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+=</string>
+   </property>
   </action>
   <action name="actionMonitor">
    <property name="text">
@@ -369,6 +424,9 @@
    <property name="shortcut">
     <string>Ctrl+S</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::ApplicationSpecificRole</enum>
+   </property>
   </action>
   <action name="actionFlash">
    <property name="text">
@@ -376,6 +434,38 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::AboutRole</enum>
+   </property>
+  </action>
+  <action name="optAutoConnect">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto Connect</string>
+   </property>
+  </action>
+  <action name="optClearAfterFlash">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Clear After Flash</string>
+   </property>
+  </action>
+  <action name="optDebugMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Configurator Debug Mode</string>
    </property>
   </action>
  </widget>
@@ -470,22 +560,6 @@
     <hint type="sourcelabel">
      <x>748</x>
      <y>68</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>400</x>
-     <y>271</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pbQuickFlash</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onPbFlashClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>175</x>
-     <y>69</y>
     </hint>
     <hint type="destinationlabel">
      <x>400</x>

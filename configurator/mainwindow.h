@@ -10,6 +10,7 @@
 class SettingsManager;
 class SerialManager;
 class FlashManager;
+class DebugBoxManager;
 
 
 
@@ -37,6 +38,7 @@ public:
     SettingsManager *settingsManager;
     SerialManager *serialManager;
     FlashManager *flashManager;
+    DebugBoxManager *db;
 
     Ui::MainWindow *ui;
 private slots:

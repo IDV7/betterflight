@@ -10,10 +10,11 @@
 #include "mainwindow.h"
 #include <QScrollBar>
 #include <QDebug>
+#include "DebugBoxManager.h"
 
 
-SerialManager::SerialManager(QObject *parent, Ui::MainWindow *ui)
-        : QObject(parent), m_ui(ui) {
+SerialManager::SerialManager(MainWindow *mw)
+        : QObject(mw), mw(mw) {
 
     mSerial = new QSerialPort(this);
     updatePortList();
@@ -77,37 +78,34 @@ void SerialManager::serialReadyRead() {
     }
 
     // Scroll to the bottom
-    QScrollBar *sb = m_ui->tbMonitor->verticalScrollBar();
+    QScrollBar *sb = mw->ui->tbMonitor->verticalScrollBar();
     sb->setValue(sb->maximum());
 }
 
 void SerialManager::updatePortList() {
     mSerialPorts = QSerialPortInfo::availablePorts();
 
-    m_ui->cbPorts->clear();
+    mw->ui->cbPorts->clear();
     for (QSerialPortInfo port : mSerialPorts) {
-        m_ui->cbPorts->addItem(port.portName(), port.systemLocation());
+        mw->ui->cbPorts->addItem(port.portName(), port.systemLocation());
     }
 }
 
 void SerialManager::connectSerial() {
-    QString serialName =  m_ui->cbPorts->currentText();
-    QString serialLoc  =  m_ui->cbPorts->currentData().toString();
+    QString serialName =  mw->ui->cbPorts->currentText();
+    QString serialLoc  =  mw->ui->cbPorts->currentData().toString();
 
     if (mSerial->isOpen()) { // if connected
-        qDebug() << "Serial already connected, disconnecting!";
+        mw->db->log("Disconnecting from " + serialName);
         sendCommand("disconnect");
         mSerial->close();
-        m_ui->pbConnect->setText("Connect");
-        m_ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#004011"));
+        mw->ui->pbConnect->setText("Connect");
+        mw->ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#004011"));
 //        disable_tabs_by_nr(1, false);
         return;
     }
 
     // else, if not connected, connectSerial
-    qDebug() << "Serial not connected, connecting!";
-
-
     mSerial->setPortName(serialLoc);
     mSerial->setBaudRate(QSerialPort::Baud115200);
     mSerial->setDataBits(QSerialPort::Data8);
@@ -116,13 +114,22 @@ void SerialManager::connectSerial() {
     mSerial->setFlowControl(QSerialPort::NoFlowControl);
 
     if(mSerial->open(QIODevice::ReadWrite)) { // only change the button if the connection was successful
-        qDebug() << "SERIAL: OK!";
-        m_ui->pbConnect->setText("Disconnect");
-        m_ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#7a0101"));
+        mw->db->log("Connected to " + serialName);
+        mw->ui->pbConnect->setText("Disconnect");
+        mw->ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#7a0101"));
         sendCommand("connect"); // send connection
         //        disable_tabs_by_nr(1, true);
     } else {
-        qDebug() << "SERIAL: ERROR!";
+        if (mSerial->error() == QSerialPort::PermissionError) {
+            mw->db->log("Permission denied to " + serialName);
+        } else {
+            if (serialName == "") {
+                mw->db->log("Failed to connect to serial port");
+            } else {
+                mw->db->log("Failed to connect to " + serialName);
+
+            }
+        }
     }
 }
 
@@ -130,8 +137,8 @@ void SerialManager::handleSerialError(QSerialPort::SerialPortError error) {
     if (error == QSerialPort::ResourceError) {
         qDebug() << "Serial error occurred, disconnecting!";
         mSerial->close();
-        m_ui->pbConnect->setText("Connect");
-        m_ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#004011"));
+        mw->ui->pbConnect->setText("Connect");
+        mw->ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#004011"));
 //        disable_tabs_by_nr(1, false);
     }
 }
@@ -143,16 +150,16 @@ void SerialManager::autoConnect() {
         return;
     }
 
-    if (!m_ui->cbOptAutoConnect->isChecked()){
+    if (!mw->ui->optAutoConnect->isChecked()) {
         return;
     }
 
     for (QSerialPortInfo port: mSerialPorts) {
         mSerial->setPort(port);
         if (mSerial->open(QIODevice::ReadWrite)) {
-            qDebug() << "Auto connected to " << port.portName();
-            m_ui->pbConnect->setText("Disconnect");
-            m_ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#7a0101"));
+            mw->db->logi("Auto connected to " + port.portName());
+            mw->ui->pbConnect->setText("Disconnect");
+            mw->ui->pbConnect->setStyleSheet(PBCONNECT_STYLE("#7a0101"));
             sendCommand("connect");
         }
     }
@@ -203,8 +210,8 @@ void SerialManager::writeColoredMessage(const QString& logMessage) {
 
     // Append the message with HTML formatting to the QTextBrowser
     QString formattedMessage = "<font color=\"" + color + "\">" + logLevel + paddingSpaces  + "</font>" + message + "<br>";
-    m_ui->tbMonitor->insertHtml(formattedMessage);
+    mw->ui->tbMonitor->insertHtml(formattedMessage);
 
     // Scroll to the bottom
-    m_ui->tbMonitor->verticalScrollBar()->setValue(m_ui->tbMonitor->verticalScrollBar()->maximum());
+    mw->ui->tbMonitor->verticalScrollBar()->setValue(mw->ui->tbMonitor->verticalScrollBar()->maximum());
 }

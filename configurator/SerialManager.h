@@ -10,13 +10,13 @@
 #include <QSerialPortInfo>
 #include <QTimer>
 #include <QSerialPort>
-
+class MainWindow;
 
 class SerialManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit SerialManager(QObject *parent = nullptr, Ui::MainWindow *ui = nullptr);
+    explicit SerialManager(MainWindow *mw);
     ~SerialManager();
 
     void sendCommand(QString command);
@@ -24,10 +24,11 @@ public:
     void connectSerial();
     void autoConnect();
 
-private:
-    Ui::MainWindow *m_ui;
-    QList<QSerialPortInfo> mSerialPorts;
     QSerialPort *mSerial;
+private:
+    MainWindow *mw;
+
+    QList<QSerialPortInfo> mSerialPorts;
     QTimer *mSerialScanTimer;
     QTimer *auto_connect_timer;
 
