@@ -22,9 +22,9 @@ void get_set_points( drone_pids_t *drone_pids){
 void set_pids(drone_pids_t *drone_pids) {
 
 
-    drone_pids->set_points.yaw_set_point.imu_output = 90;
-    drone_pids->set_points.roll_set_point.imu_output = 90;
-    drone_pids->set_points.pitch_set_point.imu_output = 90;
+    drone_pids->set_points.yaw_set_point.imu_output = 1090;
+    drone_pids->set_points.roll_set_point.imu_output = 1450;
+    drone_pids->set_points.pitch_set_point.imu_output = 1590;
     LOGD("Set points (in set_pids before): %d jaw, %d roll, %d pitch\r\n", drone_pids->set_points.yaw_set_point.set_point, drone_pids->set_points.roll_set_point.set_point, drone_pids->set_points.pitch_set_point.set_point);
     LOGD("Measurement (in set_pids before): %d jaw, %d roll, %d pitch", drone_pids->set_points.yaw_set_point.imu_output, drone_pids->set_points.roll_set_point.imu_output, drone_pids->set_points.pitch_set_point.imu_output);
     HAL_Delay(100);
@@ -39,9 +39,9 @@ void set_pids(drone_pids_t *drone_pids) {
 }
 
 void set_pids_change_test(drone_pids_t *drone_pids){
-    drone_pids->set_points.yaw_set_point.imu_output = 100;
-    drone_pids->set_points.roll_set_point.imu_output = 50;
-    drone_pids->set_points.pitch_set_point.imu_output = 120;
+    drone_pids->set_points.yaw_set_point.imu_output = 1200;
+    drone_pids->set_points.roll_set_point.imu_output = 1400;
+    drone_pids->set_points.pitch_set_point.imu_output = 1200;
     LOGD("Set points (in set_pids_change_test before): %d jaw, %d roll, %d pitch\r\n", drone_pids->set_points.yaw_set_point.set_point, drone_pids->set_points.roll_set_point.set_point, drone_pids->set_points.pitch_set_point.set_point);
     LOGD("Measurement (in set_pids_change_test before): %d jaw, %d roll, %d pitch", drone_pids->set_points.yaw_set_point.imu_output, drone_pids->set_points.roll_set_point.imu_output, drone_pids->set_points.pitch_set_point.imu_output);
     HAL_Delay(10);
@@ -57,9 +57,9 @@ void set_pids_change_test(drone_pids_t *drone_pids){
 void test_pid_controller(void){
     drone_pids_t drone_pids;
 
-    pid_controller_init(&drone_pids.pids.yaw_pid, 1, 1, 1, 0.1, -300, 300, 1000, 2000);
-    pid_controller_init(&drone_pids.pids.roll_pid, 1, 1, 1, 0.1, -300, 300, 1000, 2000);
-    pid_controller_init(&drone_pids.pids.pitch_pid, 1, 1, 1, 0.1, -300, 300, 1000, 2000);
+    pid_controller_init(&drone_pids.pids.yaw_pid, 1, 1, 1, 0.1, -1000, 1000, 1000, 2000);
+    pid_controller_init(&drone_pids.pids.roll_pid, 1, 1, 1, 0.1, -1000, 1000, 1000, 2000);
+    pid_controller_init(&drone_pids.pids.pitch_pid, 1, 1, 1, 0.1, -1000, 1000, 1000, 2000);
 
     limits_init(&drone_pids.set_points.yaw_set_point, drone_pids.pids.yaw_pid.limits.min_output, drone_pids.pids.yaw_pid.limits.max_output);
     limits_init(&drone_pids.set_points.roll_set_point, drone_pids.pids.roll_pid.limits.min_output, drone_pids.pids.roll_pid.limits.max_output);

@@ -19,15 +19,16 @@ void set_point_calculation(set_point_t *set_point, int16_t stick_output){
     set_point->stick_output = stick_output;
 
     //limits the stick output
-    if(stick_output> 1515 && stick_output < set_point->stick_limits.max_stick_output){
-        set_point->set_point = (int16_t)((float)(((float)stick_output-(float)(1500))/500) * (float)(set_point->imu_limits.max_imu_output));
+    if(stick_output > set_point->stick_limits.min_stick_output && stick_output < set_point->stick_limits.max_stick_output){
+        set_point->set_point = stick_output;
 
 
+    } else{
+        if(stick_output < set_point->stick_limits.min_stick_output){
+            set_point->set_point = set_point->imu_limits.min_imu_output;
+        } else if(stick_output > set_point->stick_limits.max_stick_output){
+            set_point->set_point = set_point->imu_limits.max_imu_output;
+        }
     }
-    if(stick_output < 1485 && stick_output > set_point->stick_limits.min_stick_output){
-        set_point->set_point = (int16_t)(-(((float)stick_output-(float)(1500))/500) * (float) (set_point->imu_limits.min_imu_output));
-
-    }
-
 
 }

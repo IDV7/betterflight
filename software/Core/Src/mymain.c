@@ -48,7 +48,7 @@ void mymain(void) {
     while (1) {
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-        none_blocking_delay(1500, &pid_controller_test_ms, (callback_t) test_pid_controller, NULL);
+        none_blocking_delay(5000, &pid_controller_test_ms, (callback_t) test_pid_controller, NULL);
     }
 }
 
