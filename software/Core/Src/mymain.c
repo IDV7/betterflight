@@ -51,11 +51,11 @@ void myinit(void) {
     LED_blink_pattern(20, 2, 50, 50);
     LED_off();
 
-//    LOGD("sending dshot value 0:");
-//    dshot_send_throttle(&hm2, 0);
-//    delay(2000);
-//    LOGD("sending dshot value 1250:");
-//    dshot_send_throttle(&hm2, 1250);
+    LOGD("sending dshot value 0:");
+    dshot_send_throttle(&hm2, 0);
+    delay(2000);
+    LOGD("sending dshot value 1250:");
+    dshot_send_throttle(&hm2, 1250);
 }
 
 // none blocking loop funciton
