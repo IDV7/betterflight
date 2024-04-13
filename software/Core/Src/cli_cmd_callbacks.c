@@ -20,7 +20,8 @@
 #include "version.h"
 #include "misc.h"
 #include "main.h"
-
+#include "dshot.h"
+#include "mymain.h"
 
 void cli_cb_status(cli_handle_t *cli_h) {
     LOGI("Status: OK");
@@ -75,6 +76,11 @@ callback_t cli_cb_none(cli_handle_t *cli_h) {
     LOGI("Command not implemented yet");
 }
 
+void cli_cb_dshotdemo(cli_handle_t *cli_h) {
+    LOG((uint8_t *) "[RSP] Dshot demo starting");
+    dshot_send(&hm1, (uint16_t *) 1000);
+}
+
 void add_commands(cli_handle_t *cli_h) {
     cli_add_cmd(cli_h, (uint8_t *)"help", (callback_t) cli_cb_help);
     cli_add_cmd(cli_h, (uint8_t *)"status", (callback_t) cli_cb_status);
@@ -85,4 +91,5 @@ void add_commands(cli_handle_t *cli_h) {
     cli_add_cmd(cli_h, (uint8_t *)"reboot", (callback_t) cli_cb_reboot);
     cli_add_cmd(cli_h, (uint8_t *)"disconnect", (callback_t) cli_cb_disconnect);
     cli_add_cmd(cli_h, (uint8_t *)"demo", (callback_t) cli_cb_clidemo);
+    cli_add_cmd(cli_h, (uint8_t *)"dshot", (callback_t) cli_cb_dshotdemo);
 }
