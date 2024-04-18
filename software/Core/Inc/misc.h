@@ -11,6 +11,8 @@
 typedef enum {false = 0, true = 1} bool;
 typedef void (*callback_t)(void *arg);
 
+extern volatile uint32_t millis;
+
 void LED_toggle(void);
 void LED_on(void);
 void LED_off(void);

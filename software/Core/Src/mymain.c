@@ -9,6 +9,7 @@
 #include "cli.h"
 #include "dshot.h"
 
+
 /* SETTINGS */
 #define LOG_LEVEL LOG_LEVEL_DEBUG
 // check version.h for version settings
@@ -51,29 +52,33 @@ void myinit(void) {
     LED_off();
 
     LOGD("sending dshot value 0 to init esc");
-    dshot_send_throttle(&m1_h, 0);
-    delay(2000);
+
+
+
 }
 
 // none blocking loop funciton
 void dshot_test(void) {
-    static uint16_t motor_value_last = DSHOT_MIN_THROTTLE;
-
-    if (motor_value_last < (DSHOT_MAX_THROTTLE / 3)) {
-        motor_value_last += 50;
-    } else {
-        motor_value_last = DSHOT_MIN_THROTTLE;
+    // first 5 seconds, send 0 throttle
+    static uint64_t start_time = 0;
+    if (start_time == 0) {
+        start_time = millis;
     }
-    LOGD("Sending motor value: %d", motor_value_last);
-    dshot_send(&m1_h, &motor_value_last);
+    if (millis - start_time < 5000) {
+        dshot_send_throttle(&m1_h, 0);
+        return;
+    }
+
+    // after 5 seconds, send throttle value 500
+    dshot_send_throttle(&m1_h, 250);
 }
 
 
 void mymain(void) {
     while (1) {
+        none_blocking_delay(1, NULL, (callback_t) dshot_test, NULL);
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-        none_blocking_delay(1500, NULL, (callback_t) dshot_test, NULL);
     }
 }
 
