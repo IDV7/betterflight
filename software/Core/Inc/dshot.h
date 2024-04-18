@@ -14,10 +14,12 @@
 #include "misc.h"
 
 
-#define TIMER_CLOCK 108000000 // 100MHz
+#define TIMER_CLOCK 100000000 // 100MHz
 
-#define MOTOR_BIT_0 7
-#define MOTOR_BIT_1 14
+#define MOTOR_BIT_0 240
+#define MOTOR_BIT_1 480
+#define DSHOT_PSC 0
+#define DSHOT_ARR 639
 #define MOTOR_BITLENGTH 20
 
 #define DSHOT_FRAME_SIZE 16
@@ -46,8 +48,8 @@ typedef struct {
     uint32_t tim_channel;
 } dshot_handle_t;
 
-void dshot_init(dshot_handle_t *dshot, TIM_HandleTypeDef *htim, DMA_HandleTypeDef *hdma, uint32_t tim_channel);
-void dshot_send(dshot_handle_t *dshot, uint16_t* motor_value);
+void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleTypeDef *hdma, uint32_t tim_channel);
+void dshot_send(dshot_handle_t *dshot_h, uint16_t* motor_value);
 void dshot_send_throttle(dshot_handle_t *dshot, uint16_t throttle);
 
 #endif //BETTERFLIGHT_DSHOT_H

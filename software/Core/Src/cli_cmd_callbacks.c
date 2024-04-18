@@ -78,7 +78,7 @@ callback_t cli_cb_none(cli_handle_t *cli_h) {
 
 void cli_cb_dshotdemo(cli_handle_t *cli_h) {
     LOG((uint8_t *) "[RSP] Dshot demo starting");
-    dshot_send(&hm1, (uint16_t *) 1000);
+    dshot_send(&m2_h, (uint16_t *) 1000);
 }
 
 void add_commands(cli_handle_t *cli_h) {

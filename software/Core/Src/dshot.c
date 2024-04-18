@@ -4,23 +4,28 @@
 #include <math.h>
 #include "log.h"
 #include "misc.h"
+#include "stm32f7xx_hal_tim.h"
 
 
 static uint16_t dshot_prepare_packet(uint16_t value);
 static void dshot_dma_complete_callback(DMA_HandleTypeDef *hdma);
 
-void dshot_init(dshot_handle_t *dshot, TIM_HandleTypeDef *htim, DMA_HandleTypeDef *hdma, uint32_t tim_channel) {
-    dshot->htim = htim;
-    dshot->hdma = hdma;
-    dshot->tim_channel = tim_channel;
+
+
+void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleTypeDef *hdma, uint32_t tim_channel) {
+    dshot_h->htim = htim;
+    dshot_h->hdma = hdma;
+    dshot_h->tim_channel = tim_channel;
 
     // set timer
-    __HAL_TIM_SET_PRESCALER(dshot->htim, lrintf((float)TIMER_CLOCK / (float)DSHOT600_HZ + 0.01f) - 1);
-    __HAL_TIM_SET_AUTORELOAD(dshot->htim, MOTOR_BITLENGTH);
-    HAL_TIM_PWM_Start(dshot->htim, dshot->tim_channel);
+//    uint16_t dshot_prescaler = (lrintf((float)TIMER_CLOCK/ (float)DSHOT600_HZ + 0.01f) - 1);
+    __HAL_TIM_SET_PRESCALER(dshot_h->htim, DSHOT_PSC);
+    __HAL_TIM_SET_AUTORELOAD(dshot_h->htim, DSHOT_ARR);
+    HAL_TIM_PWM_Start(dshot_h->htim, TIM_CHANNEL_2);
+
 
     //set dma callback function
-    dshot->hdma->XferCpltCallback = dshot_dma_complete_callback;
+    dshot_h->hdma->XferCpltCallback = dshot_dma_complete_callback;
 }
 
 void dshot_send_throttle(dshot_handle_t *dshot, uint16_t throttle) {
@@ -34,24 +39,25 @@ void dshot_send_throttle(dshot_handle_t *dshot, uint16_t throttle) {
     dshot_send(dshot, &motor_value);
 }
 
-void dshot_send(dshot_handle_t *dshot, uint16_t *value) {
+
+void dshot_send(dshot_handle_t *dshot_h, uint16_t *value) {
 
     // put packet in dma buffer
     uint16_t packet = dshot_prepare_packet(*value);
     for (int i = 0; i < DSHOT_FRAME_SIZE; i++) {
-        dshot->dma_buffer[i] = (packet & 0x8000) ? MOTOR_BIT_1 : MOTOR_BIT_0;
+        dshot_h->dma_buffer[i] = (packet & 0x8000) ? MOTOR_BIT_1 : MOTOR_BIT_0;
         packet <<= 1;
     }
-    dshot->dma_buffer[16] = 0;
-    dshot->dma_buffer[17] = 0;
+    dshot_h->dma_buffer[16] = 0;
+    dshot_h->dma_buffer[17] = 0;
 
-    for (int i = 0; i < DSHOT_FRAME_SIZE + 2; i++) {
-        LOGD("dma_buffer[%d]: %d", i, dshot->dma_buffer[i]);
-        delay(2);
-    }
+//    for (int i = 0; i < DSHOT_FRAME_SIZE + 2; i++) {
+//        LOGD("dma_buffer[%d]: %d", i, dshot_h->dma_buffer[i]);
+//        delay(2);
+//    }
 
-    HAL_DMA_Start_IT(dshot->hdma, (uint32_t) dshot->dma_buffer, (uint32_t)&dshot->htim->Instance->CCR1, DSHOT_DMA_BUFFER_SIZE);
-    __HAL_TIM_ENABLE_DMA(dshot->htim, TIM_DMA_CC1);
+    HAL_DMA_Start_IT(dshot_h->hdma, (uint32_t) dshot_h->dma_buffer, (uint32_t)&dshot_h->htim->Instance->CCR2, DSHOT_DMA_BUFFER_SIZE);
+    __HAL_TIM_ENABLE_DMA(dshot_h->htim, TIM_DMA_CC2);
     // when dma is done, the dma callback function will disable the dma channel.
 }
 
@@ -78,7 +84,7 @@ static uint16_t dshot_prepare_packet(uint16_t value) {
 
 static void dshot_dma_complete_callback(DMA_HandleTypeDef *hdma) {
     TIM_HandleTypeDef *htim = (TIM_HandleTypeDef *)((DMA_HandleTypeDef *)hdma)->Parent;
-    __HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC1);
+    __HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC2);
     // find the correct dma channel and disable it
     /*if (hdma == htim->hdma[TIM_DMA_ID_CC1])
         __HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC1);

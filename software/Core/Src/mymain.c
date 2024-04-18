@@ -15,15 +15,14 @@
 
 /* EOF SETTINGS */
 
-
 gyro_t gyro_h;
 cli_handle_t cli_h;
 
 //motors
-dshot_handle_t hm1; // TIM1 CH2
-dshot_handle_t hm2; // TIM1 CH1
-dshot_handle_t hm3; // TIM8 CH4
-dshot_handle_t hm4; // TIM8 CH3
+dshot_handle_t m1_h; // TIM1 CH2
+dshot_handle_t m2_h; // TIM1 CH1
+dshot_handle_t m3_h; // TIM8 CH4
+dshot_handle_t m4_h; // TIM8 CH3
 
 uint64_t led_toggle_last_ms = 0;
 uint64_t cli_process_last_ms = 0;
@@ -41,7 +40,7 @@ void myinit(void) {
     // ----- all initialization code goes here ----- //
 
     gyro_init(&gyro_h);
-    dshot_init(&hm2, &htim1, &hdma_tim1_ch1, TIM_CHANNEL_1);
+    dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);
     // ----- end initialization code ----- //
 
     delay(1);
@@ -51,33 +50,30 @@ void myinit(void) {
     LED_blink_pattern(20, 2, 50, 50);
     LED_off();
 
-    LOGD("sending dshot value 0:");
-    dshot_send_throttle(&hm2, 0);
+    LOGD("sending dshot value 0 to init esc");
+    dshot_send_throttle(&m1_h, 0);
     delay(2000);
-    LOGD("sending dshot value 1250:");
-    dshot_send_throttle(&hm2, 1250);
 }
 
 // none blocking loop funciton
 void dshot_test(void) {
-    static uint16_t motor_value_last = 0;
+    static uint16_t motor_value_last = DSHOT_MIN_THROTTLE;
 
-
-
-    if (motor_value_last < DSHOT_MAX_THROTTLE) {
+    if (motor_value_last < (DSHOT_MAX_THROTTLE / 3)) {
         motor_value_last += 50;
     } else {
         motor_value_last = DSHOT_MIN_THROTTLE;
     }
     LOGD("Sending motor value: %d", motor_value_last);
-    dshot_send(&hm2, &motor_value_last);
+    dshot_send(&m1_h, &motor_value_last);
 }
+
 
 void mymain(void) {
     while (1) {
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-        //none_blocking_delay(500, NULL, (callback_t) dshot_test, NULL);
+        none_blocking_delay(1500, NULL, (callback_t) dshot_test, NULL);
     }
 }
 
