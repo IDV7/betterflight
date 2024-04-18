@@ -9,8 +9,8 @@
 
 static uint16_t dshot_prepare_packet(uint16_t value);
 static void dshot_dma_complete_callback(DMA_HandleTypeDef *hdma);
-
-
+uint32_t dshot_find_ccrx(dshot_handle_t *dshot_h);
+static void dshot_dma_enable(DMA_HandleTypeDef *hdma, bool enable);
 
 void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleTypeDef *hdma, uint32_t tim_channel) {
     dshot_h->htim = htim;
@@ -22,7 +22,7 @@ void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleType
 //    uint16_t dshot_prescaler = (lrintf((float)TIMER_CLOCK/ (float)DSHOT600_HZ + 0.01f) - 1);
     __HAL_TIM_SET_PRESCALER(dshot_h->htim, DSHOT_PSC);
     __HAL_TIM_SET_AUTORELOAD(dshot_h->htim, DSHOT_ARR);
-    HAL_TIM_PWM_Start(dshot_h->htim, TIM_CHANNEL_2);
+    HAL_TIM_PWM_Start(dshot_h->htim, dshot_h->tim_channel);
 
 
     //set dma callback function
@@ -71,9 +71,8 @@ void dshot_send(dshot_handle_t *dshot_h, uint16_t *value) {
     dshot_h->dma_buffer[16] = 0;
     dshot_h->dma_buffer[17] = 0;
 
-
-    HAL_DMA_Start_IT(dshot_h->hdma, (uint32_t) dshot_h->dma_buffer, (uint32_t)&dshot_h->htim->Instance->CCR2, DSHOT_DMA_BUFFER_SIZE);
-    __HAL_TIM_ENABLE_DMA(dshot_h->htim, TIM_DMA_CC2);
+    HAL_DMA_Start_IT(dshot_h->hdma, (uint32_t) dshot_h->dma_buffer, dshot_find_ccrx(dshot_h), DSHOT_DMA_BUFFER_SIZE);
+    dshot_dma_enable(dshot_h->hdma, true);
     // when dma is done, the dma callback function will disable the dma channel.
 }
 
@@ -98,18 +97,56 @@ static uint16_t dshot_prepare_packet(uint16_t value) {
     return packet;
 }
 
+
 static void dshot_dma_complete_callback(DMA_HandleTypeDef *hdma) {
     TIM_HandleTypeDef *htim = (TIM_HandleTypeDef *)((DMA_HandleTypeDef *)hdma)->Parent;
-    __HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC2);
     // find the correct dma channel and disable it
-    /*if (hdma == htim->hdma[TIM_DMA_ID_CC1])
-        __HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC1);
-    else if(hdma == htim->hdma[TIM_DMA_ID_CC2])
-        __HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC2);
-    else if(hdma == htim->hdma[TIM_DMA_ID_CC3])
-        __HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC3);
-    else if(hdma == htim->hdma[TIM_DMA_ID_CC4])
-        __HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC4);
-    else
-        LOGE("DMA channel not found");*/
+    dshot_dma_enable(hdma, false);
 }
+
+// true for enable, false for disable
+static void dshot_dma_enable(DMA_HandleTypeDef *hdma, bool enable) {
+    TIM_HandleTypeDef *htim = (TIM_HandleTypeDef *)((DMA_HandleTypeDef *)hdma)->Parent;
+
+    if (enable) {
+        if (hdma == htim->hdma[TIM_DMA_ID_CC1])
+            __HAL_TIM_ENABLE_DMA(htim, TIM_DMA_CC1);
+        else if(hdma == htim->hdma[TIM_DMA_ID_CC2])
+            __HAL_TIM_ENABLE_DMA(htim, TIM_DMA_CC2);
+        else if(hdma == htim->hdma[TIM_DMA_ID_CC3])
+            __HAL_TIM_ENABLE_DMA(htim, TIM_DMA_CC3);
+        else if(hdma == htim->hdma[TIM_DMA_ID_CC4])
+            __HAL_TIM_ENABLE_DMA(htim, TIM_DMA_CC4);
+        else
+            LOGE("DMA channel not found");
+    } else {
+        if (hdma == htim->hdma[TIM_DMA_ID_CC1])
+            __HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC1);
+        else if(hdma == htim->hdma[TIM_DMA_ID_CC2])
+            __HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC2);
+        else if(hdma == htim->hdma[TIM_DMA_ID_CC3])
+            __HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC3);
+        else if(hdma == htim->hdma[TIM_DMA_ID_CC4])
+            __HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC4);
+        else
+            LOGE("DMA channel not found");
+
+    }
+}
+
+
+uint32_t dshot_find_ccrx(dshot_handle_t *dshot_h) {
+    if (dshot_h->tim_channel == TIM_CHANNEL_1) {
+        return (uint32_t)&dshot_h->htim->Instance->CCR1;
+    } else if (dshot_h->tim_channel == TIM_CHANNEL_2) {
+        return (uint32_t)&dshot_h->htim->Instance->CCR2;
+    } else if (dshot_h->tim_channel == TIM_CHANNEL_3) {
+        return (uint32_t)&dshot_h->htim->Instance->CCR3;
+    } else if (dshot_h->tim_channel == TIM_CHANNEL_4) {
+        return (uint32_t)&dshot_h->htim->Instance->CCR4;
+    } else {
+        LOGE("Invalid TIM channel");
+        return 0;
+    }
+}
+

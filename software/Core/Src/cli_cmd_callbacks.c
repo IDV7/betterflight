@@ -81,6 +81,40 @@ void cli_cb_dshotdemo(cli_handle_t *cli_h) {
     dshot_send(&m2_h, (uint16_t *) 1000);
 }
 
+void cli_cb_set_motors(cli_handle_t *cli_h) {
+    uint16_t motor_values[5];
+    if (cli_h->last_args_count == 1) {
+        for (uint8_t i = 0; i < 4; i++) {
+            motor_values[i] = (char_to_uint16((char*)cli_h->last_args[0]));
+        }
+    } else if (cli_h->last_args_count == 4) {
+        for (uint8_t i = 0; i < 4; ++i) {
+            motor_values[i] = (char_to_uint16((char*)cli_h->last_args[i]));
+            delay(1);
+        }
+    } else {
+        LOGE("Invalid number of arguments, 1 to set all motors to the same value, 4 to set each motor individually!");
+        return;
+    }
+
+    LOG("[RSP] Set Motor valuese to: m1: %d m2: %d m3: %d m4: %d", motor_values[0], motor_values[1], motor_values[2], motor_values[3]);
+
+    dshot_set_speed(&m1_h, motor_values[0]);
+    dshot_set_speed(&m2_h, motor_values[1]);
+    dshot_set_speed(&m3_h, motor_values[2]);
+    dshot_set_speed(&m4_h, motor_values[3]);
+
+}
+
+void cli_cb_testargs(cli_handle_t *cli_h) {
+    LOG("[RSP] Test Args");
+    for (uint8_t i = 0; i < cli_h->last_args_count; i++) {
+        LOGI("Arg %d: %s", i, cli_h->last_args[i]);
+    }
+}
+
+
+
 void add_commands(cli_handle_t *cli_h) {
     cli_add_cmd(cli_h, (uint8_t *)"help", (callback_t) cli_cb_help);
     cli_add_cmd(cli_h, (uint8_t *)"status", (callback_t) cli_cb_status);
@@ -92,4 +126,6 @@ void add_commands(cli_handle_t *cli_h) {
     cli_add_cmd(cli_h, (uint8_t *)"disconnect", (callback_t) cli_cb_disconnect);
     cli_add_cmd(cli_h, (uint8_t *)"demo", (callback_t) cli_cb_clidemo);
     cli_add_cmd(cli_h, (uint8_t *)"dshot", (callback_t) cli_cb_dshotdemo);
+    cli_add_cmd(cli_h, (uint8_t *)"testargs", (callback_t) cli_cb_testargs);
+    cli_add_cmd(cli_h, (uint8_t *)"setmotors", (callback_t) cli_cb_set_motors);
 }

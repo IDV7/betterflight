@@ -8,9 +8,13 @@
 #include <stdarg.h>
 #include <malloc.h>
 #include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+
 
 #include "main.h"
 #include "log.h"
+
 
 volatile uint32_t millis = 0;
 
@@ -112,4 +116,16 @@ void reboot_into_dfu() {
 
 void delay(uint32_t ms) {
     HAL_Delay(ms);
+}
+
+uint16_t char_to_uint16(char *str) {
+    char *endptr;
+    unsigned long num = strtoul(str, &endptr, 10);
+
+    // Check for conversion errors
+    if (endptr == str || *endptr != '\0' || errno == ERANGE || num > UINT16_MAX) {
+        return 0; // Return 0 if conversion failed or number is out of range
+    }
+
+    return (uint16_t)num;
 }

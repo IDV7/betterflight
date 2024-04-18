@@ -44,9 +44,11 @@ void myinit(void) {
     LOGI("Starting Initialization...");
     // ----- all initialization code goes here ----- //
 
-    gyro_init(&gyro_h);
+    //gyro_init(&gyro_h);
     dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);
-
+    dshot_init(&m2_h, &htim1, &hdma_tim1_ch1, TIM_CHANNEL_1);
+    dshot_init(&m3_h, &htim8, &hdma_tim8_ch4_trig_com, TIM_CHANNEL_4);
+    dshot_init(&m4_h, &htim8, &hdma_tim8_ch3, TIM_CHANNEL_3);
 
     // ----- end initialization code ----- //
 
@@ -64,6 +66,10 @@ void mymain(void) {
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
         none_blocking_delay(1, &dshot_m1_process_last_ms, (callback_t) dshot_process, &m1_h);
+        none_blocking_delay(1, &dshot_m2_process_last_ms, (callback_t) dshot_process, &m2_h);
+        none_blocking_delay(1, &dshot_m3_process_last_ms, (callback_t) dshot_process, &m3_h);
+        none_blocking_delay(1, &dshot_m4_process_last_ms, (callback_t) dshot_process, &m4_h);
+
     }
 }
 
