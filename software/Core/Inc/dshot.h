@@ -49,7 +49,9 @@ typedef struct {
 } dshot_handle_t;
 
 void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleTypeDef *hdma, uint32_t tim_channel);
-void dshot_send(dshot_handle_t *dshot_h, uint16_t* motor_value);
+void dshot_process(dshot_handle_t *dshot_h);
 void dshot_set_speed(dshot_handle_t *dshot, uint16_t throttle);
+void dshot_stop(dshot_handle_t *dshot_h);
+void dshot_send(dshot_handle_t *dshot_h, uint16_t* motor_value);
 
 #endif //BETTERFLIGHT_DSHOT_H
