@@ -16,6 +16,7 @@ void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleType
     dshot_h->htim = htim;
     dshot_h->hdma = hdma;
     dshot_h->tim_channel = tim_channel;
+    dshot_h->motor_value = 0;
 
     // set timer
 //    uint16_t dshot_prescaler = (lrintf((float)TIMER_CLOCK/ (float)DSHOT600_HZ + 0.01f) - 1);
@@ -28,16 +29,35 @@ void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleType
     dshot_h->hdma->XferCpltCallback = dshot_dma_complete_callback;
 }
 
-void dshot_send_throttle(dshot_handle_t *dshot, uint16_t throttle) {
+// CALL EVERY 1MS or esc will disconnect
+void dshot_process(dshot_handle_t * dshot_h) {
+    static uint64_t last_time = 0;
+    uint64_t current_time = millis;
+    if (last_time != 0 && (current_time - last_time) > 2) {
+        LOGW((uint8_t*)"More than 1ms has been past since DSHOT PROCESS has been called, motor may disconnect!");
+    }
+    last_time = current_time;
+
+    //command dma to send new value to motor
+    dshot_send(dshot_h, &dshot_h->motor_value);
+}
+
+void dshot_stop(dshot_handle_t *dshot_h) {
+    dshot_h->motor_value = 0;
+}
+
+//doesn't change the speed, expects you to call dshot_process every 1ms
+void dshot_set_speed(dshot_handle_t *dshot_h, uint16_t throttle) {
     if (throttle < DSHOT_MIN_THROTTLE) {
         throttle = DSHOT_MIN_THROTTLE;
     } else if (throttle > DSHOT_MAX_THROTTLE) {
         throttle = DSHOT_MAX_THROTTLE;
     }
 
-    uint16_t motor_value = throttle - DSHOT_MIN_THROTTLE;
-    dshot_send(dshot, &motor_value);
+    dshot_h->motor_value = throttle - DSHOT_MIN_THROTTLE;
 }
+
+
 
 
 void dshot_send(dshot_handle_t *dshot_h, uint16_t *value) {
@@ -51,10 +71,6 @@ void dshot_send(dshot_handle_t *dshot_h, uint16_t *value) {
     dshot_h->dma_buffer[16] = 0;
     dshot_h->dma_buffer[17] = 0;
 
-//    for (int i = 0; i < DSHOT_FRAME_SIZE + 2; i++) {
-//        LOGD("dma_buffer[%d]: %d", i, dshot_h->dma_buffer[i]);
-//        delay(2);
-//    }
 
     HAL_DMA_Start_IT(dshot_h->hdma, (uint32_t) dshot_h->dma_buffer, (uint32_t)&dshot_h->htim->Instance->CCR2, DSHOT_DMA_BUFFER_SIZE);
     __HAL_TIM_ENABLE_DMA(dshot_h->htim, TIM_DMA_CC2);

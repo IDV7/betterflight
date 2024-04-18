@@ -42,6 +42,10 @@ void myinit(void) {
 
     gyro_init(&gyro_h);
     dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);
+
+
+
+
     // ----- end initialization code ----- //
 
     delay(1);
@@ -55,6 +59,8 @@ void myinit(void) {
 
 
 
+
+
 }
 
 // none blocking loop funciton
@@ -65,12 +71,12 @@ void dshot_test(void) {
         start_time = millis;
     }
     if (millis - start_time < 5000) {
-        dshot_send_throttle(&m1_h, 0);
+        dshot_set_speed(&m1_h, 0);
         return;
     }
 
     // after 5 seconds, send throttle value 500
-    dshot_send_throttle(&m1_h, 250);
+    dshot_set_speed(&m1_h, 250);
 }
 
 
