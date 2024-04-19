@@ -38,8 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->actionFlash, &QAction::triggered, this, &MainWindow::changeStackedWidgetIndex);
     connect(ui->actionMonitor, &QAction::triggered, this, &MainWindow::changeStackedWidgetIndex);
-    connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::changeStackedWidgetIndex);
-
+    connect(ui->actionConfigurator, &QAction::triggered, this, &MainWindow::changeStackedWidgetIndex);
 }
 
 
@@ -87,7 +86,7 @@ void MainWindow::changeStackedWidgetIndex() {
             index = 1;
         } else if (actionName == "Flash") {
             index = 2;
-        } else if (actionName == "Settings") {
+        } else if (actionName == "Configurator") {
             index = 3;
         }
         ui->swContent->setCurrentIndex(index);

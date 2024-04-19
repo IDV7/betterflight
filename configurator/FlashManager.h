@@ -31,7 +31,7 @@ private:
 
     QString getDfuDevice();
     void flashFromFile(QString pathToBinary, QString deviceIndex);
-    void exitDFU(QString deviceIndex);
+     void exitDFU(QString deviceIndex);
 };
 
 #endif //CONFIGURATOR_FLASHMANAGER_H

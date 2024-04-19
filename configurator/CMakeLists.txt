@@ -34,6 +34,8 @@
             StyleManager.h
             DebugBoxManager.cpp
             DebugBoxManager.h
+            ConfTabs.cpp
+            ConfTabs.h
     )
 
     #qt6_wrap_ui(SOURCES mainwindow.ui)
