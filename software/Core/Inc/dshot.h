@@ -19,6 +19,9 @@
 
 #define CMD_ONLY_WHILE_STOP_RANGE 36 // only allow special commands to be send when motors if they are from 0 to 36
 
+
+
+
 //dshot special commands, send these values to the motor instead of the throttle value to execute the command
 typedef enum {
     DSHOT_CMD_BEEP1 = 1, // Wait at least length of beep (260ms) before next command
@@ -55,54 +58,31 @@ typedef enum {
     DSHOT_CMD_SIGNAL_LINE_CONSUMPTION_TELEMETRY = 45, // 10mAh per LSB, 40.95Ah max
     DSHOT_CMD_SIGNAL_LINE_ERPM_TELEMETRY = 46, // 100erpm per LSB, 409500erpm max
     DSHOT_CMD_SIGNAL_LINE_ERPM_PERIOD_TELEMETRY = 47 // 16us per LSB, 65520us max TBD
-} dshot_special_cmd_t;
+} dshot_cmd_t;
 
 // struct to keep track of special command send count
 typedef struct {
-    dshot_special_cmd_t cmd;
-    uint8_t send_count;
+    dshot_cmd_t cmd;
+    int8_t send_count;
     uint16_t delayms_after_cmd;
 } dshot_cmd_info_t;
 
 // table to keep track of special command info
-dshot_cmd_info_t DSHOT_CMD_SEND_INFO[] = {
-        {DSHOT_CMD_BEEP1, 1, 260},
-        {DSHOT_CMD_BEEP2, 1, 260},
-        {DSHOT_CMD_BEEP3, 1, 260},
-        {DSHOT_CMD_BEEP4, 1, 260},
-        {DSHOT_CMD_BEEP5, 1, 260},
-        {DSHOT_CMD_ESC_INFO, 1, 12},
-        {DSHOT_CMD_SPIN_DIRECTION_1, 6, 0},
-        {DSHOT_CMD_SPIN_DIRECTION_2, 6, 0},
-        {DSHOT_CMD_3D_MODE_OFF, 6, 0},
-        {DSHOT_CMD_3D_MODE_ON, 6, 0},
-        {DSHOT_CMD_SAVE_SETTINGS, 6, 35},
-        {DSHOT_EXTENDED_TELEMETRY_ENABLE, 6, 0},
-        {DSHOT_EXTENDED_TELEMETRY_DISABLE, 6, 0},
-        {DSHOT_CMD_SPIN_DIRECTION_NORMAL, 6, 0},
-        {DSHOT_CMD_SPIN_DIRECTION_REVERSED, 6, 0},
-        {DSHOT_CMD_SIGNAL_LINE_TELEMETRY_DISABLE, 6, 0},
-        {DSHOT_CMD_SIGNAL_LINE_TELEMETRY_ENABLE, 6, 0},
-        {DSHOT_CMD_SIGNAL_LINE_CONTINUOUS_ERPM_TELEMETRY, 6, 0},
-        {DSHOT_CMD_SIGNAL_LINE_CONTINUOUS_ERPM_PERIOD_TELEMETRY, 6, 0}
-};
-#define DSHOT_CMD_SEND_INFO_SIZE (sizeof(DSHOT_CMD_SEND_INFO) / sizeof(DSHOT_CMD_SEND_INFO[0]))
-
+extern const dshot_cmd_info_t DSHOT_CMD_SEND_INFO[];
 
 typedef struct {
     uint32_t dma_buffer[DSHOT_DMA_BUFFER_SIZE];
     TIM_HandleTypeDef *htim;
     DMA_HandleTypeDef *hdma;
     uint32_t tim_channel;
-    uint16_t throttle_value; // last speed value set by user (altered by dshot_set_speed!!)
-    dshot_special_cmd_t special_cmd;  // last special command set by user
-    uint8_t send_special_cmd_count; // keep track of how many times a special command has been sent, if counter is more then 0 the stored special command will be send instead of the throttle value
+    uint16_t throttle_value; // last speed value set by user (altered by dshot_set_throttle!!)
+    dshot_cmd_info_t *cmd_cnts; //cmd and its counters (note: cmd_cnts->send_count = -1 means cmd timeout)
 } dshot_handle_t;
 
 void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleTypeDef *hdma, uint32_t tim_channel);
 void dshot_process(dshot_handle_t *dshot_h);
-void dshot_set_speed(dshot_handle_t *dshot, uint16_t throttle);
+void dshot_set_throttle(dshot_handle_t *dshot_h, uint16_t throttle);
 void dshot_stop(dshot_handle_t *dshot_h);
-void dshot_send_special_command(dshot_handle_t *dshot_h, dshot_special_cmd_t cmd);
+void dshot_send_special_command(dshot_handle_t *dshot_h, dshot_cmd_t cmd);
 
 #endif //BETTERFLIGHT_DSHOT_H

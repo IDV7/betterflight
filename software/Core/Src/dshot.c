@@ -16,7 +16,30 @@ static void dshot_dma_complete_callback(DMA_HandleTypeDef *hdma);
 static uint32_t dshot_find_ccrx(dshot_handle_t *dshot_h);
 static void dshot_dma_enable(DMA_HandleTypeDef *hdma, bool enable);
 static void dshot_send(dshot_handle_t *dshot_h, uint16_t* motor_value);
-static dshot_cmd_info_t* dshot_find_special_cmd_info(dshot_special_cmd_t cmd);
+static dshot_cmd_info_t dshot_find_special_cmd_info(dshot_cmd_t cmd);
+
+const dshot_cmd_info_t DSHOT_CMD_SEND_INFO[] = {
+        {DSHOT_CMD_BEEP1, 1, 260},
+        {DSHOT_CMD_BEEP2, 1, 260},
+        {DSHOT_CMD_BEEP3, 1, 260},
+        {DSHOT_CMD_BEEP4, 1, 260},
+        {DSHOT_CMD_BEEP5, 1, 260},
+        {DSHOT_CMD_ESC_INFO, 1, 12},
+        {DSHOT_CMD_SPIN_DIRECTION_1, 6, 0},
+        {DSHOT_CMD_SPIN_DIRECTION_2, 6, 0},
+        {DSHOT_CMD_3D_MODE_OFF, 6, 0},
+        {DSHOT_CMD_3D_MODE_ON, 6, 0},
+        {DSHOT_CMD_SAVE_SETTINGS, 6, 35},
+        {DSHOT_EXTENDED_TELEMETRY_ENABLE, 6, 0},
+        {DSHOT_EXTENDED_TELEMETRY_DISABLE, 6, 0},
+        {DSHOT_CMD_SPIN_DIRECTION_NORMAL, 6, 0},
+        {DSHOT_CMD_SPIN_DIRECTION_REVERSED, 6, 0},
+        {DSHOT_CMD_SIGNAL_LINE_TELEMETRY_DISABLE, 6, 0},
+        {DSHOT_CMD_SIGNAL_LINE_TELEMETRY_ENABLE, 6, 0},
+        {DSHOT_CMD_SIGNAL_LINE_CONTINUOUS_ERPM_TELEMETRY, 6, 0},
+        {DSHOT_CMD_SIGNAL_LINE_CONTINUOUS_ERPM_PERIOD_TELEMETRY, 6, 0}
+};
+
 
 void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleTypeDef *hdma, uint32_t tim_channel) {
     dshot_h->htim = htim;
@@ -31,6 +54,7 @@ void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleType
 
     //set dma callback function
     dshot_h->hdma->XferCpltCallback = dshot_dma_complete_callback;
+
 }
 
 // CALL EVERY 1MS or esc will disconnect
@@ -44,10 +68,20 @@ void dshot_process(dshot_handle_t * dshot_h) {
     }
     last_time = current_time;
 
-    //check if we have to send a special command
-    if (dshot_h->send_special_cmd_count > 0) {
-        dshot_send(dshot_h, (uint16_t*)&dshot_h->special_cmd);
-        dshot_h->send_special_cmd_count--;
+    //cmd timeout
+    if (dshot_h->cmd_cnts->send_count == -1) {
+        dshot_h->cmd_cnts->delayms_after_cmd--;
+        if (dshot_h->cmd_cnts->delayms_after_cmd <= 0) { //if delay is over, reset sent counter
+            dshot_h->cmd_cnts->send_count = 0;
+        }
+        dshot_send(dshot_h, &dshot_h->throttle_value);
+        return;
+    }
+
+    //send special command
+    if (dshot_h->cmd_cnts->send_count > 0) {
+        dshot_send(dshot_h, (uint16_t*)&dshot_h->cmd_cnts->cmd);
+        dshot_h->cmd_cnts->send_count--;
         return;
     }
 
@@ -60,7 +94,7 @@ void dshot_stop(dshot_handle_t *dshot_h) {
 }
 
 //doesn't change the speed, expects you to call dshot_process every 1ms
-void dshot_set_speed(dshot_handle_t *dshot_h, uint16_t throttle) {
+void dshot_set_throttle(dshot_handle_t *dshot_h, uint16_t throttle) {
     if (throttle < DSHOT_MIN_THROTTLE) {
         throttle = DSHOT_MIN_THROTTLE;
     } else if (throttle > DSHOT_MAX_THROTTLE) {
@@ -70,26 +104,29 @@ void dshot_set_speed(dshot_handle_t *dshot_h, uint16_t throttle) {
     dshot_h->throttle_value = throttle - DSHOT_MIN_THROTTLE;
 }
 
-void dshot_send_special_command(dshot_handle_t *dshot_h, dshot_special_cmd_t cmd) {
-    dshot_h->special_cmd = cmd;
-    dshot_cmd_info_t *cmd_info = dshot_find_special_cmd_info(cmd);
+void dshot_send_special_command(dshot_handle_t *dshot_h, dshot_cmd_t cmd) {
+    dshot_cmd_info_t cmd_info = dshot_find_special_cmd_info(cmd);
 
     //refuse cmd if it requires motor to be stopped and the motor is still spinning
-    if (cmd_info->cmd (stopped here for the day) CMD_ONLY_WHILE_STOP_RANGE && dshot_h->throttle_value > 0) {
-        LOGW((uint8_t*)"Special command %d refused, motor is still spinning", cmd);
+    if (cmd_info.cmd <= CMD_ONLY_WHILE_STOP_RANGE && dshot_h->throttle_value > 0) {
+        LOGW((uint8_t*)"Special command %d refused, motor is still spinning (for 1-36 motors should be stopped)", cmd);
         return;
     }
 
+    //refuse cmd if one is already in progress
+    if (dshot_h->cmd_cnts->send_count != 0) {
+        LOGW((uint8_t*)"Special command %d refused, another special command is already in progress", cmd);
+        return;
+    }
 
-    dshot_h->send_special_cmd_count = cmd_info->send_count;
-
-
-
+    //set the command for the process to executed on the next cycle
+    dshot_h->cmd_cnts->cmd = cmd;
+    dshot_h->cmd_cnts->send_count = cmd_info.send_count;
 }
 
 // ---------- static functions ---------- //
 
-// raw send function, use dshot_set_speed to set motor speed, dshot_send_special_command to send special commands
+// raw send function, use dshot_set_throttle to set motor speed, dshot_send_special_command to send special commands
 static void dshot_send(dshot_handle_t *dshot_h, uint16_t *value) {
     dshot_prepare_packet(dshot_h->dma_buffer, *value);
 
@@ -179,16 +216,14 @@ static uint32_t dshot_find_ccrx(dshot_handle_t *dshot_h) {
     }
 }
 
-static dshot_cmd_info_t* dshot_find_special_cmd_info(dshot_special_cmd_t cmd) {
-    for (int i = 0; i < DSHOT_CMD_SEND_INFO_SIZE; i++) {
+
+static dshot_cmd_info_t dshot_find_special_cmd_info(dshot_cmd_t cmd) {
+    for (int i = 0; i < sizeof(DSHOT_CMD_SEND_INFO) ; i++) {
         if (DSHOT_CMD_SEND_INFO[i].cmd == cmd) {
-            return &DSHOT_CMD_SEND_INFO[i];
+            return DSHOT_CMD_SEND_INFO[i];
         }
     }
-
     // return standard info if not found, this is normal, only cmd's with special requirements are in the table
     dshot_cmd_info_t standard_cmd_info = {cmd, 1, 0};
-    return &standard_cmd_info;
+    return standard_cmd_info;
 }
-
-
