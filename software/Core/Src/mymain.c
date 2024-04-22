@@ -15,7 +15,7 @@
 /* EOF SETTINGS */
 uint64_t led_toggle_last_ms = 0;
 uint64_t cli_process_last_ms = 0;
-uint64_t uart_transmit_last_ms = 0;
+uint64_t crsf_last_ms = 0;
 
 gyro_t gyro_h;
 cli_handle_t cli_h;
@@ -38,7 +38,7 @@ void myinit(void) {
 
     // ----- end initialization code ----- //
     LOGI("Finished Initialization");
-    crsf_tests();
+
     LED_blink_pattern(20, 2, 50, 50);
     LED_off();
 }
@@ -49,6 +49,7 @@ void mymain(void) {
     while (1) {
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
+        none_blocking_delay(5000, &crsf_last_ms, (callback_t) crsf_tests, &crsf_h);
 
     }
 }

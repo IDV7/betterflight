@@ -144,7 +144,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             // Data received, handle it
             // Example: Print received data
 
-        HAL_UART_Receive_IT(&huart2, &rx_data, CRSF_MAX_PACKET_SIZE);
+        HAL_UART_Receive_IT(&huart2, &rx_data, 26);
         unpack_channels(&rx_data, modified_data);
             // Start receiving again
         HAL_Delay(10);
