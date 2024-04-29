@@ -34,7 +34,7 @@ void myinit(void) {
     LOGI("Starting Initialization...");
     // ----- all initialization code goes here ----- //
 
-    crsf_init(&crsf_h, &huart2);
+
 
     // ----- end initialization code ----- //
     LOGI("Finished Initialization");
@@ -45,11 +45,12 @@ void myinit(void) {
 
 
 void mymain(void) {
-
+    crsf_init(&crsf_h, &huart2);
     while (1) {
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-        none_blocking_delay(5000, &crsf_last_ms, (callback_t) crsf_tests, &crsf_h);
+        none_blocking_delay(5, &crsf_last_ms, (callback_t) crsf_process, &crsf_h);
+
 
     }
 }

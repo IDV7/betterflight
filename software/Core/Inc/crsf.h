@@ -33,6 +33,12 @@ typedef enum {
     CRSF_FRAME_ATTITUDE_PAYLOAD_SIZE = 6,
 }crsf_payload_sizes_t;
 
+typedef enum{
+   wait_for_sync = 1,
+   receiving_data = 2,
+   processing_data = 3
+}crsf_receive_state_t;
+
 typedef enum { //https://github.com/crsf-wg/crsf/wiki/Packet-Types
     CRSF_FRAMETYPE_GPS = 0x02,
     CRSF_FRAMETYPE_VARIO  = 0x07,
@@ -91,14 +97,15 @@ typedef struct{
     uint8_t address;
     uint8_t length;
     uint8_t payload[CRSF_MAX_PACKET_SIZE-6]; // 6 = address + length + crc
-    uint8_t crc[4];
-}crsf_frame_t;
+    uint8_t crc[2];
+}crsf_channels_frame_t;
 
 
 
 
 
 void crsf_init(crsf_handle_t * hcrsf, UART_HandleTypeDef *huart);
+void crsf_process(crsf_handle_t * hcrsf);
 void crsf_send_frame_test(UART_HandleTypeDef *huart);
 void crsf_tests(void);
 

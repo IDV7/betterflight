@@ -8,34 +8,23 @@
 
 
 
-uint8_t rx_data;
-uint32_t * const modified_data;
+
+
+crsf_receive_state_t state;
+
+uint8_t start_data[3];
+uint8_t start_data_saved[3];
+uint8_t incoming_data[60];
+uint8_t incoming_data_saved[60];
+uint8_t frame_length;
+bool print_start_flag = false;
+uint8_t crc8;
+uint8_t crc8_calculate(uint8_t *data, uint8_t len);
 static void crsf_uart_setup(crsf_handle_t *crsf_h);
-//static uint8_t crc8(uint8_t *data, size_t len);
-//static void crsf_parse_frame(crsf_handle_t *crsf_h);
-//static void crsf_decode_payload(crsf_handle_t *crsf_h);
-//static void crsf_error_handling(crsf_handle_t *crsf_h;
-//static void crsf_convert_data(crsf_handle_t *crsf_h);
-static void unpack_channels(uint8_t const * const payload, uint32_t * const dest);
+static void unpack_channels(uint8_t const * payload, uint32_t * dest);
 static void crsf_telemetry_send(crsf_handle_t *crsf_h, crsf_frametype_t frame_type, uint8_t *data);
 
-uint8_t crc8(uint8_t *data, size_t len) {
-    uint8_t crc = 0;
-    size_t i, j;
 
-    for (i = 0; i < len; ++i) {
-        crc ^= data[i];
-        for (j = 0; j < 8; ++j) {
-            if (crc & 0x80) {
-                crc = (crc << 1) ^ 0xD5; // polynomial 0xD5
-            } else {
-                crc <<= 1;
-            }
-        }
-    }
-
-    return crc;
-}
 
 void crsf_telemetry_send(crsf_handle_t *crsf_h, crsf_frametype_t frame_type, uint8_t *data){
     //frame -> [sync/address] [len] [type] [payload] [crc8]
@@ -51,7 +40,7 @@ void crsf_telemetry_send(crsf_handle_t *crsf_h, crsf_frametype_t frame_type, uin
             frame[i+2] = data[i];
         }
         //calculate crc
-        crc = crc8(data, len);
+        crc = crc8_calculate(data, len);
 
         for(int i = len-4; i < len; i++){
             frame[i] = data[i];
@@ -69,24 +58,13 @@ void crsf_telemetry_send(crsf_handle_t *crsf_h, crsf_frametype_t frame_type, uin
 
 }
 
-void crsf_parse_frame(crsf_handle_t * crsf_h){
-
-}
-void crsf_decode_payload(crsf_handle_t * crsf_h){
-
-}
-void crsf_error_handling(crsf_handle_t * crsf_h){
-
-}
-void crsf_convert_data(crsf_handle_t * crsf_h){
-
-}
 
 void crsf_init(crsf_handle_t * crsf_h, UART_HandleTypeDef *huart) {
     crsf_h->huart = huart;
     crsf_uart_setup(crsf_h);
 }
-static void unpack_channels(uint8_t const * const payload, uint32_t * const dest)
+
+static void unpack_channels(uint8_t const * payload, uint32_t * dest)
 {
 
     const unsigned dstBits = 32;
@@ -110,49 +88,110 @@ static void unpack_channels(uint8_t const * const payload, uint32_t * const dest
         bitsMerged -= CHANNEL_SIZE;
     }
 }
+
 void crsf_process(crsf_handle_t * crsf_h){
-    // check if action has to be taken
-    crsf_parse_frame(crsf_h);
+    if(state == processing_data){
 
-    crsf_decode_payload(crsf_h);
+        if(start_data_saved[2] == CRSF_FRAMETYPE_RC_CHANNELS_PACKED){
+            LOGD("Processing data");
+            HAL_Delay(10);
+            uint32_t channels[16];
+            crc8 = incoming_data_saved[frame_length-2];
+            uint8_t incoming_frame_lenght = frame_length;
+            LOGD("Frame length: %u", incoming_frame_lenght);
+            HAL_Delay(10);
+            unpack_channels(incoming_data_saved, channels);
 
-    //process data
-    crsf_error_handling(crsf_h);
-    crsf_convert_data(crsf_h);
+            for (unsigned ch=0; ch<16; ++ch){
+                LOGD("ch%02u=%u", ch+1, channels[ch]);
 
+                HAL_Delay(10);
+            }
+            LOGD("CRC8=%u", crc8);
+            state = wait_for_sync;
+            HAL_UART_Receive_IT(crsf_h->huart, start_data, 3);
+        }
+
+
+    }
+    else if(state == wait_for_sync){
+        HAL_UART_Receive_IT(crsf_h->huart, start_data, 3);
+        LOGD("Waiting for sync");
+        HAL_Delay(10);
+    }
+    else if(state == receiving_data){
+
+
+        HAL_UART_Receive_IT(crsf_h->huart, incoming_data, start_data_saved[1]);
+        //LOGD("Receiving data");
+        if (print_start_flag == true){
+            for (int i = 0; i < 3; ++i) {
+
+                LOGD("start_data[%u]=%u ", i, start_data_saved[i]);
+                HAL_Delay(10);
+            }
+            print_start_flag = false;
+        }
+
+    }
 }
 
-static void crsf_uart_setup(crsf_handle_t * crsf_h){
+static void crsf_uart_setup(crsf_handle_t * crsf_h) {
+
+    LOGD("UART setup begin");
+    HAL_Delay(5);
     crsf_h->huart->Instance = USART2;
     crsf_h->huart->Init.BaudRate = 420000;
     crsf_h->huart->Init.WordLength = UART_WORDLENGTH_8B;
     crsf_h->huart->Init.StopBits = UART_STOPBITS_1;
     crsf_h->huart->Init.Parity = UART_PARITY_NONE;
     crsf_h->huart->Init.Mode = UART_MODE_RX;
-    crsf_h->huart->Init.HwFlowCtl = UART_HWCONTROL_NONE;
     crsf_h->huart->Init.OverSampling = UART_OVERSAMPLING_16;
     HAL_UART_Init((UART_HandleTypeDef *) crsf_h->huart);
+    LOGD("UART setup done");
+    HAL_Delay(20);
+    state = wait_for_sync;
+
 }
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
+    if (huart->Instance == USART2) {
+    if(state == wait_for_sync){
+        //HAL_UART_Receive_IT(huart, start_data, 3);
+        if(start_data[0] == 0xC8){
+            print_start_flag = true;
+            if(start_data[1] > 0 && start_data[1] < CRSF_MAX_PACKET_SIZE){
+                start_data_saved[0] = start_data[0];
+                start_data_saved[1] = start_data[1];
+                start_data_saved[2] = start_data[2];
+                frame_length = start_data[1];
 
+                HAL_UART_Receive_IT(huart, incoming_data, frame_length-1);
+                state = receiving_data;
+            }
+            else{
+                state = receiving_data;
+                HAL_UART_Receive_IT(huart, start_data, 3);
+            }
 
-    if (huart->Instance == USART2)
-    {
-
-            // Data received, handle it
-            // Example: Print received data
-
-        HAL_UART_Receive_IT(&huart2, &rx_data, 26);
-        unpack_channels(&rx_data, modified_data);
-            // Start receiving again
-        HAL_Delay(10);
-        for (unsigned ch=0; ch<16; ++ch){
-            LOGD("ch%02u=%u ", ch, modified_data[ch]);
-            HAL_Delay(10);
+        }
+        else{
+            state = wait_for_sync;
+            HAL_UART_Receive_IT(huart, start_data, 3);
         }
     }
+    else if(state == receiving_data){
+        //do something
+        HAL_UART_Receive_IT(huart, incoming_data, frame_length-1);
+        for (int i = 0; i < frame_length; ++i) {
+            incoming_data_saved[i] = incoming_data[i];
+        }
+        state = processing_data;
+    }
+
+    }
+
+
 }
 
 void crsf_send_frame_test(UART_HandleTypeDef *huart){
@@ -192,7 +231,7 @@ void crsf_unpack_channels_test(){
 
 void crsf_tests(void){
 
-    HAL_UART_RxCpltCallback(&huart2);
+
     //crsf_send_frame_test(&huart2);
     //crsf_unpack_channels_test();
 }
