@@ -33,4 +33,5 @@ void get_set_points(drone_pids_t *drone_pids);
 void set_pids(drone_pids_t *drone_pids);
 void test_pid_controller(void);
 void set_pids_change_test(drone_pids_t *drone_pids);
+void set_pids_change_test2(drone_pids_t *drone_pids);
 #endif //BETTERFLIGHT_PID_CONTROLLER_H
