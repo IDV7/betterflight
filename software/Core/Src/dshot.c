@@ -15,7 +15,7 @@ static void dshot_prepare_packet(uint32_t *dma_buffer ,uint16_t value);
 static void dshot_dma_complete_callback(DMA_HandleTypeDef *hdma);
 static uint32_t dshot_find_ccrx(dshot_handle_t *dshot_h);
 static void dshot_dma_enable(DMA_HandleTypeDef *hdma, bool enable);
-static void dshot_send(dshot_handle_t *dshot_h, uint16_t* motor_value);
+static void dshot_send(dshot_handle_t *dshot_h, const uint16_t value);
 static dshot_cmd_info_t dshot_find_special_cmd_info(dshot_cmd_t cmd);
 
 const dshot_cmd_info_t DSHOT_CMD_SEND_INFO[] = {
@@ -47,6 +47,7 @@ void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleType
     dshot_h->tim_channel = tim_channel;
     dshot_h->throttle_value = 0;
 
+
     // set timer
     __HAL_TIM_SET_PRESCALER(dshot_h->htim, DSHOT_PSC);
     __HAL_TIM_SET_AUTORELOAD(dshot_h->htim, DSHOT_ARR);
@@ -74,19 +75,23 @@ void dshot_process(dshot_handle_t * dshot_h) {
         if (dshot_h->cmd_cnts->delayms_after_cmd <= 0) { //if delay is over, reset sent counter
             dshot_h->cmd_cnts->send_count = 0;
         }
-        dshot_send(dshot_h, &dshot_h->throttle_value);
+//        dshot_send(dshot_h, dshot_h->throttle_value);
         return;
     }
 
     //send special command
     if (dshot_h->cmd_cnts->send_count > 0) {
-        dshot_send(dshot_h, (uint16_t*)&dshot_h->cmd_cnts->cmd);
+        LOGD("send special command %d", (uint8_t)dshot_h->cmd_cnts->cmd);
+        LOGD("send count %d", (uint8_t)dshot_h->cmd_cnts->send_count);
+
+        dshot_send(dshot_h, (uint16_t)dshot_h->cmd_cnts->cmd);
+        delay(260); //wait for beep to finish
         dshot_h->cmd_cnts->send_count--;
         return;
     }
 
     //send stored value to motor
-    dshot_send(dshot_h, &dshot_h->throttle_value);
+    dshot_send(dshot_h, dshot_h->throttle_value);
 }
 
 void dshot_stop(dshot_handle_t *dshot_h) {
@@ -127,8 +132,8 @@ void dshot_send_special_command(dshot_handle_t *dshot_h, dshot_cmd_t cmd) {
 // ---------- static functions ---------- //
 
 // raw send function, use dshot_set_throttle to set motor speed, dshot_send_special_command to send special commands
-static void dshot_send(dshot_handle_t *dshot_h, uint16_t *value) {
-    dshot_prepare_packet(dshot_h->dma_buffer, *value);
+static void dshot_send(dshot_handle_t *dshot_h, const uint16_t value) {
+    dshot_prepare_packet(dshot_h->dma_buffer, value);
 
     HAL_DMA_Start_IT(dshot_h->hdma, (uint32_t) dshot_h->dma_buffer, dshot_find_ccrx(dshot_h), DSHOT_DMA_BUFFER_SIZE);
     dshot_dma_enable(dshot_h->hdma, true);
@@ -161,6 +166,15 @@ static void dshot_prepare_packet(uint32_t *dma_buffer ,uint16_t value) {
     }
     dma_buffer[16] = 0;
     dma_buffer[17] = 0;
+
+//    //print the dma buffer if value is below 47
+//    if (value < 47 && value != 0) {
+//        for (int i = 0; i < DSHOT_FRAME_SIZE + 2; i++) {
+//            delay(10);
+//            LOGD((uint8_t*)"dma_buffer[%d]: %d", i, dma_buffer[i]);
+//        }
+//            delay(10);
+//    }
 }
 
 
@@ -218,7 +232,7 @@ static uint32_t dshot_find_ccrx(dshot_handle_t *dshot_h) {
 
 
 static dshot_cmd_info_t dshot_find_special_cmd_info(dshot_cmd_t cmd) {
-    for (int i = 0; i < sizeof(DSHOT_CMD_SEND_INFO) ; i++) {
+    for (int i = 0; i < 19 ; i++) {
         if (DSHOT_CMD_SEND_INFO[i].cmd == cmd) {
             return DSHOT_CMD_SEND_INFO[i];
         }
@@ -227,3 +241,4 @@ static dshot_cmd_info_t dshot_find_special_cmd_info(dshot_cmd_t cmd) {
     dshot_cmd_info_t standard_cmd_info = {cmd, 1, 0};
     return standard_cmd_info;
 }
+

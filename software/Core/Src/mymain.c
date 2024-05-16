@@ -21,12 +21,16 @@ gyro_t gyro_h;
 cli_handle_t cli_h;
 
 //motors
-dshot_handle_t m_hs[4];
-motors_handle_t *motors_h;
+dshot_handle_t m1_h; // TIM1 CH2
+dshot_handle_t m2_h; // TIM1 CH1
+dshot_handle_t m3_h; // TIM8 CH4
+dshot_handle_t m4_h; // TIM8 CH3
+motors_handle_t motors_h;
 
 uint64_t led_toggle_last_ms = 0;
 uint64_t cli_process_last_ms = 0;
 uint64_t motors_process_last_ms = 0;
+
 
 
 void myinit(void) {
@@ -39,18 +43,21 @@ void myinit(void) {
 
     delay(1);
     LOGI("Starting Initialization...");
+    delay(1);
+
     // ----- all initialization code goes here ----- //
 
-    //gyro_init(&gyro_h);
-    dshot_init(&m_hs[0], &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);
-    dshot_init(&m_hs[1], &htim1, &hdma_tim1_ch1, TIM_CHANNEL_1);
-    dshot_init(&m_hs[2], &htim8, &hdma_tim8_ch4_trig_com, TIM_CHANNEL_4);
-    dshot_init(&m_hs[3], &htim8, &hdma_tim8_ch3, TIM_CHANNEL_3);
-    motors_init(motors_h, m_hs[0], m_hs[1], m_hs[2], m_hs[3]);
-    // ----- end initialization code ----- //
+    gyro_init(&gyro_h, &hspi1);
+//    dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);
+//    dshot_init(&m2_h, &htim1, &hdma_tim1_ch1, TIM_CHANNEL_1);
+//    dshot_init(&m3_h, &htim8, &hdma_tim8_ch4_trig_com, TIM_CHANNEL_4);
+//    dshot_init(&m4_h, &htim8, &hdma_tim8_ch3, TIM_CHANNEL_3);
+//    motors_init(&motors_h, &m1_h, &m2_h, &m3_h, &m4_h);
+//     ----- end initialization code ----- //
 
     delay(1);
     LOGI("Finished Initialization");
+    delay(1);
 
 
     LED_blink_pattern(20, 2, 50, 50);
@@ -62,7 +69,7 @@ void mymain(void) {
     while (1) {
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-        none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
+//        none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
     }
 }
 

@@ -20,6 +20,7 @@ typedef struct {
     cli_cmd_t cmd_list[MAX_CMD_COUNT];
     version_t version;
     uint8_t cli_rx_buffer[64];
+    uint8_t cli_tx_buffer[64];
     bool new_data_flag;
     bool cli_connected_flag;
     bool halt_until_connected_flag;

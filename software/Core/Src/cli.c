@@ -28,11 +28,14 @@ void cli_process(void *arg) {
     }
     cli_handle_t *cli_h = (cli_handle_t *)arg;
 
+    // read data
     if (cli_h->new_data_flag) { // if new data data in buffer
         cli_h->new_data_flag = false;
         LOG("-> %s", cli_h->cli_rx_buffer);
         cli_handle_cmd(cli_h);
     }
+
+    //write data (from buffer)
 }
 
 void cli_init(cli_handle_t *cli_h) {
@@ -66,6 +69,10 @@ void cli_init(cli_handle_t *cli_h) {
                 if (strcmp_ign(cli_h->cli_rx_buffer, (uint8_t *)"connect") == 0) {
                     cli_h->cli_connected_flag = true;
                     LOGD("Connection confirmed");
+                }
+                //check for "dfu" cmd
+                if (strcmp_ign(cli_h->cli_rx_buffer, (uint8_t *)"dfu") == 0) {
+                    reboot_into_dfu();
                 }
             }
         }

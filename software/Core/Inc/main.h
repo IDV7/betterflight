@@ -76,10 +76,16 @@ void Error_Handler(void);
 #define GYRO_EXTI_Pin GPIO_PIN_4
 #define GYRO_EXTI_GPIO_Port GPIOC
 #define GYRO_EXTI_EXTI_IRQn EXTI4_IRQn
+#define S4_Pin GPIO_PIN_0
+#define S4_GPIO_Port GPIOB
+#define S5_Pin GPIO_PIN_1
+#define S5_GPIO_Port GPIOB
 #define GYRO_CS_Pin GPIO_PIN_2
 #define GYRO_CS_GPIO_Port GPIOB
 #define FLASH_CS_Pin GPIO_PIN_12
 #define FLASH_CS_GPIO_Port GPIOB
+#define S1_Pin GPIO_PIN_14
+#define S1_GPIO_Port GPIOB
 #define MOTOR_4_Pin GPIO_PIN_8
 #define MOTOR_4_GPIO_Port GPIOC
 #define MOTOR_3_Pin GPIO_PIN_9
@@ -90,6 +96,10 @@ void Error_Handler(void);
 #define MOTOR_1_GPIO_Port GPIOA
 #define LED_STRIP_Pin GPIO_PIN_15
 #define LED_STRIP_GPIO_Port GPIOA
+#define S2_Pin GPIO_PIN_4
+#define S2_GPIO_Port GPIOB
+#define S3_Pin GPIO_PIN_5
+#define S3_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 #define LED1_Pin GPIO_PIN_15

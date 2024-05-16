@@ -6,6 +6,7 @@
 #define BETTERFLIGHT_GYRO_H
 
 #include <stdint-gcc.h>
+#include "stm32f7xx_hal.h"
 
 typedef enum {
     GYRO_OK = 0,

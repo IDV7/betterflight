@@ -79,6 +79,24 @@ callback_t cli_cb_none(cli_handle_t *cli_h) {
 
 // --- MOTORS --- //
 
+void cli_cb_set_motor(cli_handle_t *cli_h) {
+    LOG("[RSP] Setting motor %s to %s", (char*)cli_h->last_args[0], (char*)cli_h->last_args[1]);
+
+    if (cli_h->last_args_count != 2) {
+        LOGE("Invalid number of arguments, 2 expected");
+        return;
+    }
+
+    uint8_t motor_nr = char_to_uint16((char*)cli_h->last_args[0]);
+    if (motor_nr < 1 || motor_nr > 4) {
+        LOGE("Invalid motor number, 1 to 4 expected");
+        return;
+    }
+
+    uint16_t motor_value = char_to_uint16((char*)cli_h->last_args[1]);
+    motor_set_throttle(&motors_h, motor_nr, motor_value);
+}
+
 void cli_cb_set_motors(cli_handle_t *cli_h) {
     uint16_t motor_values[4];
     if (cli_h->last_args_count == 1) {
@@ -96,17 +114,17 @@ void cli_cb_set_motors(cli_handle_t *cli_h) {
     }
 
     LOG("[RSP] Set Motor valuese to: m1: %d m2: %d m3: %d m4: %d", motor_values[0], motor_values[1], motor_values[2], motor_values[3]);
-    motors_set_throttle_arr(motors_h, motor_values);
+    motors_set_throttle_arr(&motors_h, motor_values);
 }
 
 
 void cli_cb_stop_motors(cli_handle_t *cli_h) {
-    motors_stop(motors_h);
+    motors_stop(&motors_h);
     LOG("[RSP] Motors stopped");
 }
 
 void cli_cb_beep_motors(cli_handle_t *cli_h) {
-    motors_beep(motors_h);
+    motors_beep(&motors_h);
     LOG("[RSP] Motors beeped");
 }
 
@@ -130,13 +148,15 @@ void cli_cb_set_motor_direction(cli_handle_t *cli_h) {
         return;
     }
 
-    motor_set_direction(motors_h, motor_nr, motor_dir);
+    motor_set_direction(&motors_h, motor_nr, motor_dir);
 }
 
 // --- EOF MOTORS --- //
 
-
-
+void cli_cb_sendsc(cli_handle_t *cli_h) {
+    LOG("[RSP] Sending motor %d cmd %d" , char_to_uint16((char*)cli_h->last_args[0]), char_to_uint16((char*)cli_h->last_args[1]));
+    dshot_send_special_command(motors_h.dshot_hs[char_to_uint16((char*)cli_h->last_args[0]) - 1], char_to_uint16((char*)cli_h->last_args[1]));
+}
 
 
 void add_commands(cli_handle_t *cli_h) {
@@ -149,8 +169,10 @@ void add_commands(cli_handle_t *cli_h) {
     cli_add_cmd(cli_h, (uint8_t *)"reboot", (callback_t) cli_cb_reboot);
     cli_add_cmd(cli_h, (uint8_t *)"disconnect", (callback_t) cli_cb_disconnect);
     cli_add_cmd(cli_h, (uint8_t *)"demo", (callback_t) cli_cb_clidemo);
+    cli_add_cmd(cli_h, (uint8_t *)"setmotor", (callback_t) cli_cb_set_motor);
     cli_add_cmd(cli_h, (uint8_t *)"setmotors", (callback_t) cli_cb_set_motors);
     cli_add_cmd(cli_h, (uint8_t *)"stopmotors", (callback_t) cli_cb_stop_motors);
     cli_add_cmd(cli_h, (uint8_t *)"beepmotors", (callback_t) cli_cb_beep_motors);
     cli_add_cmd(cli_h, (uint8_t *)"setmotordir", (callback_t) cli_cb_set_motor_direction);
+    cli_add_cmd(cli_h, (uint8_t *)"sendsc", (callback_t) cli_cb_sendsc);
 }
