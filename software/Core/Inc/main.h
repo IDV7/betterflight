@@ -37,7 +37,6 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 extern UART_HandleTypeDef huart2;
-extern SPI_HandleTypeDef hspi1;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim8;
 extern DMA_HandleTypeDef hdma_tim1_ch1;
@@ -73,6 +72,12 @@ void Error_Handler(void);
 #define ADC_CURR_GPIO_Port GPIOC
 #define BEEPER_1_Pin GPIO_PIN_4
 #define BEEPER_1_GPIO_Port GPIOA
+#define SPI_SCK_Pin GPIO_PIN_5
+#define SPI_SCK_GPIO_Port GPIOA
+#define SPI_MISO_Pin GPIO_PIN_6
+#define SPI_MISO_GPIO_Port GPIOA
+#define SPI_MOSI_Pin GPIO_PIN_7
+#define SPI_MOSI_GPIO_Port GPIOA
 #define GYRO_EXTI_Pin GPIO_PIN_4
 #define GYRO_EXTI_GPIO_Port GPIOC
 #define GYRO_EXTI_EXTI_IRQn EXTI4_IRQn

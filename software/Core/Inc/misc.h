@@ -7,8 +7,8 @@
 
 #include <stdint.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
-typedef enum {false = 0, true = 1} bool;
 typedef void (*callback_t)(void *arg);
 
 extern volatile uint32_t millis;
@@ -28,5 +28,7 @@ void reboot_into_dfu();
 
 void delay(uint32_t ms);
 uint16_t char_to_uint16(char *str);
+
+uint32_t get_mcu_clock_speed(void);
 
 #endif //BETTERFLIGHT_MISC_H

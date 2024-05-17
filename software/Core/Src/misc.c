@@ -129,3 +129,8 @@ uint16_t char_to_uint16(char *str) {
 
     return (uint16_t)num;
 }
+
+uint32_t get_mcu_clock_speed(void) {
+    SystemCoreClockUpdate();
+    return SystemCoreClock;
+}

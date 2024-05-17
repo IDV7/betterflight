@@ -17,7 +17,7 @@
 
 /* EOF SETTINGS */
 
-gyro_t gyro_h;
+gyro_handle_t gyro_h;
 cli_handle_t cli_h;
 
 //motors
@@ -47,7 +47,9 @@ void myinit(void) {
 
     // ----- all initialization code goes here ----- //
 
-    gyro_init(&gyro_h, &hspi1);
+    gyro_init(&gyro_h);
+
+
 //    dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);
 //    dshot_init(&m2_h, &htim1, &hdma_tim1_ch1, TIM_CHANNEL_1);
 //    dshot_init(&m3_h, &htim8, &hdma_tim8_ch4_trig_com, TIM_CHANNEL_4);
