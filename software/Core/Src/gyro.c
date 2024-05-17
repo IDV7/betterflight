@@ -38,10 +38,11 @@ gyro_err_t gyro_init(gyro_handle_t *gyro_h) {
 
     SPI_Init(&gyro_h->spi_h, 6000000);  // spi speed = 6 MHz => MCU speed/32 => 192MHz/32 = 6 MHz
     HAL_Delay(500); //temp
-    uint8_t tx_buffer[] = {0x80, 0xFF, 0xFF};
+    uint8_t tx_buffer[] = {0x80, 0x00, 0x00};
     uint8_t rx_buffer[] = {0x00, 0x00, 0x00};
 
     SPI_transmit_receive(&gyro_h->spi_h, tx_buffer, rx_buffer, 3);
+    //SPI_trx_deb(&gyro_h->spi_h);
 
 
     return GYRO_OK;

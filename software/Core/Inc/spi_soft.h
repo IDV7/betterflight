@@ -21,7 +21,8 @@ typedef struct {
 
 void SPI_Init(SPI_handle_t *spi_h, uint32_t spi_speed_hz);
 void SPI_transmit_receive(SPI_handle_t *spi_h, uint8_t *tx_data, uint8_t *rx_data, uint32_t len);
-
+void SPI_transmit(SPI_handle_t *spi_h, uint8_t *tx_data, uint32_t len);
+__attribute__((optimize("O0")))  void SPI_trx_deb(SPI_handle_t *spi_h);
 
 
 
