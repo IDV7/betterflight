@@ -59,11 +59,11 @@ void SPI_init(SPI_handle_t *spi_h) {
 
     */
 
-    SPI_DISABLE; //make sure spi is disabled when configuring its registers
-
+    //SPI_DISABLE; //make sure spi is disabled when configuring its registers
+    /*
     // Enable GPIO clocks based on which ports are used
     if (spi_h->sck.port == GPIOA || spi_h->miso.port == GPIOA || spi_h->mosi.port == GPIOA) {
-        __HAL_RCC_GPIOA_CLK_ENABLE();
+        RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
         LOGD("Found GPIOA");
     }
     if (spi_h->sck.port == GPIOB || spi_h->miso.port == GPIOB || spi_h->mosi.port == GPIOB) {
@@ -77,7 +77,7 @@ void SPI_init(SPI_handle_t *spi_h) {
         __HAL_RCC_GPIOD_CLK_ENABLE();
     }
 
-    uint32_t gpio_af = 0; //contains the GPIO_AF5_SPIx value
+    uint32_t gpio_af = GPIO_AF5_SPI1; //contains the GPIO_AF5_SPIx value
 
     //"select" HAL GPIO_AF_SPIx based on what SPIx is used
     if (spi_h->SPIx == SPI1) {
@@ -93,6 +93,10 @@ void SPI_init(SPI_handle_t *spi_h) {
         gpio_af = GPIO_AF5_SPI3;
         LOGD("Found SPI3");
     }
+    */
+
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
 
     //GPIO config for SPI pins (SCK, MISO, MOSI, CS)
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -102,16 +106,17 @@ void SPI_init(SPI_handle_t *spi_h) {
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = gpio_af;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
     HAL_GPIO_Init(spi_h->sck.port, &GPIO_InitStruct);
-    SCK_LOW; // SCK is low in idle state
+
+
 
     // Configure MISO pin
     GPIO_InitStruct.Pin = spi_h->miso.pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = gpio_af;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
     HAL_GPIO_Init(spi_h->miso.port, &GPIO_InitStruct);
 
 
@@ -120,9 +125,8 @@ void SPI_init(SPI_handle_t *spi_h) {
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = gpio_af;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
     HAL_GPIO_Init(spi_h->mosi.port, &GPIO_InitStruct);
-    MOSI_LOW; // MOSI is low in idle state
 
     // Configure CS pin if using software NSS
     GPIO_InitStruct.Pin = spi_h->cs.pin;
@@ -131,7 +135,9 @@ void SPI_init(SPI_handle_t *spi_h) {
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = 0;
     HAL_GPIO_Init(spi_h->cs.port, &GPIO_InitStruct);
-    CS_LOW;
+    CS_HIGH;
+
+
 
     // Clear CR1 & CR2 registers
     spi_h->SPIx->CR1 = 0;
@@ -139,10 +145,10 @@ void SPI_init(SPI_handle_t *spi_h) {
     spi_h->SPIx->I2SCFGR = 0;
 
     // CR1 register config
+    spi_h->SPIx->CR1 &= ~SPI_CR1_CPOL; // Clock polarity = 0
     spi_h->SPIx->CR1 |= SPI_CR1_BR_2; // BaudRate[2:0] = 100 -> fPCLK/32
     spi_h->SPIx->CR1 &= ~SPI_CR1_BR_1;
     spi_h->SPIx->CR1 &= ~SPI_CR1_BR_0;
-    spi_h->SPIx->CR1 &= ~SPI_CR1_CPOL; // Clock polarity = 0
     spi_h->SPIx->CR1 &= ~SPI_CR1_CPHA; // Clock phase = 0
     spi_h->SPIx->CR1 &= ~SPI_CR1_BIDIMODE; // ->(0) 2-line, (1) 1-line
     spi_h->SPIx->CR1 &= ~SPI_CR1_BIDIOE; // (rx vs tx only), not relevant...
@@ -154,6 +160,7 @@ void SPI_init(SPI_handle_t *spi_h) {
     spi_h->SPIx->CR1 |= SPI_CR1_SSM; // Software slave management: (0) hardware, ->(1) software
     spi_h->SPIx->CR1 &= ~SPI_CR1_SSI; // Internal slave select, not relevant...
     spi_h->SPIx->CR1 |= SPI_CR1_MSTR; // (0) slave, ->(1) master
+    spi_h->SPIx->CR1 &= ~SPI_CR1_SPE; // SPI enable, ->(0) disabled, (1) enabled
 
     // CR2 register config
     spi_h->SPIx->CR2 &= ~SPI_CR2_DS_3; // DataSize[3:0] = 0111 -> 8 bits
@@ -176,20 +183,27 @@ void SPI_init(SPI_handle_t *spi_h) {
     spi_h->SPIx->I2SCFGR &= ~SPI_I2SCFGR_I2SMOD; // ->(0) SPI mode, (1) I2S mode
     spi_h->SPIx->I2SCFGR &= ~SPI_I2SCFGR_I2SE; // ->(0) I2S peripheral disabled, (1) I2S peripheral enabled
 
+    delay(100);
+
+
+    //wait until SPI_CR1_SPE reads as set
+//    while (!(spi_h->SPIx->CR1 & SPI_CR1_SPE));
 
     //print out the CR1, CR2, I2SCFGR registers
-
-
-
-
     LOGD("CR1: %s", byte_to_binary_str(spi_h->SPIx->CR1));
+    delay(100);
     LOGD("CR2: %s", byte_to_binary_str(spi_h->SPIx->CR2));
+    delay(100);
+
     LOGD("I2SCFGR: %s", byte_to_binary_str(spi_h->SPIx->I2SCFGR));
+    delay(100);
+
     LOGD("SPI status register: %s", byte_to_binary_str(spi_h->SPIx->SR));
-
-
+    delay(100);
 
     SPI_ENABLE;
+
+
 }
 
 
@@ -203,8 +217,8 @@ void SPI_transmit_rx(SPI_handle_t *spi_h, uint8_t *tx_data, uint8_t *rx_data, ui
     while (!SPI_TXE_FLAG);
     LOGD("TXE flag set");
     // Write data
-    SPI_WRITE_DATA(*tx_data);
-
+    spi_h->SPIx->DR = 0x80;
+    LOGD("was able to write data");
     // Wait for RX buffer to be filled
     while (!SPI_RXNE_FLAG);
     LOGD("RXNE flag set");

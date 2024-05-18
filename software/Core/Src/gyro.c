@@ -44,7 +44,7 @@ gyro_err_t gyro_init(gyro_handle_t *gyro_h) {
     uint8_t tx_buffer[] = {0x80};
     uint8_t rx_buffer[] = {0x00};
 
-//    SPI_transmit_rx(&gyro_h->spi_h, tx_buffer, rx_buffer, 1);
+    SPI_transmit_rx(&gyro_h->spi_h, tx_buffer, rx_buffer, 1);
 
     LOGD("CHIP ID: %x", rx_buffer[0]);
 
