@@ -62,18 +62,18 @@ void SPI_init(SPI_handle_t *spi_h) {
     SPI_DISABLE; //make sure spi is disabled when configuring its registers
 
     // Enable GPIO clocks based on which ports are used
-    if (spi_h->sck.port == GPIOA || spi_h->miso.port == GPIOA || spi_h->mosi.port == GPIOA || spi_h->cs.port == GPIOA) {
+    if (spi_h->sck.port == GPIOA || spi_h->miso.port == GPIOA || spi_h->mosi.port == GPIOA) {
         __HAL_RCC_GPIOA_CLK_ENABLE();
         LOGD("Found GPIOA");
     }
-    if (spi_h->sck.port == GPIOB || spi_h->miso.port == GPIOB || spi_h->mosi.port == GPIOB || spi_h->cs.port == GPIOB) {
+    if (spi_h->sck.port == GPIOB || spi_h->miso.port == GPIOB || spi_h->mosi.port == GPIOB) {
         __HAL_RCC_GPIOB_CLK_ENABLE();
-        LOGD
+        LOGD("Found GPIOA");
     }
-    if (spi_h->sck.port == GPIOC || spi_h->miso.port == GPIOC || spi_h->mosi.port == GPIOC || spi_h->cs.port == GPIOC) {
+    if (spi_h->sck.port == GPIOC || spi_h->miso.port == GPIOC || spi_h->mosi.port == GPIOC) {
         __HAL_RCC_GPIOC_CLK_ENABLE();
     }
-    if (spi_h->sck.port == GPIOD || spi_h->miso.port == GPIOD || spi_h->mosi.port == GPIOD || spi_h->cs.port == GPIOD) {
+    if (spi_h->sck.port == GPIOD || spi_h->miso.port == GPIOD || spi_h->mosi.port == GPIOD) {
         __HAL_RCC_GPIOD_CLK_ENABLE();
     }
 
@@ -83,12 +83,15 @@ void SPI_init(SPI_handle_t *spi_h) {
     if (spi_h->SPIx == SPI1) {
         RCC->AHB2ENR |= RCC_APB2ENR_SPI1EN;
         gpio_af = GPIO_AF5_SPI1;
+        LOGD("Found SPI1");
     } else if (spi_h->SPIx == SPI2) {
         RCC->AHB1ENR |= RCC_APB1ENR_SPI2EN;
         gpio_af = GPIO_AF5_SPI2;
+        LOGD("Found SPI2");
     } else if (spi_h->SPIx == SPI3) {
         RCC->AHB1ENR |= RCC_APB1ENR_SPI3EN;
         gpio_af = GPIO_AF5_SPI3;
+        LOGD("Found SPI3");
     }
 
     //GPIO config for SPI pins (SCK, MISO, MOSI, CS)
@@ -137,41 +140,54 @@ void SPI_init(SPI_handle_t *spi_h) {
 
     // CR1 register config
     spi_h->SPIx->CR1 |= SPI_CR1_BR_2; // BaudRate[2:0] = 100 -> fPCLK/32
-    spi_h->SPIx->CR1 &= SPI_CR1_BR_1;
-    spi_h->SPIx->CR1 &= SPI_CR1_BR_0;
-    spi_h->SPIx->CR1 &= SPI_CR1_CPOL; // Clock polarity = 0
-    spi_h->SPIx->CR1 &= SPI_CR1_CPHA; // Clock phase = 0
-    spi_h->SPIx->CR1 &= SPI_CR1_BIDIMODE; // ->(0) 2-line, (1) 1-line
-    spi_h->SPIx->CR1 &= SPI_CR1_BIDIOE; // (rx vs tx only), not relevant...
-    spi_h->SPIx->CR1 &= SPI_CR1_RXONLY; // ->(0) full duplex, (1) output disabled
-    spi_h->SPIx->CR1 &= SPI_CR1_LSBFIRST; // ->(0) MSB first, (1) LSB first
-    spi_h->SPIx->CR1 &= SPI_CR1_CRCEN; // CRC Enable: ->(0) disabled, (1) enabled
-    spi_h->SPIx->CR1 &= SPI_CR1_CRCL; // CRC length, not relevant...
-    spi_h->SPIx->CR1 &= SPI_CR1_CRCNEXT; // CRC next, not relevant...
+    spi_h->SPIx->CR1 &= ~SPI_CR1_BR_1;
+    spi_h->SPIx->CR1 &= ~SPI_CR1_BR_0;
+    spi_h->SPIx->CR1 &= ~SPI_CR1_CPOL; // Clock polarity = 0
+    spi_h->SPIx->CR1 &= ~SPI_CR1_CPHA; // Clock phase = 0
+    spi_h->SPIx->CR1 &= ~SPI_CR1_BIDIMODE; // ->(0) 2-line, (1) 1-line
+    spi_h->SPIx->CR1 &= ~SPI_CR1_BIDIOE; // (rx vs tx only), not relevant...
+    spi_h->SPIx->CR1 &= ~SPI_CR1_RXONLY; // ->(0) full duplex, (1) output disabled
+    spi_h->SPIx->CR1 &= ~SPI_CR1_LSBFIRST; // ->(0) MSB first, (1) LSB first
+    spi_h->SPIx->CR1 &= ~SPI_CR1_CRCEN; // CRC Enable: ->(0) disabled, (1) enabled
+    spi_h->SPIx->CR1 &= ~SPI_CR1_CRCL; // CRC length, not relevant...
+    spi_h->SPIx->CR1 &= ~SPI_CR1_CRCNEXT; // CRC next, not relevant...
     spi_h->SPIx->CR1 |= SPI_CR1_SSM; // Software slave management: (0) hardware, ->(1) software
-    spi_h->SPIx->CR1 &= SPI_CR1_SSI; // Internal slave select, not relevant...
+    spi_h->SPIx->CR1 &= ~SPI_CR1_SSI; // Internal slave select, not relevant...
     spi_h->SPIx->CR1 |= SPI_CR1_MSTR; // (0) slave, ->(1) master
 
     // CR2 register config
-    spi_h->SPIx->CR2 &= SPI_CR2_DS_3; // DataSize[3:0] = 0111 -> 8 bits
+    spi_h->SPIx->CR2 &= ~SPI_CR2_DS_3; // DataSize[3:0] = 0111 -> 8 bits
     spi_h->SPIx->CR2 |= SPI_CR2_DS_2;
     spi_h->SPIx->CR2 |= SPI_CR2_DS_1;
     spi_h->SPIx->CR2 |= SPI_CR2_DS_0;
-    spi_h->SPIx->CR2 &= SPI_CR2_SSOE; // SS output, not relevant... (using software slave management)
-    spi_h->SPIx->CR2 &= SPI_CR2_FRF; // ->(0) SPI Motorola mode, (1) TI mode
-    spi_h->SPIx->CR2 &= SPI_CR2_NSSP; // generate NSS pulse, not relevant... (using software slave management)
+    spi_h->SPIx->CR2 &= ~SPI_CR2_SSOE; // SS output, not relevant... (using software slave management)
+    spi_h->SPIx->CR2 &= ~SPI_CR2_FRF; // ->(0) SPI Motorola mode, (1) TI mode
+    spi_h->SPIx->CR2 &= ~SPI_CR2_NSSP; // generate NSS pulse, not relevant... (using software slave management)
     spi_h->SPIx->CR2 |= SPI_CR2_FRXTH; // FIFO reception threshold, (0) RXNE event when 16-bit, ->(1) RXNE event when 8-bit
-    spi_h->SPIx->CR2 &= SPI_CR2_RXDMAEN; // RX buffer DMA enable, ->(0) disabled, (1) enabled
-    spi_h->SPIx->CR2 &= SPI_CR2_TXDMAEN; // TX buffer DMA enable, ->(0) disabled, (1) enabled
-    spi_h->SPIx->CR2 &= SPI_CR2_LDMARX; // DMA reception, not relevant...
-    spi_h->SPIx->CR2 &= SPI_CR2_LDMATX; // DMA transmission, not relevant...
-    spi_h->SPIx->CR2 &= SPI_CR2_TXEIE; // TX buffer empty interrupt enable, (0) TXEIE interrupt masked, ->(1) TXEIE interrupt not masked (gens interrupt)
-    spi_h->SPIx->CR2 &= SPI_CR2_RXNEIE; // RX buffer not empty interrupt enable, (0) RXNEIE interrupt masked, ->(1) RXNEIE interrupt not masked (gens interrupt)
-    spi_h->SPIx->CR2 &= SPI_CR2_ERRIE; // Error interrupt enable, (0) ERRIE interrupt masked, ->(1) ERRIE interrupt enabled
+    spi_h->SPIx->CR2 &= ~SPI_CR2_RXDMAEN; // RX buffer DMA enable, ->(0) disabled, (1) enabled
+    spi_h->SPIx->CR2 &= ~SPI_CR2_TXDMAEN; // TX buffer DMA enable, ->(0) disabled, (1) enabled
+    spi_h->SPIx->CR2 &= ~SPI_CR2_LDMARX; // DMA reception, not relevant...
+    spi_h->SPIx->CR2 &= ~SPI_CR2_LDMATX; // DMA transmission, not relevant...
+    spi_h->SPIx->CR2 &= ~SPI_CR2_TXEIE; // TX buffer empty interrupt enable, (0) TXEIE interrupt masked, ->(1) TXEIE interrupt not masked (gens interrupt)
+    spi_h->SPIx->CR2 &= ~SPI_CR2_RXNEIE; // RX buffer not empty interrupt enable, (0) RXNEIE interrupt masked, ->(1) RXNEIE interrupt not masked (gens interrupt)
+    spi_h->SPIx->CR2 &= ~SPI_CR2_ERRIE; // Error interrupt enable, (0) ERRIE interrupt masked, ->(1) ERRIE interrupt enabled
 
     // I2SCFGR register config
-    spi_h->SPIx->I2SCFGR &= SPI_I2SCFGR_I2SMOD; // ->(0) SPI mode, (1) I2S mode
-    spi_h->SPIx->I2SCFGR &= SPI_I2SCFGR_I2SE; // ->(0) I2S peripheral disabled, (1) I2S peripheral enabled
+    spi_h->SPIx->I2SCFGR &= ~SPI_I2SCFGR_I2SMOD; // ->(0) SPI mode, (1) I2S mode
+    spi_h->SPIx->I2SCFGR &= ~SPI_I2SCFGR_I2SE; // ->(0) I2S peripheral disabled, (1) I2S peripheral enabled
+
+
+    //print out the CR1, CR2, I2SCFGR registers
+
+
+
+
+    LOGD("CR1: %s", byte_to_binary_str(spi_h->SPIx->CR1));
+    LOGD("CR2: %s", byte_to_binary_str(spi_h->SPIx->CR2));
+    LOGD("I2SCFGR: %s", byte_to_binary_str(spi_h->SPIx->I2SCFGR));
+    LOGD("SPI status register: %s", byte_to_binary_str(spi_h->SPIx->SR));
+
+
 
     SPI_ENABLE;
 }
@@ -185,17 +201,18 @@ void SPI_transmit_rx(SPI_handle_t *spi_h, uint8_t *tx_data, uint8_t *rx_data, ui
 
     // Wait for TX buffer to be empty
     while (!SPI_TXE_FLAG);
-
+    LOGD("TXE flag set");
     // Write data
     SPI_WRITE_DATA(*tx_data);
 
     // Wait for RX buffer to be filled
     while (!SPI_RXNE_FLAG);
-
+    LOGD("RXNE flag set");
     // disable cs
     CS_HIGH;
 
     rx_data = (uint8_t*) SPI_READ_DATA;
+    LOGD("Read rx data");
 
 //    for (uint32_t i = 0; i < len; i++) { //for each byte
 //        uint8_t tx_byte = tx_data[i];

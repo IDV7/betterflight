@@ -47,6 +47,7 @@ void myinit(void) {
 
     // ----- all initialization code goes here ----- //
 
+
     gyro_init(&gyro_h);
 
 

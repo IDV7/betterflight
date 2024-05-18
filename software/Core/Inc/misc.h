@@ -31,4 +31,6 @@ uint16_t char_to_uint16(char *str);
 
 uint32_t get_mcu_clock_speed(void);
 
+uint8_t *byte_to_binary_str(uint16_t x);
+
 #endif //BETTERFLIGHT_MISC_H

@@ -134,3 +134,16 @@ uint32_t get_mcu_clock_speed(void) {
     SystemCoreClockUpdate();
     return SystemCoreClock;
 }
+
+// takes an 16 bit intiger and returns a string with the binary representation
+uint8_t* byte_to_binary_str(uint16_t x) {
+    static uint8_t b[17];
+    // Ensure b is at least 17 characters long
+    b[16] = '\0';
+
+    for (int i = 15; i >= 0; i--) {
+        b[15 - i] = (x & (1 << i)) ? '1' : '0';
+    }
+
+    return b;
+}
