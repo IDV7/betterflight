@@ -1,11 +1,11 @@
 #include "gyro.h"
 
-
 #include "stm32f7xx_hal.h"
 
 #include "main.h"
 #include "log.h"
-#include "spi_soft.h"
+#include "spi.h"
+
 typedef enum {
     CHIP_ID = 0x00,
     PWR_CONF = 0x7C,
@@ -20,9 +20,10 @@ typedef enum {
 
 #define NUM_BYTES_TO_READ 12
 
-void gyro_send_spi(BMI270_REG_t reg, uint8_t *rx_data_ptr, uint8_t size);
 
 gyro_err_t gyro_init(gyro_handle_t *gyro_h) {
+
+    gyro_h->spi_h.SPIx = SPI1;
 
     gyro_h->spi_h.miso.port = SPI_MISO_GPIO_Port;
     gyro_h->spi_h.miso.pin = SPI_MISO_Pin;
@@ -36,14 +37,16 @@ gyro_err_t gyro_init(gyro_handle_t *gyro_h) {
     gyro_h->spi_h.cs.port = GYRO_CS_GPIO_Port;
     gyro_h->spi_h.cs.pin = GYRO_CS_Pin;
 
-    SPI_Init(&gyro_h->spi_h, 6000000);  // spi speed = 6 MHz => MCU speed/32 => 192MHz/32 = 6 MHz
+    SPI_init(&gyro_h->spi_h);
+
     HAL_Delay(500); //temp
-    uint8_t tx_buffer[] = {0x80, 0x00, 0x00};
-    uint8_t rx_buffer[] = {0x00, 0x00, 0x00};
 
-    SPI_transmit_receive(&gyro_h->spi_h, tx_buffer, rx_buffer, 3);
-    //SPI_trx_deb(&gyro_h->spi_h);
+    uint8_t tx_buffer[] = {0x80};
+    uint8_t rx_buffer[] = {0x00};
 
+//    SPI_transmit_rx(&gyro_h->spi_h, tx_buffer, rx_buffer, 1);
+
+    LOGD("CHIP ID: %x", rx_buffer[0]);
 
     return GYRO_OK;
 }

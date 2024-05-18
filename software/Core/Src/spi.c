@@ -1,7 +1,13 @@
+/*
+    SPI driver for STM32F7xx microcontrollers
+ */
+
 
 
 #include "spi.h"
 #include "stm32f7xx.h"
+
+#include "log.h"
 
 // GPIO macros
 #define SCK_HIGH spi_h->sck.port->BSRR = (spi_h->sck.pin)
@@ -12,16 +18,16 @@
 #define CS_LOW spi_h->cs.port->BSRR = (spi_h->cs.pin << 16)
 
 // SPI control macros
-#define SPI_ENABLE spi_h->SPIx->CR1 |= SPI_CR1_SPE
-#define SPI_DISABLE spi_h->SPIx->CR1 &= ~SPI_CR1_SPE
+#define SPI_ENABLE spi_h->SPIx->CR1 |= SPI_CR1_SPE // Enable SPI peripheral
+#define SPI_DISABLE spi_h->SPIx->CR1 &= ~SPI_CR1_SPE // Disable SPI peripheral
 
 // SPI flag read macros
-#define SPI_TXE_FLAG (spi_h->SPIx->SR & SPI_SR_TXE)
-#define SPI_RXNE_FLAG (spi_h->SPIx->SR & SPI_SR_RXNE)
+#define SPI_TXE_FLAG (spi_h->SPIx->SR & SPI_SR_TXE) // TX buffer empty flag
+#define SPI_RXNE_FLAG (spi_h->SPIx->SR & SPI_SR_RXNE) // RX buffer not empty flag
 
 // SPI data read/write macros
-#define SPI_WRITE_DATA(data) spi_h->SPIx->DR = data
-#define SPI_READ_DATA spi_h->SPIx->DR
+#define SPI_WRITE_DATA(data) spi_h->SPIx->DR = data // Write data to SPI peripheral
+#define SPI_READ_DATA spi_h->SPIx->DR // Read data from SPI peripheral
 
 
 void SPI_init(SPI_handle_t *spi_h) {
@@ -53,47 +59,86 @@ void SPI_init(SPI_handle_t *spi_h) {
 
     */
 
+    SPI_DISABLE; //make sure spi is disabled when configuring its registers
+
+    // Enable GPIO clocks based on which ports are used
+    if (spi_h->sck.port == GPIOA || spi_h->miso.port == GPIOA || spi_h->mosi.port == GPIOA || spi_h->cs.port == GPIOA) {
+        __HAL_RCC_GPIOA_CLK_ENABLE();
+        LOGD("Found GPIOA");
+    }
+    if (spi_h->sck.port == GPIOB || spi_h->miso.port == GPIOB || spi_h->mosi.port == GPIOB || spi_h->cs.port == GPIOB) {
+        __HAL_RCC_GPIOB_CLK_ENABLE();
+        LOGD
+    }
+    if (spi_h->sck.port == GPIOC || spi_h->miso.port == GPIOC || spi_h->mosi.port == GPIOC || spi_h->cs.port == GPIOC) {
+        __HAL_RCC_GPIOC_CLK_ENABLE();
+    }
+    if (spi_h->sck.port == GPIOD || spi_h->miso.port == GPIOD || spi_h->mosi.port == GPIOD || spi_h->cs.port == GPIOD) {
+        __HAL_RCC_GPIOD_CLK_ENABLE();
+    }
+
+    uint32_t gpio_af = 0; //contains the GPIO_AF5_SPIx value
+
+    //"select" HAL GPIO_AF_SPIx based on what SPIx is used
+    if (spi_h->SPIx == SPI1) {
+        RCC->AHB2ENR |= RCC_APB2ENR_SPI1EN;
+        gpio_af = GPIO_AF5_SPI1;
+    } else if (spi_h->SPIx == SPI2) {
+        RCC->AHB1ENR |= RCC_APB1ENR_SPI2EN;
+        gpio_af = GPIO_AF5_SPI2;
+    } else if (spi_h->SPIx == SPI3) {
+        RCC->AHB1ENR |= RCC_APB1ENR_SPI3EN;
+        gpio_af = GPIO_AF5_SPI3;
+    }
+
     //GPIO config for SPI pins (SCK, MISO, MOSI, CS)
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-    //mosi
-    GPIO_InitStruct.Pin = spi_h->mosi.pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(spi_h->mosi.port, &GPIO_InitStruct);
-    MOSI_LOW; //init mosi low
 
-    //miso
-    GPIO_InitStruct.Pin = spi_h->miso.pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    // Configure SCK pin
+    GPIO_InitStruct.Pin = spi_h->sck.pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = gpio_af;
+    HAL_GPIO_Init(spi_h->sck.port, &GPIO_InitStruct);
+    SCK_LOW; // SCK is low in idle state
+
+    // Configure MISO pin
+    GPIO_InitStruct.Pin = spi_h->miso.pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = gpio_af;
     HAL_GPIO_Init(spi_h->miso.port, &GPIO_InitStruct);
 
-    //sck
-    GPIO_InitStruct.Pin = spi_h->sck.pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(spi_h->sck.port, &GPIO_InitStruct);
-    SCK_HIGH; //init clock high
 
-    //cs
+    // Configure MOSI pin
+    GPIO_InitStruct.Pin = spi_h->mosi.pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = gpio_af;
+    HAL_GPIO_Init(spi_h->mosi.port, &GPIO_InitStruct);
+    MOSI_LOW; // MOSI is low in idle state
+
+    // Configure CS pin if using software NSS
     GPIO_InitStruct.Pin = spi_h->cs.pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = 0;
     HAL_GPIO_Init(spi_h->cs.port, &GPIO_InitStruct);
-    CS_HIGH; //init cs high
-
+    CS_LOW;
 
     // Clear CR1 & CR2 registers
     spi_h->SPIx->CR1 = 0;
     spi_h->SPIx->CR2 = 0;
+    spi_h->SPIx->I2SCFGR = 0;
 
     // CR1 register config
-    spi_h->SPIx->CR1 &= SPI_CR1_BR_2; // BaudRate[2:0] = 011 -> fPCLK/16
-    spi_h->SPIx->CR1 |= SPI_CR1_BR_1;
-    spi_h->SPIx->CR1 |= SPI_CR1_BR_0;
+    spi_h->SPIx->CR1 |= SPI_CR1_BR_2; // BaudRate[2:0] = 100 -> fPCLK/32
+    spi_h->SPIx->CR1 &= SPI_CR1_BR_1;
+    spi_h->SPIx->CR1 &= SPI_CR1_BR_0;
     spi_h->SPIx->CR1 &= SPI_CR1_CPOL; // Clock polarity = 0
     spi_h->SPIx->CR1 &= SPI_CR1_CPHA; // Clock phase = 0
     spi_h->SPIx->CR1 &= SPI_CR1_BIDIMODE; // ->(0) 2-line, (1) 1-line
@@ -117,12 +162,18 @@ void SPI_init(SPI_handle_t *spi_h) {
     spi_h->SPIx->CR2 &= SPI_CR2_NSSP; // generate NSS pulse, not relevant... (using software slave management)
     spi_h->SPIx->CR2 |= SPI_CR2_FRXTH; // FIFO reception threshold, (0) RXNE event when 16-bit, ->(1) RXNE event when 8-bit
     spi_h->SPIx->CR2 &= SPI_CR2_RXDMAEN; // RX buffer DMA enable, ->(0) disabled, (1) enabled
+    spi_h->SPIx->CR2 &= SPI_CR2_TXDMAEN; // TX buffer DMA enable, ->(0) disabled, (1) enabled
     spi_h->SPIx->CR2 &= SPI_CR2_LDMARX; // DMA reception, not relevant...
     spi_h->SPIx->CR2 &= SPI_CR2_LDMATX; // DMA transmission, not relevant...
     spi_h->SPIx->CR2 &= SPI_CR2_TXEIE; // TX buffer empty interrupt enable, (0) TXEIE interrupt masked, ->(1) TXEIE interrupt not masked (gens interrupt)
     spi_h->SPIx->CR2 &= SPI_CR2_RXNEIE; // RX buffer not empty interrupt enable, (0) RXNEIE interrupt masked, ->(1) RXNEIE interrupt not masked (gens interrupt)
     spi_h->SPIx->CR2 &= SPI_CR2_ERRIE; // Error interrupt enable, (0) ERRIE interrupt masked, ->(1) ERRIE interrupt enabled
 
+    // I2SCFGR register config
+    spi_h->SPIx->I2SCFGR &= SPI_I2SCFGR_I2SMOD; // ->(0) SPI mode, (1) I2S mode
+    spi_h->SPIx->I2SCFGR &= SPI_I2SCFGR_I2SE; // ->(0) I2S peripheral disabled, (1) I2S peripheral enabled
+
+    SPI_ENABLE;
 }
 
 
@@ -132,27 +183,29 @@ void SPI_transmit_rx(SPI_handle_t *spi_h, uint8_t *tx_data, uint8_t *rx_data, ui
     // enable cs
     CS_LOW;
 
-    for (uint32_t i = 0; i < len; i++) { //for each byte
-        uint8_t tx_byte = tx_data[i];
-        uint8_t rx_byte = 0;
+    // Wait for TX buffer to be empty
+    while (!SPI_TXE_FLAG);
 
-        /*
-         MAARTEN!!!
-         Read the reference manual on how to send and receive data using the SPI peripheral
-         its not just writing to the DR register, you also need to wait for the correct flags etc...
-         reading is also not super easy you need to check a bunch of things like the SR registers FRLVL and FRE flags (I think)
-         read the reference manual on how SPI works (starting on page 953),
-         most interesting part for this part of the software is on page (962: Data transmission and reception procedure)
-         NOTE: don't use/read the parts about DMA (we won't use it)
-         gl :)
-        */
+    // Write data
+    SPI_WRITE_DATA(*tx_data);
 
-
-
-        // store received byte
-        rx_data[i] = rx_byte;
-    }
+    // Wait for RX buffer to be filled
+    while (!SPI_RXNE_FLAG);
 
     // disable cs
     CS_HIGH;
+
+    rx_data = (uint8_t*) SPI_READ_DATA;
+
+//    for (uint32_t i = 0; i < len; i++) { //for each byte
+//        uint8_t tx_byte = tx_data[i];
+//        uint8_t rx_byte = 0;
+//
+//
+//
+//
+//        // store received byte
+//        rx_data[i] = rx_byte;
+//    }
+
 }

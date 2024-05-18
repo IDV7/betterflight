@@ -7,7 +7,7 @@
 
 #include <stdint-gcc.h>
 #include "stm32f7xx_hal.h"
-#include "spi_soft.h"
+#include "spi.h"
 
 typedef enum {
     GYRO_OK = 0,
