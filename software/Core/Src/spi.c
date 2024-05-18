@@ -9,12 +9,7 @@
 
 #include "log.h"
 
-// GPIO macros
-#define SCK_HIGH spi_h->sck.port->BSRR = (spi_h->sck.pin)
-#define SCK_LOW spi_h->sck.port->BSRR = (spi_h->sck.pin << 16)
-#define MOSI_HIGH spi_h->mosi.port->BSRR = (spi_h->mosi.pin)
-#define MOSI_LOW spi_h->mosi.port->BSRR = (spi_h->mosi.pin << 16)
-#define CS_HIGH spi_h->cs.port->BSRR = (spi_h->cs.pin)
+#define CS_HIGH spi_h->cs.port->BSRR = spi_h->cs.pin
 #define CS_LOW spi_h->cs.port->BSRR = (spi_h->cs.pin << 16)
 
 // SPI control macros
@@ -24,6 +19,11 @@
 // SPI flag read macros
 #define SPI_TXE_FLAG (spi_h->SPIx->SR & SPI_SR_TXE) // TX buffer empty flag
 #define SPI_RXNE_FLAG (spi_h->SPIx->SR & SPI_SR_RXNE) // RX buffer not empty flag
+#define SPI_BSY_FLAG (spi_h->SPIx->SR & SPI_SR_BSY) // SPI busy flag
+#define SPI_MODF_FLAG (spi_h->SPIx->SR & SPI_SR_MODF) // Mode fault flag
+#define SPI_OVR_FLAG (spi_h->SPIx->SR & SPI_SR_OVR) // Overrun flag
+#define SPI_FRE_FLAG (spi_h->SPIx->SR & SPI_SR_FRE) // Frame format error flag
+
 
 // SPI data read/write macros
 #define SPI_WRITE_DATA(data) spi_h->SPIx->DR = data // Write data to SPI peripheral
@@ -98,10 +98,10 @@ void SPI_init(SPI_handle_t *spi_h) {
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
 
-    //GPIO config for SPI pins (SCK, MISO, MOSI, CS)
+    // Configure GPIO pins
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-    // Configure SCK pin
+    // SCK
     GPIO_InitStruct.Pin = spi_h->sck.pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -109,9 +109,7 @@ void SPI_init(SPI_handle_t *spi_h) {
     GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
     HAL_GPIO_Init(spi_h->sck.port, &GPIO_InitStruct);
 
-
-
-    // Configure MISO pin
+    // MISO
     GPIO_InitStruct.Pin = spi_h->miso.pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -119,8 +117,7 @@ void SPI_init(SPI_handle_t *spi_h) {
     GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
     HAL_GPIO_Init(spi_h->miso.port, &GPIO_InitStruct);
 
-
-    // Configure MOSI pin
+    // MOSI
     GPIO_InitStruct.Pin = spi_h->mosi.pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -128,15 +125,13 @@ void SPI_init(SPI_handle_t *spi_h) {
     GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
     HAL_GPIO_Init(spi_h->mosi.port, &GPIO_InitStruct);
 
-    // Configure CS pin if using software NSS
+    // CS
     GPIO_InitStruct.Pin = spi_h->cs.pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = 0;
     HAL_GPIO_Init(spi_h->cs.port, &GPIO_InitStruct);
     CS_HIGH;
-
 
 
     // Clear CR1 & CR2 registers
@@ -194,14 +189,15 @@ void SPI_init(SPI_handle_t *spi_h) {
     delay(100);
     LOGD("CR2: %s", byte_to_binary_str(spi_h->SPIx->CR2));
     delay(100);
-
     LOGD("I2SCFGR: %s", byte_to_binary_str(spi_h->SPIx->I2SCFGR));
     delay(100);
-
     LOGD("SPI status register: %s", byte_to_binary_str(spi_h->SPIx->SR));
     delay(100);
 
     SPI_ENABLE;
+    delay(100);
+
+    LOGD("SPI status register: %s", byte_to_binary_str(spi_h->SPIx->SR));
 
 
 }
@@ -210,22 +206,33 @@ void SPI_init(SPI_handle_t *spi_h) {
 // CMSIS Hardware SPI transmit & receive
 void SPI_transmit_rx(SPI_handle_t *spi_h, uint8_t *tx_data, uint8_t *rx_data, uint32_t len) {
 
+    // check for MODF error
+    if (SPI_MODF_FLAG) {
+        LOGD("MODF error detected");
+        volatile uint32_t clear_modf = spi_h->SPIx->SR; //clear MODF flag
+        SPI_ENABLE; //re-enable SPI
+        CS_HIGH; //disable CS
+        spi_h->SPIx->CR1 |= SPI_CR1_SPE | SPI_CR1_MSTR; //restore to re-enable
+    }
+
     // enable cs
     CS_LOW;
 
     // Wait for TX buffer to be empty
     while (!SPI_TXE_FLAG);
     LOGD("TXE flag set");
+
     // Write data
     spi_h->SPIx->DR = 0x80;
     LOGD("was able to write data");
+
     // Wait for RX buffer to be filled
-    while (!SPI_RXNE_FLAG);
+    //while (!SPI_RXNE_FLAG);
     LOGD("RXNE flag set");
     // disable cs
     CS_HIGH;
 
-    rx_data = (uint8_t*) SPI_READ_DATA;
+    //rx_data = (uint8_t*) SPI_READ_DATA;
     LOGD("Read rx data");
 
 //    for (uint32_t i = 0; i < len; i++) { //for each byte

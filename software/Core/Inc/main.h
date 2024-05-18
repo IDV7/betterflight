@@ -70,14 +70,6 @@ void Error_Handler(void);
 #define ADC_BATT_GPIO_Port GPIOC
 #define ADC_CURR_Pin GPIO_PIN_2
 #define ADC_CURR_GPIO_Port GPIOC
-#define BEEPER_1_Pin GPIO_PIN_4
-#define BEEPER_1_GPIO_Port GPIOA
-#define SPI_SCK_Pin GPIO_PIN_5
-#define SPI_SCK_GPIO_Port GPIOA
-#define SPI_MISO_Pin GPIO_PIN_6
-#define SPI_MISO_GPIO_Port GPIOA
-#define SPI_MOSI_Pin GPIO_PIN_7
-#define SPI_MOSI_GPIO_Port GPIOA
 #define GYRO_EXTI_Pin GPIO_PIN_4
 #define GYRO_EXTI_GPIO_Port GPIOC
 #define GYRO_EXTI_EXTI_IRQn EXTI4_IRQn
@@ -85,10 +77,6 @@ void Error_Handler(void);
 #define S4_GPIO_Port GPIOB
 #define S5_Pin GPIO_PIN_1
 #define S5_GPIO_Port GPIOB
-#define GYRO_CS_Pin GPIO_PIN_2
-#define GYRO_CS_GPIO_Port GPIOB
-#define FLASH_CS_Pin GPIO_PIN_12
-#define FLASH_CS_GPIO_Port GPIOB
 #define S1_Pin GPIO_PIN_14
 #define S1_GPIO_Port GPIOB
 #define MOTOR_4_Pin GPIO_PIN_8
@@ -107,10 +95,8 @@ void Error_Handler(void);
 #define S3_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-#define LED1_Pin GPIO_PIN_15
-#define LED1_GPIO_Port GPIOC
-#define GYRO_CS_Pin GPIO_PIN_2
-#define GYRO_CS_GPIO_Port GPIOB
+
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

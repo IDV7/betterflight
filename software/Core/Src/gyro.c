@@ -25,17 +25,17 @@ gyro_err_t gyro_init(gyro_handle_t *gyro_h) {
 
     gyro_h->spi_h.SPIx = SPI1;
 
-    gyro_h->spi_h.miso.port = SPI_MISO_GPIO_Port;
-    gyro_h->spi_h.miso.pin = SPI_MISO_Pin;
+    gyro_h->spi_h.sck.port = GPIOA;
+    gyro_h->spi_h.sck.pin = GPIO_PIN_5;
 
-    gyro_h->spi_h.mosi.port = SPI_MOSI_GPIO_Port;
-    gyro_h->spi_h.mosi.pin = SPI_MOSI_Pin;
+    gyro_h->spi_h.miso.port = GPIOA;
+    gyro_h->spi_h.miso.pin = GPIO_PIN_6;
 
-    gyro_h->spi_h.sck.port = SPI_SCK_GPIO_Port;
-    gyro_h->spi_h.sck.pin = SPI_SCK_Pin;
+    gyro_h->spi_h.mosi.port = GPIOA;
+    gyro_h->spi_h.mosi.pin = GPIO_PIN_7;
 
-    gyro_h->spi_h.cs.port = GYRO_CS_GPIO_Port;
-    gyro_h->spi_h.cs.pin = GYRO_CS_Pin;
+    gyro_h->spi_h.cs.port = GPIOB;
+    gyro_h->spi_h.cs.pin = GPIO_PIN_2;
 
     SPI_init(&gyro_h->spi_h);
 
