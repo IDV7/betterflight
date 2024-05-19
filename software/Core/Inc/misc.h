@@ -27,6 +27,8 @@ int8_t strcmp_ign(const uint8_t *str1, const uint8_t *str2);
 void reboot_into_dfu();
 
 void delay(uint32_t ms);
+void delay_us(uint32_t us);
+
 uint16_t char_to_uint16(char *str);
 
 uint32_t get_mcu_clock_speed(void);

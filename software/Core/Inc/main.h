@@ -70,6 +70,12 @@ void Error_Handler(void);
 #define ADC_BATT_GPIO_Port GPIOC
 #define ADC_CURR_Pin GPIO_PIN_2
 #define ADC_CURR_GPIO_Port GPIOC
+#define SPI_SCK_Pin GPIO_PIN_5
+#define SPI_SCK_GPIO_Port GPIOA
+#define SPI_MISO_Pin GPIO_PIN_6
+#define SPI_MISO_GPIO_Port GPIOA
+#define SPI_MOSI_Pin GPIO_PIN_7
+#define SPI_MOSI_GPIO_Port GPIOA
 #define GYRO_EXTI_Pin GPIO_PIN_4
 #define GYRO_EXTI_GPIO_Port GPIOC
 #define GYRO_EXTI_EXTI_IRQn EXTI4_IRQn
@@ -77,6 +83,8 @@ void Error_Handler(void);
 #define S4_GPIO_Port GPIOB
 #define S5_Pin GPIO_PIN_1
 #define S5_GPIO_Port GPIOB
+#define SPI_CS_Pin GPIO_PIN_2
+#define SPI_CS_GPIO_Port GPIOB
 #define S1_Pin GPIO_PIN_14
 #define S1_GPIO_Port GPIOB
 #define MOTOR_4_Pin GPIO_PIN_8

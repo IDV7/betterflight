@@ -118,6 +118,21 @@ void delay(uint32_t ms) {
     HAL_Delay(ms);
 }
 
+// not working
+void delay_us(uint32_t us) {
+    uint32_t mcu_clock_speed = get_mcu_clock_speed();
+    uint32_t startTick = SysTick->VAL; // current tick count
+    uint32_t ticks = (mcu_clock_speed / 1000000) * us; //tick count for us delay
+    while ((SysTick->VAL - startTick) < ticks);
+    LOGD("get_mcu_clock_speed: %d", get_mcu_clock_speed());
+    delay(1);
+    LOGD("ticks: %d", ticks);
+    delay(1);
+    LOGD("startTick: %d", startTick);
+    delay(1);
+    LOGD("end tick: %d", SysTick->VAL);
+}
+
 uint16_t char_to_uint16(char *str) {
     char *endptr;
     unsigned long num = strtoul(str, &endptr, 10);
