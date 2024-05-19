@@ -47,7 +47,7 @@ void myinit(void) {
     // ----- all initialization code goes here ----- //
 
 
-    log_gyro_err_t(gyro_init(&gyro_h));
+        log_gyro_err_t(gyro_init(&gyro_h));
 
 
 //    dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);

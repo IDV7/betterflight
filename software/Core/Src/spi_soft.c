@@ -98,7 +98,7 @@ void SPI_soft_trx(SPI_handle_t *spi_h, uint8_t *tx_data, uint8_t *rx_data, uint3
             SCK_HIGH;
             SPI_Delay(NOP_CNT);
         }
-
+        MOSI_LOW;
 
         rx_data[i] = rx_byte;
     }
@@ -140,6 +140,7 @@ void SPI_soft_tx(SPI_handle_t *spi_h, uint8_t *tx_data, uint32_t len) {
             SCK_HIGH;
             SPI_Delay(NOP_CNT);
         }
+        MOSI_LOW;
     }
 
     // disable cs
@@ -179,6 +180,7 @@ void SPI_soft_burst_tx(SPI_handle_t *spi_h, uint8_t *tx_data, uint32_t len) {
             SCK_HIGH;
             SPI_Delay(NOP_CNT);
         }
+        MOSI_LOW;
     }
 
     // disable cs
