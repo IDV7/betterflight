@@ -4,10 +4,8 @@
 #include "misc.h"
 #include "dshot.h"
 #include "cli.h"
-#include "gyro.h"
 #include "motors.h"
 
-extern gyro_handle_t gyro_h;
 extern cli_handle_t cli_h;
 
 //motors

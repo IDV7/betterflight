@@ -2,13 +2,13 @@
 
 #include <stdio.h>
 
-#include "gyro.h"
 #include "main.h"
 #include "misc.h"
 #include "log.h"
 #include "cli.h"
 #include "dshot.h"
 #include "motors.h"
+#include "imu.h"
 
 /* SETTINGS */
 #define LOG_LEVEL LOG_LEVEL_DEBUG
@@ -16,7 +16,7 @@
 
 /* EOF SETTINGS */
 
-gyro_handle_t gyro_h;
+IMU_handle_t imu_h;
 cli_handle_t cli_h;
 
 //motors
@@ -47,7 +47,8 @@ void myinit(void) {
     // ----- all initialization code goes here ----- //
 
 
-        log_gyro_err_t(gyro_init(&gyro_h));
+    //init imu
+    log_imu_err(imu_init(&imu_h));
 
 
 //    dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);

@@ -19,24 +19,6 @@
 #define ACCEL          UINT8_C(0x00)
 #define GYRO           UINT8_C(0x01)
 
-/*
-
- bmi2_dev  //Structure to define BMI2 sensor configurations BEGIN
-
- important ones
-
- bmi2_intf => interface type
- uint8_t dummy_byte  => switching from i2c to spi
- const uint8_t *config_file_ptr;     // Pointer to the configuration data buffer address
-
- bmi2_delay_fptr_t delay_us;      //Delay function pointer
-
-
- bmi2_dev  Structure to define BMI2 sensor configurations   END
-
- */
-
-// Global SPI handler because the BMI270's SPI interface doesn't work with this handler
 
 static int8_t set_accel_gyro_config(struct bmi2_dev *bmi);
 static float lsb_to_mps2(int16_t val, float g_range, uint8_t bit_width);
@@ -49,7 +31,7 @@ void bmi2_error_codes_print_result(int8_t rslt);
 
 
 // Initializes the BMI270 using the Bosch BMI270 API
-imu_err_t imu_init(IMU_handle_t *imu_h) { //todo return error code
+IMU_err_t imu_init(IMU_handle_t *imu_h) {
 
     // spi init
     imu_h->spi_h.sck.port = GPIOA;
@@ -69,24 +51,25 @@ imu_err_t imu_init(IMU_handle_t *imu_h) { //todo return error code
     // bmi270 init
     int8_t rslt;
 
-    imu_h->limit = 100; // limit to print accel data
     imu_h->sensor_list[0] = BMI2_ACCEL;
     imu_h->sensor_list[1] = BMI2_GYRO;
 
     struct bmi2_sens_data sensor_data = { { 0 } };
     imu_h->sensor_data = sensor_data;
 
-    imu_h->indx = 0;
     imu_h->acc_x = 0; imu_h->acc_y = 0; imu_h->acc_z = 0;
     imu_h->gyr_x = 0; imu_h->gyr_y = 0; imu_h->gyr_z = 0;
 
+    imu_h->bmi.intf_ptr = &imu_h->spi_h;
     imu_h->bmi.intf = BMI2_SPI_INTF;
     imu_h->bmi.read = (bmi2_read_fptr_t)imu_spi_read_reg;
     imu_h->bmi.write = (bmi2_write_fptr_t)imu_spi_write_reg;
     imu_h->bmi.delay_us = (bmi2_delay_fptr_t)delay_us;
 
     LOGI("bmi270 init");
+    delay(10); // RWBA
     rslt = bmi270_init(&imu_h->bmi);
+
     bmi2_error_codes_print_result(rslt);
 
     if (rslt != BMI2_OK) return IMU_ERR_BMI_INIT;
@@ -128,10 +111,12 @@ void imu_process(IMU_handle_t *imu_h) {
         return;
     }
 
+    imu_h->last_err = IMU_OK; // "reset" last error
+
     if (imu_h->sensor_data.status & BMI2_DRDY_ACC) {
-        imu_h->acc_x = lsb_to_mps2(imu_h->sensor_data.sens_data[0].x, 2, 16);
-        imu_h->acc_y = lsb_to_mps2(imu_h->sensor_data.sens_data[0].y, 2, 16);
-        imu_h->acc_z = lsb_to_mps2(imu_h->sensor_data.sens_data[0].z, 2, 16);
+        imu_h->acc_x = lsb_to_mps2(imu_h->sensor_data.acc.x, 2, 16);
+        imu_h->acc_y = lsb_to_mps2(imu_h->sensor_data.acc.y, 2, 16);
+        imu_h->acc_z = lsb_to_mps2(imu_h->sensor_data.acc.z, 2, 16);
 
     }
     else {
@@ -139,9 +124,9 @@ void imu_process(IMU_handle_t *imu_h) {
     }
 
     if (imu_h->sensor_data.status & BMI2_DRDY_GYR) {
-        imu_h->gyr_x = lsb_to_dps(imu_h->sensor_data.sens_data[1].x, 2000, 16);
-        imu_h->gyr_y = lsb_to_dps(imu_h->sensor_data.sens_data[1].y, 2000, 16);
-        imu_h->gyr_z = lsb_to_dps(imu_h->sensor_data.sens_data[1].z, 2000, 16);
+        imu_h->gyr_x = lsb_to_dps(imu_h->sensor_data.gyr.x, 2000, 16);
+        imu_h->gyr_y = lsb_to_dps(imu_h->sensor_data.gyr.y, 2000, 16);
+        imu_h->gyr_z = lsb_to_dps(imu_h->sensor_data.gyr.z, 2000, 16);
     }
     else {
         if (imu_h->last_err == IMU_WARN_ACC_READ_NOT_READY)  // if both acc and gyro are not ready
@@ -153,10 +138,20 @@ void imu_process(IMU_handle_t *imu_h) {
 
 // alias for SPI_soft_read (to feed in spi_h handler struct)
 int8_t imu_spi_read_reg(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {
+    // for debug perpose, print all incoming data:
+    LOGD("imu_spi_read_reg: reg_addr: %d, len: %d", reg_addr, len);
+
+    //cast intf_ptr to SPI_handle_t
+    SPI_handle_t *spi_h = (SPI_handle_t *)intf_ptr;
+
+    //for debug perpose print out part of the spi_h struct
+    LOGD("spi_h: sck.port: %d, sck.pin: %d", spi_h->sck.port, spi_h->sck.pin);
+
+
     uint8_t tx_buffer[] = {(reg_addr | 0x80), 0x00, 0x00}; // | 0x80 to set the read bit
     uint8_t rx_buffer[] = {0x00, 0x00, 0x00};
 
-    SPI_soft_trx(intf_ptr, &reg_addr, reg_data, 3);
+    SPI_soft_trx(spi_h, &reg_addr, reg_data, 3);
     return 0;
 }
 
@@ -423,4 +418,41 @@ void bmi2_error_codes_print_result(int8_t rslt)
             LOGE("Error [%d] : Unknown error code\r\n", rslt);
             break;
     }
+}
+
+void log_imu_err(IMU_err_t err) {
+    switch (err) {
+        case IMU_OK:
+            LOGI("IMU_OK");
+            break;
+        case IMU_ERR_BMI_INIT:
+            LOGE("IMU_ERR_BMI_INIT (imu_init)");
+            break;
+        case IMU_ERR_ACC_GYR_CONFIG:
+            LOGE("IMU_ERR_ACC_GYR_CONFIG (imu_init)");
+            break;
+        case IMU_ERR_SENSOR_ENABLE:
+            LOGE("IMU_ERR_SENSOR_ENABLE (imu_init)");
+            break;
+        case IMU_ERR_GET_SENSOR_CONFIG:
+            LOGE("IMU_ERR_GET_SENSOR_CONFIG (imu_init)");
+            break;
+        case IMU_ERR_GET_SENSOR_DATA:
+            LOGE("IMU_ERR_GET_SENSOR_DATA (imu_process)");
+            break;
+        case IMU_WARN_GYRO_READ_NOT_READY:
+            LOGW("IMU_WARN_GYRO_READ_NOT_READY (imu_process)");
+            break;
+        case IMU_WARN_ACC_READ_NOT_READY:
+            LOGW("IMU_WARN_ACC_READ_NOT_READY (imu_process)");
+            break;
+        case IMU_WARN_GYRO_AND_ACC_READ_NOT_READY:
+            LOGW("IMU_WARN_GYRO_AND_ACC_READ_NOT_READY (imu_process)");
+            break;
+    }
+}
+
+// logs gyro and acc data on one line
+void log_imu_data(IMU_handle_t *imu_h) {
+    LOGD("acc: %f %f %f, gyr: %f %f %f", imu_h->acc_x, imu_h->acc_y, imu_h->acc_z, imu_h->gyr_x, imu_h->gyr_y, imu_h->gyr_z);
 }
