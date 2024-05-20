@@ -28,11 +28,14 @@ void cli_process(void *arg) {
     }
     cli_handle_t *cli_h = (cli_handle_t *)arg;
 
+    // read data
     if (cli_h->new_data_flag) { // if new data data in buffer
         cli_h->new_data_flag = false;
         LOG("-> %s", cli_h->cli_rx_buffer);
         cli_handle_cmd(cli_h);
     }
+
+    //write data (from buffer)
 }
 
 void cli_init(cli_handle_t *cli_h) {
@@ -67,6 +70,10 @@ void cli_init(cli_handle_t *cli_h) {
                     cli_h->cli_connected_flag = true;
                     LOGD("Connection confirmed");
                 }
+                //check for "dfu" cmd
+                if (strcmp_ign(cli_h->cli_rx_buffer, (uint8_t *)"dfu") == 0) {
+                    reboot_into_dfu();
+                }
             }
         }
     }
@@ -74,7 +81,30 @@ void cli_init(cli_handle_t *cli_h) {
 
 void cli_handle_cmd(cli_handle_t *cli_h) {
     // find the command index
-    uint8_t *cmd_str = cli_h->cli_rx_buffer;
+    uint8_t *raw_cmd_str = cli_h->cli_rx_buffer;
+
+    // take first word as command
+    uint8_t *cmd_str = (uint8_t *)strtok((char *)raw_cmd_str, " ");
+
+    //clean arg array
+    for (int i = 0; i < MAX_ARGS_COUNT; i++) {
+        cli_h->last_args[i] = (uint8_t*)"";
+    }
+
+    // array to hold the arguments
+    uint8_t arg_count = 0;
+
+    // get the rest of the arguments
+    while (arg_count < MAX_ARGS_COUNT) {
+        cli_h->last_args[arg_count] = (uint8_t *)strtok(NULL, " ");
+        if (cli_h->last_args[arg_count] == NULL) {
+            break;
+        }
+        clean_str(cli_h->last_args[arg_count]); // removes any \n or \r
+        arg_count++;
+    }
+    cli_h->last_args_count = arg_count; //save last count so cmd callbacks know how many args there are
+
     int8_t cmd_index = -1;
 
     for (int8_t i = 0; i < MAX_CMD_COUNT; i++) {
@@ -100,7 +130,6 @@ void cli_handle_cmd(cli_handle_t *cli_h) {
 
 
 void cli_add_cmd(cli_handle_t *cli_h, uint8_t *cmd_str, callback_t cmd_callback) {
-
     //check if cmd_str is already an existing command
     for (size_t i = 0; i < MAX_CMD_COUNT; i++) {
         if (strcmp_ign(cmd_str, (uint8_t *)cli_h->cmd_list[i].cmd_str) == 0) {

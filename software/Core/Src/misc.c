@@ -8,9 +8,13 @@
 #include <stdarg.h>
 #include <malloc.h>
 #include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+
 
 #include "main.h"
 #include "log.h"
+
 
 volatile uint32_t millis = 0;
 
@@ -112,4 +116,49 @@ void reboot_into_dfu() {
 
 void delay(uint32_t ms) {
     HAL_Delay(ms);
+}
+
+// not working
+void delay_us(uint32_t us) {
+    uint32_t mcu_clock_speed = get_mcu_clock_speed();
+    uint32_t startTick = SysTick->VAL; // current tick count
+    uint32_t ticks = (mcu_clock_speed / 1000000) * us; //tick count for us delay
+    while ((SysTick->VAL - startTick) < ticks);
+    LOGD("get_mcu_clock_speed: %d", get_mcu_clock_speed());
+    delay(1);
+    LOGD("ticks: %d", ticks);
+    delay(1);
+    LOGD("startTick: %d", startTick);
+    delay(1);
+    LOGD("end tick: %d", SysTick->VAL);
+}
+
+uint16_t char_to_uint16(char *str) {
+    char *endptr;
+    unsigned long num = strtoul(str, &endptr, 10);
+
+    // Check for conversion errors
+    if (endptr == str || *endptr != '\0' || errno == ERANGE || num > UINT16_MAX) {
+        return 0; // Return 0 if conversion failed or number is out of range
+    }
+
+    return (uint16_t)num;
+}
+
+uint32_t get_mcu_clock_speed(void) {
+    SystemCoreClockUpdate();
+    return SystemCoreClock;
+}
+
+// takes an 16 bit intiger and returns a string with the binary representation
+uint8_t* byte_to_binary_str(uint16_t x) {
+    static uint8_t b[17];
+    // Ensure b is at least 17 characters long
+    b[16] = '\0';
+
+    for (int i = 15; i >= 0; i--) {
+        b[15 - i] = (x & (1 << i)) ? '1' : '0';
+    }
+
+    return b;
 }
