@@ -125,9 +125,9 @@ void imu_process(IMU_handle_t *imu_h) {
     }
 
     if (imu_h->sensor_data.status & BMI2_DRDY_GYR) {
-        imu_h->gyr_x = lsb_to_dps(imu_h->sensor_data.gyr.x, 2000, 16);
-        imu_h->gyr_y = lsb_to_dps(imu_h->sensor_data.gyr.y, 2000, 16);
-        imu_h->gyr_z = lsb_to_dps(imu_h->sensor_data.gyr.z, 2000, 16);
+        imu_h->gyr_x = roundf(lsb_to_dps(imu_h->sensor_data.gyr.x, 2000, 16) * 100) / 100;
+        imu_h->gyr_y = roundf(lsb_to_dps(imu_h->sensor_data.gyr.y, 2000, 16) * 100) / 100;
+        imu_h->gyr_z = roundf(lsb_to_dps(imu_h->sensor_data.gyr.z, 2000, 16) * 100) / 100;
     }
     else {
         if (imu_h->last_err == IMU_WARN_ACC_READ_NOT_READY)  // if both acc and gyro are not ready
@@ -135,9 +135,8 @@ void imu_process(IMU_handle_t *imu_h) {
         else // if only gyro is not ready
             imu_h->last_err = IMU_WARN_GYRO_READ_NOT_READY;
     }
-    LOGD("acc: %f %f %f, gyr: %f %f %f", imu_h->acc_x, imu_h->acc_y, imu_h->acc_z, imu_h->gyr_x, imu_h->gyr_y, imu_h->gyr_z);
+    LOGD("acc: %f | %f | %f, gyr: %.2f | %.2f | %.2f", imu_h->acc_x, imu_h->acc_y, imu_h->acc_z, imu_h->gyr_x, imu_h->gyr_y, imu_h->gyr_z);
 }
-
 // alias for SPI_soft_read (to feed in spi_h handler struct)
 int8_t imu_spi_read_reg(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {
     len++; // add one byte for the reg_addr
