@@ -64,13 +64,14 @@ IMU_err_t imu_init(IMU_handle_t *imu_h) {
     imu_h->bmi.intf = BMI2_SPI_INTF;
     imu_h->bmi.read = (bmi2_read_fptr_t)imu_spi_read_reg;
     imu_h->bmi.write = (bmi2_write_fptr_t)imu_spi_write_reg;
-    imu_h->bmi.delay_us = (bmi2_delay_fptr_t)delay_us;
+    imu_h->bmi.delay_us = (bmi2_delay_fptr_t)imu_delay_us;
 
     LOGI("bmi270 init");
     delay(10); // RWBA
     rslt = bmi270_init(&imu_h->bmi);
-
+    delay(10); // RWBA
     bmi2_error_codes_print_result(rslt);
+    delay(10); // RWBA
 
     if (rslt != BMI2_OK) return IMU_ERR_BMI_INIT;
 
@@ -134,34 +135,49 @@ void imu_process(IMU_handle_t *imu_h) {
         else // if only gyro is not ready
             imu_h->last_err = IMU_WARN_GYRO_READ_NOT_READY;
     }
+    LOGD("acc: %f %f %f, gyr: %f %f %f", imu_h->acc_x, imu_h->acc_y, imu_h->acc_z, imu_h->gyr_x, imu_h->gyr_y, imu_h->gyr_z);
 }
 
 // alias for SPI_soft_read (to feed in spi_h handler struct)
 int8_t imu_spi_read_reg(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {
-    // for debug perpose, print all incoming data:
-    LOGD("imu_spi_read_reg: reg_addr: %d, len: %d", reg_addr, len);
+    len++; // add one byte for the reg_addr
 
-    //cast intf_ptr to SPI_handle_t
-    SPI_handle_t *spi_h = (SPI_handle_t *)intf_ptr;
+    uint8_t tx_buffer[len];
 
-    //for debug perpose print out part of the spi_h struct
-    LOGD("spi_h: sck.port: %d, sck.pin: %d", spi_h->sck.port, spi_h->sck.pin);
+    //empty tx buffer
+    for (uint32_t i = 0; i < len; i++) {
+        tx_buffer[i] = 0;
+    }
+
+    tx_buffer[0] = reg_addr;
+
+    uint8_t rx_buffer[len];
+
+    SPI_soft_trx((SPI_handle_t *)intf_ptr, tx_buffer, rx_buffer, len);
 
 
-    uint8_t tx_buffer[] = {(reg_addr | 0x80), 0x00, 0x00}; // | 0x80 to set the read bit
-    uint8_t rx_buffer[] = {0x00, 0x00, 0x00};
+    // Copy the received data into reg_data, starting from rx_buffer[1]
+    for (uint32_t i = 0; i < len - 1; i++) {
+        reg_data[i] = rx_buffer[i + 1];
+        delay(1);
+    }
 
-    SPI_soft_trx(spi_h, &reg_addr, reg_data, 3);
     return 0;
 }
 
 
 // alias for SPI_soft_write (to feed in spi_h handler struct)
 int8_t imu_spi_write_reg(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr) {
-    uint8_t tx_buffer[] = {reg_addr, *reg_data};
-    uint8_t rx_buffer[] = {0x00, 0x00};
+    uint8_t tx_buffer[len + 1];
+    tx_buffer[0] = reg_addr;
 
-    SPI_soft_trx(intf_ptr, tx_buffer, rx_buffer, 2);
+    // Copy data to be written into the tx_buffer
+    for (uint32_t i = 0; i < len; i++) {
+        tx_buffer[i + 1] = reg_data[i];
+    }
+
+    uint8_t rx_buffer[len + 1];
+    SPI_soft_trx((SPI_handle_t *)intf_ptr, tx_buffer, rx_buffer, len + 1);
     return 0;
 }
 
@@ -300,7 +316,7 @@ void bmi2_error_codes_print_result(int8_t rslt)
 
         case BMI2_E_COM_FAIL:
             LOGE("Error [%d] : Communication failure error. It occurs due to read/write operation failure and also due " "to power failure during communication\r\n", rslt);
-                        break;
+            break;
 
         case BMI2_E_DEV_NOT_FOUND:
             LOGE("Error [%d] : Device not found error. It occurs when the device chip id is incorrectly read\r\n",rslt);
@@ -448,6 +464,9 @@ void log_imu_err(IMU_err_t err) {
             break;
         case IMU_WARN_GYRO_AND_ACC_READ_NOT_READY:
             LOGW("IMU_WARN_GYRO_AND_ACC_READ_NOT_READY (imu_process)");
+            break;
+        default:
+            LOGE("Unknown IMU_err_t: %d", err);
             break;
     }
 }

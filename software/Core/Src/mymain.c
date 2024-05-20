@@ -29,6 +29,8 @@ motors_handle_t motors_h;
 uint64_t led_toggle_last_ms = 0;
 uint64_t cli_process_last_ms = 0;
 uint64_t motors_process_last_ms = 0;
+uint64_t imu_process_last_ms = 0;
+
 
 
 
@@ -51,6 +53,8 @@ void myinit(void) {
     log_imu_err(imu_init(&imu_h));
 
 
+
+
 //    dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);
 //    dshot_init(&m2_h, &htim1, &hdma_tim1_ch1, TIM_CHANNEL_1);
 //    dshot_init(&m3_h, &htim8, &hdma_tim8_ch4_trig_com, TIM_CHANNEL_4);
@@ -68,10 +72,14 @@ void myinit(void) {
 
 }
 
+
 void mymain(void) {
     while (1) {
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
+        if (imu_h.last_err == IMU_OK) {
+            none_blocking_delay(1000, &imu_process_last_ms, (callback_t) imu_process, &imu_h);
+        }
 //        none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
     }
 }
