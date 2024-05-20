@@ -33,12 +33,13 @@ uint64_t pid_controller_test_ms = 0;
 uint64_t crsf_last_ms = 0;
 uint64_t motors_process_last_ms = 0;
 uint64_t imu_process_last_ms = 0;
+uint64_t flight_ctrl_cycle_last_ms = 0;
 
 
 cli_handle_t cli_h;
 crsf_handle_t crsf_h;
 
-
+static void flight_ctrl_cycle(void);
 
 void myinit(void) {
     cli_h.halt_until_connected_flag = true; //set to false if you don't want to wait for a connection
@@ -83,18 +84,25 @@ void myinit(void) {
 
 
 void mymain(void) {
-    while (1) {
+    while (1) { //todo has to be replaced by a scheduler
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-        none_blocking_delay(5, &crsf_last_ms, (callback_t) crsf_process, &crsf_h);
-        none_blocking_delay(5000, &pid_controller_test_ms, (callback_t) test_pid_controller, NULL);
-//        none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
-        if (imu_h.last_err == IMU_OK) {
-            none_blocking_delay(1000, &imu_process_last_ms, (callback_t) imu_process, &imu_h);
-        }
+        //none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
+        flight_ctrl_cycle();
     }
 }
 
+static void flight_ctrl_cycle(void) {
+    //crsf + imu =>pid's=>motor mixer
 
+    // update imu data
+    if (imu_h.last_err == IMU_OK) {
+        imu_process(&imu_h);
+    }
 
+    // update elrs channels
+    crsf_process(&crsf_h);
 
+    // update pid controllers
+
+}

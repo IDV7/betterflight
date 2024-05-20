@@ -24,7 +24,7 @@ typedef struct{
 }pids_t;
 
 typedef struct{
-    set_points_t set_points;
+    set_points_t set_p;
     stick_output_t stick_outputs;
     pids_t pids;
 }drone_pids_t;

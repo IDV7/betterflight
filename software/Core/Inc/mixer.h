@@ -32,11 +32,13 @@ typedef struct{
     int16_t yaw;
     int16_t throttle;
 }mixer_input_t;
+
 typedef struct{
     pid_handle_t roll_pid;
     pid_handle_t pitch_pid;
     pid_handle_t yaw_pid;
 }mixer_pid_t;
+
 typedef struct{
     mixer_input_t input;
     mixer_percentages_t percentages;
