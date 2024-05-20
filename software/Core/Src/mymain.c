@@ -39,6 +39,7 @@ cli_handle_t cli_h;
 crsf_handle_t crsf_h;
 
 
+
 void myinit(void) {
     cli_h.halt_until_connected_flag = true; //set to false if you don't want to wait for a connection
 
@@ -57,14 +58,15 @@ void myinit(void) {
     //init imu
     log_imu_err(imu_init(&imu_h));
 
+    //elrs init
+    crsf_init(&crsf_h, &huart2);
 
-
-
+    // motors init
+//    motors_init(&motors_h, &m1_h, &m2_h, &m3_h, &m4_h);
 //    dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);
 //    dshot_init(&m2_h, &htim1, &hdma_tim1_ch1, TIM_CHANNEL_1);
 //    dshot_init(&m3_h, &htim8, &hdma_tim8_ch4_trig_com, TIM_CHANNEL_4);
 //    dshot_init(&m4_h, &htim8, &hdma_tim8_ch3, TIM_CHANNEL_3);
-//    motors_init(&motors_h, &m1_h, &m2_h, &m3_h, &m4_h);
 //     ----- end initialization code ----- //
 
     delay(1);
@@ -78,23 +80,20 @@ void myinit(void) {
 }
 
 
+
+
 void mymain(void) {
-    crsf_init(&crsf_h, &huart2);
     while (1) {
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
         none_blocking_delay(5, &crsf_last_ms, (callback_t) crsf_process, &crsf_h);
         none_blocking_delay(5000, &pid_controller_test_ms, (callback_t) test_pid_controller, NULL);
-        //none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
+//        none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
         if (imu_h.last_err == IMU_OK) {
             none_blocking_delay(1000, &imu_process_last_ms, (callback_t) imu_process, &imu_h);
         }
     }
 }
-
-
-
-
 
 
 
