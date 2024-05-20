@@ -8,6 +8,7 @@
 #include "log.h"
 #include "cli.h"
 #include "crsf.h"
+#include "pid_controller.h"
 /* SETTINGS */
 #define LOG_LEVEL LOG_LEVEL_DEBUG
 // check version.h for version settings
@@ -15,6 +16,7 @@
 /* EOF SETTINGS */
 uint64_t led_toggle_last_ms = 0;
 uint64_t cli_process_last_ms = 0;
+uint64_t pid_controller_test_ms = 0;
 uint64_t crsf_last_ms = 0;
 
 gyro_t gyro_h;
@@ -39,6 +41,7 @@ void myinit(void) {
     // ----- end initialization code ----- //
     LOGI("Finished Initialization");
 
+
     LED_blink_pattern(20, 2, 50, 50);
     LED_off();
 }
@@ -52,6 +55,7 @@ void mymain(void) {
         none_blocking_delay(5, &crsf_last_ms, (callback_t) crsf_process, &crsf_h);
 
 
+        none_blocking_delay(5000, &pid_controller_test_ms, (callback_t) test_pid_controller, NULL);
     }
 }
 
