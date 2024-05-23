@@ -58,22 +58,6 @@ void SPI_soft_init(SPI_handle_t *spi_h) {
     HAL_GPIO_Init(spi_h->cs.port, &GPIO_InitStruct);
     CS_HIGH;
 
-    /*
-     Conclusion::
-
-        delay_nop 1000: 183.64
-        delay_nop 100: 17.6
-        delay_nop 10: 2.12
-
-        Knowing that the smallest us will be around 10us.
-        For 10us we need 2.12 NOPs.
-     */
-
-
-
-
-
-
 }
 
 
