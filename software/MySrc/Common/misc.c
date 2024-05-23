@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <math.h>
 
 
 #include "main.h"
@@ -118,19 +119,22 @@ void delay(uint32_t ms) {
     HAL_Delay(ms);
 }
 
-// not working
+// 1000us = 970 actual us, 10us = 15 actual us
 void delay_us(uint32_t us) {
-    uint32_t mcu_clock_speed = get_mcu_clock_speed();
+
+    /* //not working
+    //uint32_t mcu_clock_speed = get_mcu_clock_speed();
     uint32_t startTick = SysTick->VAL; // current tick count
-    uint32_t ticks = (mcu_clock_speed / 1000000) * us; //tick count for us delay
+    uint32_t ticks = (192000000 / 1000000) * us; //tick count for us delay
     while ((SysTick->VAL - startTick) < ticks);
-    LOGD("get_mcu_clock_speed: %d", get_mcu_clock_speed());
-    delay(1);
-    LOGD("ticks: %d", ticks);
-    delay(1);
-    LOGD("startTick: %d", startTick);
-    delay(1);
-    LOGD("end tick: %d", SysTick->VAL);
+    */
+
+    float nops_per_us = 5.56; //calculated using logic analyzer
+    float total_nops = (float)us * nops_per_us;
+
+    uint32_t nops_to_execute = (uint32_t)ceilf(total_nops);
+
+    delay_nop(nops_to_execute);
 }
 
 uint16_t char_to_uint16(char *str) {
@@ -161,4 +165,8 @@ uint8_t* byte_to_binary_str(uint16_t x) {
     }
 
     return b;
+}
+
+__attribute__((optimize("O0")))  void delay_nop(uint32_t nops) {
+    while (nops--) {__NOP();}
 }

@@ -57,10 +57,27 @@ void SPI_soft_init(SPI_handle_t *spi_h) {
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(spi_h->cs.port, &GPIO_InitStruct);
     CS_HIGH;
+
+    /*
+     Conclusion::
+
+        delay_nop 1000: 183.64
+        delay_nop 100: 17.6
+        delay_nop 10: 2.12
+
+        Knowing that the smallest us will be around 10us.
+        For 10us we need 2.12 NOPs.
+     */
+
+
+
+
+
+
 }
 
 
-#define NOP_CNT 20
+#define NOP_CNT 1 //5
 void SPI_soft_trx(SPI_handle_t *spi_h, uint8_t *tx_data, uint8_t *rx_data, uint32_t len) {
 
     // turn off interrupts
@@ -87,7 +104,7 @@ void SPI_soft_trx(SPI_handle_t *spi_h, uint8_t *tx_data, uint8_t *rx_data, uint3
             tx_byte <<= 1;
 
             SCK_LOW;
-            SPI_Delay(NOP_CNT);
+            //SPI_Delay(NOP_CNT);
 
             // read miso
             rx_byte <<= 1;
@@ -96,7 +113,7 @@ void SPI_soft_trx(SPI_handle_t *spi_h, uint8_t *tx_data, uint8_t *rx_data, uint3
             }
 
             SCK_HIGH;
-            SPI_Delay(NOP_CNT);
+            //SPI_Delay(NOP_CNT);
         }
         MOSI_LOW;
 
@@ -197,6 +214,7 @@ void SPI_soft_cs_high(SPI_handle_t *spi_h) {
 void SPI_soft_cs_low(SPI_handle_t *spi_h) {
     CS_LOW;
 }
+
 
 
 
