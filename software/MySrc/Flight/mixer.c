@@ -1,9 +1,8 @@
 #include "mixer.h"
 
-void mixing(mixer_handle_t *mixer_h){
-    int16_t max_roll = mixer_h->pid.roll_pid.limits.max_output;
-    int16_t max_pitch = mixer_h->pid.pitch_pid.limits.max_output;
-    int16_t max_yaw = mixer_h->pid.yaw_pid.limits.max_output;
+void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
+    LOGD("Throttle input: %f, roll input  %f, pitch input %f, yaw input %f", mixer_h->input.throttle, mixer_h->input.roll, mixer_h->input.pitch, mixer_h->input.yaw);
+    HAL_Delay(10);
     float throttle = ((float)mixer_h->input.throttle)*mixer_h->percentages.throttle;
     float roll = ((float)mixer_h->input.roll)* mixer_h->percentages.roll;
     float pitch = ((float)mixer_h->input.pitch)* mixer_h->percentages.pitch;
@@ -11,10 +10,10 @@ void mixing(mixer_handle_t *mixer_h){
 
     LOGD("Throttle: %f, roll %f, pitch %f, yaw %f", throttle, roll, pitch, yaw);
     HAL_Delay(10);
-    mixer_h->output.motor1 = (int16_t)((throttle + roll- pitch - yaw));
-    mixer_h->output.motor2 = (int16_t)((throttle - roll - pitch + yaw));
-    mixer_h->output.motor3 = (int16_t)((throttle - roll + pitch - yaw));
-    mixer_h->output.motor4 = (int16_t)((throttle+ roll + pitch + yaw));
+    motor_output->motor1 = (int16_t)((throttle + roll- pitch - yaw));
+    motor_output->motor2 = (int16_t)((throttle - roll - pitch + yaw));
+    motor_output->motor3 = (int16_t)((throttle - roll + pitch - yaw));
+    motor_output->motor4 = (int16_t)((throttle+ roll + pitch + yaw));
 
 
 

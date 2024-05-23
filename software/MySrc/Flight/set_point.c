@@ -13,7 +13,7 @@ float power5(float x) {
     return x * x * x * x * x;
 }
 
-void limits_init(set_point_t *set_point, int16_t min_imu_output, int16_t max_imu_output){
+void limits_init(set_point_handle_t *set_point, int16_t min_imu_output, int16_t max_imu_output){
     set_point->stick_limits.min_stick_output = 1000;
     set_point->stick_limits.max_stick_output = 2000;
     set_point->actual_rates.rc_rates = (float) 0.5;
@@ -21,7 +21,7 @@ void limits_init(set_point_t *set_point, int16_t min_imu_output, int16_t max_imu
     set_point->actual_rates.rates = (float) 0.7;
 }
 
-float set_point_calculation(set_point_t *set_point, int16_t stick_output,float rc_commandf, const float rc_commandfabs){
+int16_t set_point_calculation(set_point_handle_t *set_point, int16_t stick_output,float rc_commandf, const float rc_commandfabs){
 
 
 
@@ -32,6 +32,6 @@ float set_point_calculation(set_point_t *set_point, int16_t stick_output,float r
     const float stickMovement = MAX(0, set_point->actual_rates.rates * 10.0f - centerSensitivity);
     const float angleRate = rc_commandf * centerSensitivity + stickMovement * expof;
 
-    set_point->set_point =  (int16_t)(angleRate * (float)stick_output);
+    return ((int16_t)(angleRate * (float)stick_output));
 
 }

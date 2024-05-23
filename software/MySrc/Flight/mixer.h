@@ -7,13 +7,7 @@
 #include "misc.h"
 #include "stm32f7xx_hal.h"
 
-typedef struct {
-    int16_t motor1;
-    int16_t motor2;
-    int16_t motor3;
-    int16_t motor4;
-}motor_output_t;
-
+#include "common_structs.h"
 
 typedef struct {
     float roll;
@@ -39,10 +33,10 @@ typedef struct{
     mixer_input_t input;
     mixer_percentages_t percentages;
     motor_output_t output;
-    mixer_pid_t pid;
+    //mixer_pid_t pid;
 }mixer_handle_t;
 
 
-void mixing(mixer_handle_t *mixer_h);
+void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output);
 void init_mixer_percentages(mixer_handle_t *mixer_h);
 #endif //BETTERFLIGHT_MIXER_H

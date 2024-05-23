@@ -20,6 +20,12 @@
 IMU_handle_t imu_h;
 cli_handle_t cli_h;
 
+
+//general
+flight_axis_t channel_data;
+flight_measurements_t imu_data;
+
+
 //motors
 dshot_handle_t m1_h; // TIM1 CH2
 dshot_handle_t m2_h; // TIM1 CH1
@@ -29,11 +35,15 @@ motors_handle_t motors_h;
 
 
 //pid
-drone_pids_t pids_h;
-
+flight_pids_t pids_h;
+pids_val_t pid_vals;
 //mixer
 mixer_handle_t motor_mixer_h;
+//setpoint
+set_points_t s_points;
 
+
+motor_output_t motor_output;
 
 uint64_t led_toggle_last_ms = 0;
 uint64_t cli_process_last_ms = 0;
@@ -69,6 +79,8 @@ void myinit(void) {
 
     //elrs init
     crsf_init(&crsf_h, &huart2);
+
+    init_mixer_percentages(&motor_mixer_h);
     pid_init(&pids_h);
 
     // motors init
@@ -145,12 +157,23 @@ static void flight_ctrl_cycle(void) {
 
     // update imu data
     if (imu_h.last_err == IMU_OK) {
-        imu_process(&imu_h);
+        imu_process(&imu_h, &imu_data);
     }
 
     // update elrs channels
-    crsf_process(&crsf_h);
-
+    crsf_process(&crsf_h, &channel_data);
+    //calculate setpoints
+    s_points.roll_set_point.sp = set_point_calculation(&pids_h.setp,channel_data.roll,0.2,0.2);
+    s_points.pitch_set_point.sp = set_point_calculation(&pids_h.setp,channel_data.pitch,0.2,0.2);
+    s_points.yaw_set_point.sp = set_point_calculation(&pids_h.setp,channel_data.yaw,0.2,0.2);
     // update pid controllers
+    set_pids(&pids_h, &imu_data, &s_points, &pid_vals);
 
+    // update motor mixer
+    mixing(&motor_mixer_h, &motor_output);
+
+    motor_set_throttle(&motors_h,1, motor_output.motor1);
+    motor_set_throttle(&motors_h,2, motor_output.motor2);
+    motor_set_throttle(&motors_h,3, motor_output.motor3);
+    motor_set_throttle(&motors_h,4, motor_output.motor4);
 }

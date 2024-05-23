@@ -5,7 +5,7 @@
 #include "stm32f7xx_hal_uart.h"
 #include "stm32f7xx_hal.h"
 #include "string.h"
-
+#include "common_structs.h"
 
 
 
@@ -89,7 +89,7 @@ static void unpack_channels(uint8_t const * payload, uint32_t * dest)
     }
 }
 
-void crsf_process(crsf_handle_t * crsf_h){
+void crsf_process(crsf_handle_t * crsf_h, flight_axis_t * data){
     if(state == processing_data){
 
         if(start_data_saved[2] == CRSF_FRAMETYPE_RC_CHANNELS_PACKED){
@@ -101,6 +101,12 @@ void crsf_process(crsf_handle_t * crsf_h){
             LOGD("Frame length: %u", incoming_frame_lenght);
             HAL_Delay(10);
             unpack_channels(incoming_data_saved, channels);
+            data->yaw = channels[0];
+            data->pitch = channels[1];
+            data->thr = channels[2];
+            data->roll = channels[3];
+
+
 
             for (unsigned ch=0; ch<16; ++ch){
                 LOGD("ch%02u=%u", ch+1, channels[ch]);

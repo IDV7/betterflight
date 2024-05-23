@@ -6,6 +6,8 @@
 #define BETTERFLIGHT_PID_H
 
 #include "stdint.h"
+#include "common_structs.h"
+
 typedef struct{
     //gains pid
     float Kp;
@@ -46,7 +48,7 @@ typedef struct{
 
 void  pid_controller_init(pid_handle_t *pid_h, float Kp, float Ki, float Kd, float T, int16_t min_output, int16_t max_output, int16_t min_input, int16_t max_input);      //initializes the pid controller
 void  pid_controller_clear(pid_handle_t *pid_h);        //clears the calculations
-int16_t pid_controller_update(pid_handle_t *pid_h, int16_t setp, int16_t measurement);         //updates the pid controller with user input
+int16_t pid_controller_update(pid_handle_t *pid_h, int16_t *pid, int16_t setp, int16_t measurement);         //updates the pid controller with user input
 
 
 

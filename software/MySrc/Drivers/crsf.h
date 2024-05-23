@@ -2,7 +2,7 @@
 
 #include "stm32f7xx.h"
 #include "stm32f7xx_hal_uart.h"
-
+#include "common_structs.h"
 /*
 crsf notes:
 
@@ -105,7 +105,7 @@ typedef struct{
 
 
 void crsf_init(crsf_handle_t * hcrsf, UART_HandleTypeDef *huart);
-void crsf_process(crsf_handle_t * hcrsf);
+void crsf_process(crsf_handle_t * hcrsf, flight_axis_t * data);
 void crsf_send_frame_test(UART_HandleTypeDef *huart);
 void crsf_tests(void);
 

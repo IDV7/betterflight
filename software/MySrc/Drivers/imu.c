@@ -98,7 +98,7 @@ IMU_err_t imu_init(IMU_handle_t *imu_h) {
 
 
 // reads out the accelerometer and gyroscope data from the BMI270 and stores it in the IMU_handle_t struct
-void imu_process(IMU_handle_t *imu_h) {
+void imu_process(IMU_handle_t *imu_h, flight_measurements_t *flight_measurement){
     int8_t rslt;
 
     struct bmi2_sens_data sensor_data = { { 0 } };
@@ -116,7 +116,9 @@ void imu_process(IMU_handle_t *imu_h) {
 
     if (imu_h->sensor_data.status & BMI2_DRDY_ACC) {
         imu_h->acc_x = lsb_to_mps2(imu_h->sensor_data.acc.x, 2, 16);
+
         imu_h->acc_y = lsb_to_mps2(imu_h->sensor_data.acc.y, 2, 16);
+
         imu_h->acc_z = lsb_to_mps2(imu_h->sensor_data.acc.z, 2, 16);
 
     }

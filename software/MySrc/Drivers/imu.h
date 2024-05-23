@@ -7,7 +7,7 @@
 
 #include "spi_soft.h"
 #include "bmi270.h"
-
+#include "common_structs.h"
 
 typedef enum {
     IMU_OK = 0,
@@ -34,7 +34,7 @@ typedef struct {
 
 // for implementation of imu.c
 IMU_err_t imu_init(IMU_handle_t *imu_h);
-void imu_process(IMU_handle_t *imu_h);
+void imu_process(IMU_handle_t *imu_h,flight_measurements_t *flight_meas);
 void log_imu_err(IMU_err_t err);
 void log_gyr_acc_data(IMU_handle_t *imu_h);
 
