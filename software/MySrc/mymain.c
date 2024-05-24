@@ -103,52 +103,13 @@ void myinit(void) {
 
 
 
-/*
-
- folder layout core:
-    [flight]
-        - pid
-        - pid_controller
-        - motor
-        - mixer
-        - setpoint
-        - common_data_structs.h -> structs that are used in multiple flight files
-    [driver/]
-        spi_soft
-        spsi
-        imu
-        gyro
-        dshot
-        crsf
-        BMI270_CONFIG
-    [common]
-        - misc
-        - log
-        - cli
-        - cli_cmd_callbacks
-        - version
-     [root]
-        main
-        mymain
-        stm32f7xx_hal_conf
-        stm32f7xx_it.h
-        ioc
-
-
-
-
-
-
- */
-
-
-
 void mymain(void) {
     while (1) { //todo has to be replaced by a scheduler
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
         //none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
-        flight_ctrl_cycle();
+        none_blocking_delay(500, &imu_process_last_ms, (callback_t) imu_process, &imu_h);
+        //flight_ctrl_cycle();
     }
 }
 

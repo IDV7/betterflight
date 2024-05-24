@@ -35,4 +35,6 @@ uint32_t get_mcu_clock_speed(void);
 
 uint8_t *byte_to_binary_str(uint16_t x);
 
+__attribute__((optimize("O0")))  void delay_nop(uint32_t nops);
+
 #endif //BETTERFLIGHT_MISC_H
