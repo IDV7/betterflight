@@ -45,7 +45,7 @@ void  pid_controller_clear(pid_handle_t *pid_h)
 int16_t pid_controller_update(pid_handle_t *pid_h, int16_t *pid, int16_t setp, int16_t measurement){
 
     int16_t error = setp - measurement;
-    //LOGD("Error: %d, setp: %d, measurement %d", error, setp, measurement);
+    LOGD("Error: %d, setp: %d, measurement %d", error, setp, measurement);
     int16_t proportional =  (int16_t )(pid_h->gains.Kp *(float) error); //p[n]
 
     pid_h->integrator = pid_h->integrator + 0.5f * pid_h->gains.Ki * pid_h->T * ((float)error + pid_h->prev_error);             //i[n]
@@ -54,12 +54,12 @@ int16_t pid_controller_update(pid_handle_t *pid_h, int16_t *pid, int16_t setp, i
 
     *pid = (int16_t) ((float)proportional + (float) pid_h->integrator + (float)pid_h->differentiator); //u[n]
 
-    //LOGD("PID output(before limited): %d", pid_h->output);
+    LOGD("PID output(before limited): %d", pid_h->output);
     //HAL_Delay(500);
-    if (pid_h->output > pid_h->limits.max_output){
+    if (*pid > pid_h->limits.max_output){
         *pid = pid_h->limits.max_output;
     }
-    else if (pid_h->output < pid_h->limits.min_output){
+    else if (*pid < pid_h->limits.min_output){
        *pid = pid_h->limits.min_output;
     }
 
@@ -67,7 +67,7 @@ int16_t pid_controller_update(pid_handle_t *pid_h, int16_t *pid, int16_t setp, i
     pid_h->prev_error = error;
     pid_h->prev_measurement = measurement;
 
-    return pid_h->output;
+    return *pid;
 }
 
 

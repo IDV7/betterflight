@@ -108,8 +108,8 @@ void mymain(void) {
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
         //none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
-        none_blocking_delay(500, &imu_process_last_ms, (callback_t) imu_process, &imu_h);
-        //flight_ctrl_cycle();
+        //none_blocking_delay(500, &imu_process_last_ms, (callback_t) imu_process, &imu_h);
+        flight_ctrl_cycle();
     }
 }
 
@@ -123,14 +123,25 @@ static void flight_ctrl_cycle(void) {
 
     // update elrs channels
     crsf_process(&crsf_h, &channel_data);
+   //LOGD("Channel data: roll=%d pitch=%d yaw=%d throttle=%d", channel_data.roll, channel_data.pitch, channel_data.yaw, channel_data.thr);
+
     //calculate setpoints
     s_points.roll_set_point.sp = set_point_calculation(&pids_h.setp,channel_data.roll,0.2,0.2);
     s_points.pitch_set_point.sp = set_point_calculation(&pids_h.setp,channel_data.pitch,0.2,0.2);
     s_points.yaw_set_point.sp = set_point_calculation(&pids_h.setp,channel_data.yaw,0.2,0.2);
+
+    //LOGD("setpoints: roll=%d pitch=%d yaw=%d", s_points.roll_set_point.sp, s_points.pitch_set_point.sp, s_points.yaw_set_point.sp);
+
     // update pid controllers
     set_pids(&pids_h, &imu_data, &s_points, &pid_vals);
-
+    LOGD("pid vals: roll=%d pitch=%d yaw=%d", pid_vals.roll_pid, pid_vals.pitch_pid, pid_vals.yaw_pid);
     // update motor mixer
+
+
+    motor_mixer_h.input.yaw = pid_vals.yaw_pid;
+    motor_mixer_h.input.roll = pid_vals.roll_pid;
+    motor_mixer_h.input.pitch = pid_vals.pitch_pid;
+    motor_mixer_h.input.throttle = channel_data.thr;
     mixing(&motor_mixer_h, &motor_output);
 
     motor_set_throttle(&motors_h,1, motor_output.motor1);

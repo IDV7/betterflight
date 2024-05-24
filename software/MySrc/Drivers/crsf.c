@@ -24,7 +24,9 @@ static void crsf_uart_setup(crsf_handle_t *crsf_h);
 static void unpack_channels(uint8_t const * payload, uint32_t * dest);
 static void crsf_telemetry_send(crsf_handle_t *crsf_h, crsf_frametype_t frame_type, uint8_t *data);
 
-
+int16_t map(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t out_max) {
+    return (int16_t )((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
+}
 
 void crsf_telemetry_send(crsf_handle_t *crsf_h, crsf_frametype_t frame_type, uint8_t *data){
     //frame -> [sync/address] [len] [type] [payload] [crc8]
@@ -93,20 +95,29 @@ void crsf_process(crsf_handle_t * crsf_h, flight_axis_t * data){
     if(state == processing_data){
 
         if(start_data_saved[2] == CRSF_FRAMETYPE_RC_CHANNELS_PACKED){
-            LOGD("Processing data");
-            HAL_Delay(10);
+            //LOGD("Processing data");
+            //HAL_Delay(10);
             uint32_t channels[16];
             crc8 = incoming_data_saved[frame_length-2];
             uint8_t incoming_frame_lenght = frame_length;
-            LOGD("Frame length: %u", incoming_frame_lenght);
-            HAL_Delay(10);
+            //LOGD("Frame length: %u", incoming_frame_lenght);
+            //HAL_Delay(10);
             unpack_channels(incoming_data_saved, channels);
+
+
+            data->yaw = map(channels[0], 172, 1811, 988, 2012);
+            data->pitch = map(channels[1], 172, 1811, 988, 2012);
+            data->thr = map(channels[2], 172, 1811, 988, 2012);
+            data->roll = map(channels[3], 172, 1811, 988, 2012);
+            //LOGD("Data: yaw=%d pitch=%d thr=%d roll=%d", data->yaw, data->pitch, data->thr, data->roll);
+/*
             data->yaw = channels[0];
             data->pitch = channels[1];
             data->thr = channels[2];
             data->roll = channels[3];
+            */
 
-
+/*
 
             for (unsigned ch=0; ch<16; ++ch){
                 LOGD("ch%02u=%u", ch+1, channels[ch]);
@@ -114,6 +125,12 @@ void crsf_process(crsf_handle_t * crsf_h, flight_axis_t * data){
                 HAL_Delay(10);
             }
             LOGD("CRC8=%u", crc8);
+            */
+            state = wait_for_sync;
+            HAL_UART_Receive_IT(crsf_h->huart, start_data, 3);
+        }
+        else{
+            LOGD("wrong frame type");
             state = wait_for_sync;
             HAL_UART_Receive_IT(crsf_h->huart, start_data, 3);
         }
