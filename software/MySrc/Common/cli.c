@@ -18,6 +18,12 @@
 #include "misc.h"
 #include "cli_cmd_callbacks.h"
 #include "main.h"
+#include <sys/errno.h>
+#include <sys/unistd.h>
+#include "main.h"
+#include "usbd_cdc_if.h"
+#include "mymain.h"
+
 
 void cli_handle_cmd(cli_handle_t *cli_h);
 
@@ -162,4 +168,30 @@ void cli_rx_callback(cli_handle_t* cli_h) {
     cli_h->new_data_flag = true;
     // don't copy data here... will break receive function.
     //TODO: Add a true callback...
+}
+
+int _write(int file, char *ptr, int len) {
+    HAL_StatusTypeDef xStatus;
+    switch (file) {
+        case STDOUT_FILENO: /*stdout*/
+            CDC_Transmit_FS((uint8_t*)ptr, len);
+            //xStatus = HAL_UART_Transmit(&huart2, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+            if (xStatus != HAL_OK) {
+                errno = EIO;
+                return -1;
+            }
+            break;
+        case STDERR_FILENO: /* stderr */
+            CDC_Transmit_FS((uint8_t*)ptr, len);
+            //xStatus = HAL_UART_Transmit(&huart2, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+            if (xStatus != HAL_OK) {
+                errno = EIO;
+                return -1;
+            }
+            break;
+        default:
+            errno = EBADF;
+            return -1;
+    }
+    return len;
 }
