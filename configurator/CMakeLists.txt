@@ -19,23 +19,27 @@
     find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS SerialPort)
     find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Test)
 
+    include_directories({CMAKE_SOURCE_DIR})
+
     set(PROJECT_SOURCES
             main.cpp
             mainwindow.cpp
             mainwindow.h
             mainwindow.ui
-            SettingsManager.cpp
-            SettingsManager.h
-            FlashManager.cpp
-            FlashManager.h
-            SerialManager.cpp
-            SerialManager.h
-            StyleManager.cpp
-            StyleManager.h
-            DebugBoxManager.cpp
-            DebugBoxManager.h
-            ConfTabs.cpp
-            ConfTabs.h
+            managers/SettingsManager.cpp
+            managers/SettingsManager.h
+            managers/FlashManager.cpp
+            managers/FlashManager.h
+            managers/SerialManager.cpp
+            managers/SerialManager.h
+            managers/StyleManager.cpp
+            managers/StyleManager.h
+            managers/DebugBoxManager.cpp
+            managers/DebugBoxManager.h
+            managers/TabManager.cpp
+            managers/TabManager.h
+            tabs/MotorTab.cpp
+            tabs/MotorTab.h
     )
 
     #qt6_wrap_ui(SOURCES mainwindow.ui)

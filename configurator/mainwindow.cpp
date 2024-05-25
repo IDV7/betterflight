@@ -5,12 +5,12 @@
 #include <QFileDialog>
 #include <QProcess>
 #include <QTest>
-#include "SerialManager.h"
-#include "SettingsManager.h"
-#include "FlashManager.h"
-#include "DebugBoxManager.h"
+#include "managers/SerialManager.h"
+#include "managers/SettingsManager.h"
+#include "managers/FlashManager.h"
+#include "managers/DebugBoxManager.h"
 
-#define VERSION "0.1.3"
+#define VERSION "0.1.5"
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent)
