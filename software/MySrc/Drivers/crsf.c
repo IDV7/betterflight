@@ -105,10 +105,15 @@ void crsf_process(crsf_handle_t * crsf_h, flight_axis_t * data){
             unpack_channels(incoming_data_saved, channels);
 
 
-            data->yaw = map(channels[0], 172, 1811, 988, 2012);
-            data->pitch = map(channels[1], 172, 1811, 988, 2012);
-            data->thr = map(channels[2], 172, 1811, 988, 2012);
-            data->roll = map(channels[3], 172, 1811, 988, 2012);
+            data->yaw = map(channels[0], 172, 1811, -500, 500);
+            data->pitch = map(channels[1], 172, 1811, -500, 500);
+            data->thr = map(channels[2], 172, 1811, 100, 2000);
+            data->roll = map(channels[3], 172, 1811, -500, 500);
+
+
+
+
+
             //LOGD("Data: yaw=%d pitch=%d thr=%d roll=%d", data->yaw, data->pitch, data->thr, data->roll);
 /*
             data->yaw = channels[0];

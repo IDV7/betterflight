@@ -134,10 +134,10 @@ static void flight_ctrl_cycle(void) {
 
     // update pid controllers
     set_pids(&pids_h, &imu_data, &s_points, &pid_vals);
-    LOGD("pid vals: roll=%d pitch=%d yaw=%d", pid_vals.roll_pid, pid_vals.pitch_pid, pid_vals.yaw_pid);
+    LOGD("pid vals: roll=%d pitch=%d yaw=%d throttle", pid_vals.roll_pid, pid_vals.pitch_pid, pid_vals.yaw_pid, channel_data);
     // update motor mixer
 
-
+    delay(1);
     motor_mixer_h.input.yaw = pid_vals.yaw_pid;
     motor_mixer_h.input.roll = pid_vals.roll_pid;
     motor_mixer_h.input.pitch = pid_vals.pitch_pid;
@@ -148,4 +148,5 @@ static void flight_ctrl_cycle(void) {
     motor_set_throttle(&motors_h,2, motor_output.motor2);
     motor_set_throttle(&motors_h,3, motor_output.motor3);
     motor_set_throttle(&motors_h,4, motor_output.motor4);
+    delay(50);
 }
