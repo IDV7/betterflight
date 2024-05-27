@@ -173,5 +173,5 @@ static void flight_ctrl_cycle(void) {
     motor_set_throttle(&motors_h,4, motor_output.motor4);
 
 }
-   // delay(50);
+   delay(50);
 }

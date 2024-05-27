@@ -8,25 +8,28 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
     float pitch = ((float)mixer_h->input.pitch)* mixer_h->percentages.pitch;
     float yaw = ((float)mixer_h->input.yaw)* mixer_h->percentages.yaw;
 
-    u_int16_t temp;
+    uint16_t temp;
 
 
-    //LOGD("Throttle: %f, roll %f, pitch %f, yaw %f", throttle, roll, pitch, yaw);
+    LOGD("Throttle: %f, roll %f, pitch %f, yaw %f", throttle, roll, pitch, yaw);
     HAL_Delay(10);
     motor_output->motor1 = (int16_t)((throttle + roll- pitch - yaw));
     motor_output->motor2 = (int16_t)((throttle - roll - pitch + yaw));
     motor_output->motor3 = (int16_t)((throttle - roll + pitch - yaw));
     motor_output->motor4 = (int16_t)((throttle + roll + pitch + yaw));
-    if(motor_output->motor1 > 2000 || motor_output->motor2 > 2000 || motor_output->motor3 > 2000 || motor_output->motor4 > 2000){
+
         if(motor_output->motor1 > 2000){
             temp = motor_output->motor1 - 2000;
+         //   LOGD("Temp1+: %d", temp);
             motor_output->motor1 -= (temp + 50);
             motor_output->motor2 -= (temp + 50);
             motor_output->motor3 -= (temp + 50);
             motor_output->motor4 -= (temp + 50);
         }
         if(motor_output->motor2 > 2000){
+
             temp = motor_output->motor2 - 2000;
+         //   LOGD("TEMP2+: %d", temp);
             motor_output->motor1 -= (temp + 50);
             motor_output->motor2 -= (temp + 50);
             motor_output->motor3 -= (temp + 50);
@@ -34,6 +37,7 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
         }
         if(motor_output->motor3 > 2000){
             temp = motor_output->motor3 - 2000;
+         //   LOGD("TEMP3+: %d", temp);
             motor_output->motor1 -= (temp + 50);
             motor_output->motor2 -= (temp + 50);
             motor_output->motor3 -= (temp + 50);
@@ -41,41 +45,54 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
         }
         if(motor_output->motor4 > 2000){
             temp = motor_output->motor4 - 2000;
+         //   LOGD("TEMP4+: %d", temp);
             motor_output->motor1 -= (temp + 50);
             motor_output->motor2 -= (temp + 50);
             motor_output->motor3 -= (temp + 50);
             motor_output->motor4 -= (temp + 50);
         }
 
-    }
-    if(motor_output->motor1 < 0 || motor_output->motor2 < 0 || motor_output->motor3 < 0 || motor_output->motor4 < 0 ) {
+
+
 
         if (motor_output->motor1 < 0) {
-            motor_output->motor1 += 50 - (motor_output->motor1);
-            motor_output->motor2 -= (int16_t) motor_output->motor1;
-            motor_output->motor3 -= (int16_t) motor_output->motor1;
-            motor_output->motor4 -= (int16_t) motor_output->motor1;
+            temp = 50 - (motor_output->motor1);
+            LOGD("TEMP1: %d", temp);
+            //delay(10);
+            motor_output->motor1 += temp;
+            motor_output->motor2 += (int16_t) motor_output->motor1;
+            motor_output->motor3 += (int16_t) motor_output->motor1;
+            motor_output->motor4 += (int16_t) motor_output->motor1;
 
         }
         if (motor_output->motor2 < 0) {
-            motor_output->motor2 += 50 - (motor_output->motor2);
-            motor_output->motor1 -= (int16_t) motor_output->motor2;
-            motor_output->motor3 -= (int16_t) motor_output->motor2;
-            motor_output->motor4 -= (int16_t) motor_output->motor2;
+            temp = 50 - (motor_output->motor2);
+            LOGD("TEMP2: %d", temp);
+            //delay(10);
+            motor_output->motor2 += temp;
+            motor_output->motor1 += (int16_t) motor_output->motor2;
+            motor_output->motor3 += (int16_t) motor_output->motor2;
+            motor_output->motor4 += (int16_t) motor_output->motor2;
 
         }
         if (motor_output->motor3 < 0) {
-            motor_output->motor3 += 50 - (motor_output->motor3);
-            motor_output->motor1 -= (int16_t) motor_output->motor3;
-            motor_output->motor2 -= (int16_t) motor_output->motor3;
-            motor_output->motor4 -= (int16_t) motor_output->motor3;
+            temp = 50 - (motor_output->motor3);
+            LOGD("TEMP3: %d", temp);
+           // delay(10);
+            motor_output->motor3 += temp;
+            motor_output->motor1 += (int16_t) motor_output->motor3;
+            motor_output->motor2 += (int16_t) motor_output->motor3;
+            motor_output->motor4 += (int16_t) motor_output->motor3;
 
         }
         if (motor_output->motor4 < 0) {
-            motor_output->motor4 += 50 - (motor_output->motor4);
-            motor_output->motor1 -= (int16_t) motor_output->motor4;
-            motor_output->motor2 -= (int16_t) motor_output->motor4;
-            motor_output->motor3 -= (int16_t) motor_output->motor4;
+            temp = 50 - (motor_output->motor4);
+            LOGD("TEMP4: %d", temp);
+            //delay(10);
+            motor_output->motor4 += temp;
+            motor_output->motor1 += (int16_t) motor_output->motor4;
+            motor_output->motor2 += (int16_t) motor_output->motor4;
+            motor_output->motor3 += (int16_t) motor_output->motor4;
 
         }
         if(motor_output->motor1 > 2000){
@@ -90,7 +107,7 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
         if(motor_output->motor4 > 2000){
             motor_output->motor4 = 2000;
         }
-}
+
 
 
 
