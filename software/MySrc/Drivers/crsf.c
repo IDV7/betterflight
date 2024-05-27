@@ -24,9 +24,7 @@ static void crsf_uart_setup(crsf_handle_t *crsf_h);
 static void unpack_channels(uint8_t const * payload, uint32_t * dest);
 static void crsf_telemetry_send(crsf_handle_t *crsf_h, crsf_frametype_t frame_type, uint8_t *data);
 
-int16_t map(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t out_max) {
-    return (int16_t )((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
-}
+
 
 void crsf_telemetry_send(crsf_handle_t *crsf_h, crsf_frametype_t frame_type, uint8_t *data){
     //frame -> [sync/address] [len] [type] [payload] [crc8]
@@ -91,30 +89,22 @@ static void unpack_channels(uint8_t const * payload, uint32_t * dest)
     }
 }
 
-void crsf_process(crsf_handle_t * crsf_h, flight_axis_t * data){
+void crsf_process(crsf_handle_t * crsf_h, uint32_t *data){
     if(state == processing_data){
 
         if(start_data_saved[2] == CRSF_FRAMETYPE_RC_CHANNELS_PACKED){
             //LOGD("Processing data");
             //HAL_Delay(10);
-            uint32_t channels[16];
+            //uint32_t channels[16];
             crc8 = incoming_data_saved[frame_length-2];
             uint8_t incoming_frame_lenght = frame_length;
             //LOGD("Frame length: %u", incoming_frame_lenght);
             //HAL_Delay(10);
-            unpack_channels(incoming_data_saved, channels);
-
-
-            data->yaw = map(channels[0], 172, 1811, -500, 500);
-            data->pitch = map(channels[1], 172, 1811, -500, 500);
-            data->thr = map(channels[2], 172, 1811, 100, 2000);
-            data->roll = map(channels[3], 172, 1811, -500, 500);
+            unpack_channels(incoming_data_saved, data);
 
 
 
-
-
-            //LOGD("Data: yaw=%d pitch=%d thr=%d roll=%d", data->yaw, data->pitch, data->thr, data->roll);
+            LOGD("Data: yaw=%d pitch=%d thr=%d roll=%d, arm: %d", data[0], data[1], data[2], data[3],data[4]);
 /*
             data->yaw = channels[0];
             data->pitch = channels[1];

@@ -53,6 +53,9 @@ uint64_t motors_process_last_ms = 0;
 uint64_t imu_process_last_ms = 0;
 uint64_t flight_ctrl_cycle_last_ms = 0;
 
+uint32_t received_data[16];
+
+bool is_armed_flag = false;
 
 cli_handle_t cli_h;
 crsf_handle_t crsf_h;
@@ -114,30 +117,50 @@ void mymain(void) {
 }
 
 static void flight_ctrl_cycle(void) {
-    //crsf + imu =>pid's=>motor mixer
+    //crsf + imu =>pid's=>motor mixe
+    int16_t temp;
+
+    // update elrs channels
+    crsf_process(&crsf_h, received_data);
+
+    LOGD("Data: yaw=%d pitch=%d thr=%d roll=%d, arm: %d", received_data[0], received_data[1], received_data[2], received_data[3],received_data[4]);
+    //delay(10);
+    channel_data.yaw = map( received_data[0], 172, 1811, -500, 500);
+    channel_data.pitch = map(received_data[1], 172, 1811, -500, 500);
+    channel_data.thr= map(received_data[2], 172, 1811, 50, 2012);
+    channel_data.roll = map(received_data[3], 172, 1811, -500, 500);
+    temp = map(received_data[4],172,1811,988,2012);
+    if(((int16_t) received_data[4]) > 1500){
+        is_armed_flag = true;
+    }
+    else{
+        is_armed_flag = false;
+    }
+    LOGD("Channel data: roll=%d pitch=%d yaw=%d throttle=%d, arm %d", channel_data.roll, channel_data.pitch, channel_data.yaw, channel_data.thr, temp);
+
+
+    if(is_armed_flag == true){
+
 
     // update imu data
     if (imu_h.last_err == IMU_OK) {
         imu_process(&imu_h, &imu_data);
     }
 
-    // update elrs channels
-    crsf_process(&crsf_h, &channel_data);
-   //LOGD("Channel data: roll=%d pitch=%d yaw=%d throttle=%d", channel_data.roll, channel_data.pitch, channel_data.yaw, channel_data.thr);
 
     //calculate setpoints
     s_points.roll_set_point.sp = set_point_calculation(&pids_h.setp,channel_data.roll,0.2,0.2);
     s_points.pitch_set_point.sp = set_point_calculation(&pids_h.setp,channel_data.pitch,0.2,0.2);
     s_points.yaw_set_point.sp = set_point_calculation(&pids_h.setp,channel_data.yaw,0.2,0.2);
 
-    //LOGD("setpoints: roll=%d pitch=%d yaw=%d", s_points.roll_set_point.sp, s_points.pitch_set_point.sp, s_points.yaw_set_point.sp);
+    LOGD("setpoints: roll=%d pitch=%d yaw=%d", s_points.roll_set_point.sp, s_points.pitch_set_point.sp, s_points.yaw_set_point.sp);
 
     // update pid controllers
     set_pids(&pids_h, &imu_data, &s_points, &pid_vals);
-    LOGD("pid vals: roll=%d pitch=%d yaw=%d throttle", pid_vals.roll_pid, pid_vals.pitch_pid, pid_vals.yaw_pid, channel_data);
+    LOGD("pid vals: roll=%d pitch=%d yaw=%d throttle %d", pid_vals.roll_pid, pid_vals.pitch_pid, pid_vals.yaw_pid, channel_data.thr);
     // update motor mixer
 
-    delay(1);
+   // delay(1);
     motor_mixer_h.input.yaw = pid_vals.yaw_pid;
     motor_mixer_h.input.roll = pid_vals.roll_pid;
     motor_mixer_h.input.pitch = pid_vals.pitch_pid;
@@ -148,5 +171,7 @@ static void flight_ctrl_cycle(void) {
     motor_set_throttle(&motors_h,2, motor_output.motor2);
     motor_set_throttle(&motors_h,3, motor_output.motor3);
     motor_set_throttle(&motors_h,4, motor_output.motor4);
-    delay(50);
+
+}
+   // delay(50);
 }
