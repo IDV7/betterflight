@@ -105,7 +105,7 @@ typedef struct{
 
 
 void crsf_init(crsf_handle_t * hcrsf, UART_HandleTypeDef *huart);
-void crsf_process(crsf_handle_t * hcrsf, uint32_t * data);
+void crsf_process(crsf_handle_t * hcrsf, int16_t * data);
 void crsf_send_frame_test(UART_HandleTypeDef *huart);
 void crsf_tests(void);
 
