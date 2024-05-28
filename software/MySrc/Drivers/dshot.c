@@ -46,7 +46,7 @@ void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleType
     dshot_h->hdma = hdma;
     dshot_h->tim_channel = tim_channel;
     dshot_h->throttle_value = 0;
-
+    dshot_h->cmd_cnts->send_count = 0;
 
     // set timer
     __HAL_TIM_SET_PRESCALER(dshot_h->htim, DSHOT_PSC);

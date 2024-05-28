@@ -27,10 +27,6 @@ void motors_init(motors_handle_t *motors_h, dshot_handle_t *m1_h, dshot_handle_t
     motors_h->dshot_hs[1] = m2_h;
     motors_h->dshot_hs[2] = m3_h;
     motors_h->dshot_hs[3] = m4_h;
-
-    for (int i = 0; i < 4; i++) {
-        dshot_stop(motors_h->dshot_hs[i]);
-    }
 }
 
 void motors_process(motors_handle_t *motors_h) {
