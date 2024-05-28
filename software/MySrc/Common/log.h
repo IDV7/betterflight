@@ -39,11 +39,11 @@ typedef enum {
 
 void log_init(log_level_t log_level, bool color);
 log_level_t get_log_level();
-void LOGD(const uint8_t *format, ...);
-void LOGI(const uint8_t *format, ...);
-void LOGW(const uint8_t *format, ...);
-void LOGE(const uint8_t *format, ...);
-void LOG(const uint8_t *format, ...);
-void LOG_ascii_hex_dump(uint8_t *data);
+void LOGD(const char *format, ...);
+void LOGI(const char *format, ...);
+void LOGW(const char *format, ...);
+void LOGE(const char *format, ...);
+void LOG(const char *format, ...);
+void LOG_ascii_hex_dump(char *data);
 
 #endif //BETTERFLIGHT_LOG_H

@@ -21,18 +21,17 @@ IMU_handle_t imu_h;
 cli_handle_t cli_h;
 
 //motors
-dshot_handle_t m1_h; // TIM1 CH2
-dshot_handle_t m2_h; // TIM1 CH1
-dshot_handle_t m3_h; // TIM8 CH4
-dshot_handle_t m4_h; // TIM8 CH3
+//dshot_handle_t m1_h; // TIM1 CH2
+//dshot_handle_t m2_h; // TIM1 CH1
+//dshot_handle_t m3_h; // TIM8 CH4
+//dshot_handle_t m4_h; // TIM8 CH3
 motors_handle_t motors_h;
 
 
 //pid
-drone_pids_t pids_h;
-
+//drone_pids_t pids_h;
 //mixer
-mixer_handle_t motor_mixer_h;
+//mixer_handle_t motor_mixer_h;
 
 
 uint64_t led_toggle_last_ms = 0;
@@ -43,9 +42,8 @@ uint64_t motors_process_last_ms = 0;
 uint64_t imu_process_last_ms = 0;
 uint64_t flight_ctrl_cycle_last_ms = 0;
 
+//crsf_handle_t crsf_h;
 
-cli_handle_t cli_h;
-crsf_handle_t crsf_h;
 
 static void flight_ctrl_cycle(void);
 
@@ -55,7 +53,7 @@ void myinit(void) {
     log_init(LOG_LEVEL, true);
     LED_on();
 
-    cli_init(&cli_h); //will block if halt_until_connected_flag is true
+    //cli_init(&cli_h); //will block if halt_until_connected_flag is true
 
     delay(1);
     LOGI("Starting Initialization...");
@@ -65,12 +63,17 @@ void myinit(void) {
 
 
     //init imu
-    log_imu_err(imu_init(&imu_h));
+    if(imu_init(&imu_h) == IMU_OK) {
+        for (int i = 0; i < 100; i++) {
+            LED_toggle();
+            delay(20);
+        }
+    };
 
     //elrs init
-    crsf_init(&crsf_h, &huart2);
-    pid_init(&pids_h);
-
+//    crsf_init(&crsf_h, &huart2);
+//    pid_init(&pids_h);
+//
     // motors init
 //    motors_init(&motors_h, &m1_h, &m2_h, &m3_h, &m4_h);
 //    dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);
@@ -94,24 +97,24 @@ void myinit(void) {
 void mymain(void) {
     while (1) { //todo has to be replaced by a scheduler
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
-        none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
+        //none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
         //none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
         none_blocking_delay(500, &imu_process_last_ms, (callback_t) imu_process, &imu_h);
         //flight_ctrl_cycle();
     }
 }
 
-static void flight_ctrl_cycle(void) {
-    //crsf + imu =>pid's=>motor mixer
-
-    // update imu data
-    if (imu_h.last_err == IMU_OK) {
-        imu_process(&imu_h);
-    }
-
-    // update elrs channels
-    crsf_process(&crsf_h);
-
-    // update pid controllers
-
-}
+//static void flight_ctrl_cycle(void) {
+//    //crsf + imu =>pid's=>motor mixer
+//
+//    // update imu data
+//    if (imu_h.last_err == IMU_OK) {
+//        imu_process(&imu_h);
+//    }
+//
+//    // update elrs channels
+//    crsf_process(&crsf_h);
+//
+//    // update pid controllers
+//
+//}

@@ -40,7 +40,7 @@ uint8_t * get_log_level_color_attr(log_level_t log_level) {
     }
 }
 
-void log_msg(log_level_t log_level, const uint8_t *format, va_list args) {
+void log_msg(log_level_t log_level, const char *format, va_list args) {
     if (log_level < logging.level) {
         return;
     }
@@ -65,35 +65,35 @@ void log_msg(log_level_t log_level, const uint8_t *format, va_list args) {
     printf("\n");
 }
 
-void LOGD(const uint8_t *format, ...) {
+void LOGD(const char *format, ...) {
     va_list args;
     va_start(args, format);
     log_msg(LOG_LEVEL_DEBUG, format, args);
     va_end(args);
 }
 
-void LOGI(const uint8_t *format, ...) {
+void LOGI(const char *format, ...) {
     va_list args;
     va_start(args, format);
     log_msg(LOG_LEVEL_INFO, format, args);
     va_end(args);
 }
 
-void LOGW(const uint8_t *format, ...) {
+void LOGW(const char *format, ...) {
     va_list args;
     va_start(args, format);
     log_msg(LOG_LEVEL_WARN, format, args);
     va_end(args);
 }
 
-void LOGE(const uint8_t *format, ...) {
+void LOGE(const char *format, ...) {
     va_list args;
     va_start(args, format);
     log_msg(LOG_LEVEL_ERROR, format, args);
     va_end(args);
 }
 
-void LOG( const uint8_t *format, ...) {
+void LOG(const char *format, ...) {
     va_list args;
     va_start(args, format);
 
@@ -104,9 +104,9 @@ void LOG( const uint8_t *format, ...) {
 }
 
 // for debugging ascii buffers / strings
-void LOG_ascii_hex_dump(uint8_t *data) {
+void LOG_ascii_hex_dump(char *data) {
     printf("[DEBUG] ASCII HEX DUMP: ");
-    for (int i = 0; i < strlen((char*)data); i++) {
+    for (int i = 0; i < strlen(data); i++) {
         printf("%02X ", data[i]);
     }
     printf("\n");

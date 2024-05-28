@@ -80,8 +80,8 @@ void none_blocking_delay(uint32_t ms, uint64_t *last_millis, callback_t callback
 }
 
 
-void clean_str(uint8_t *str) {
-    uint8_t *src, *dst;
+void clean_str(char *str) {
+    char *src, *dst;
     for (src = dst = str; *src != '\0'; src++) {
         if (*src != '\n' && *src != '\r') {
             *dst++ = *src;
@@ -91,16 +91,16 @@ void clean_str(uint8_t *str) {
 }
 
 // strcmp_ign (ign -> ignore) compares two strings, ignoring newlines and carriage returns
-int8_t strcmp_ign(const uint8_t *str1, const uint8_t *str2) {
+int8_t strcmp_ign(const char *str1, const char *str2) {
     // make copy to avoid modifying original strings
-    uint8_t *copy1 = (uint8_t *)strdup((char *)str1);
-    uint8_t *copy2 = (uint8_t *)strdup((char *)str2);
+    char *copy1 = strdup(str1);
+    char *copy2 = strdup(str2);
 
     // remove newlines and carriage returns
     clean_str(copy1);
     clean_str(copy2);
 
-    int8_t result = (int8_t)strcmp((char *)copy1, (char *)copy2);
+    int8_t result = (int8_t)strcmp(copy1, copy2);
 
     free(copy1);
     free(copy2);
