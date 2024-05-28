@@ -36,18 +36,6 @@ void cli_process(void *arg) {
 
     // read data
     if (CLI_h->new_data_flag) { // if new data data in buffer
-
-//        //todo remove this when 'add_commands' memory bug is fixed
-//        if (strcmp_ign(CLI_h->cli_rx_buffer, "dfu") == 0) {
-//            reboot_into_dfu();
-//        }
-//        else if (strcmp_ign(CLI_h->cli_rx_buffer, "connect") == 0) {
-//            CLI_h->cli_connected_flag = true;
-//        }
-//        else if (strcmp_ign(CLI_h->cli_rx_buffer, "reboot") == 0) {
-//            NVIC_SystemReset();
-//        }
-
         CLI_h->new_data_flag = false;
         LOG("-> %s", CLI_h->cli_rx_buffer);
         cli_handle_cmd(CLI_h);

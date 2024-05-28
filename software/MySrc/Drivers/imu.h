@@ -39,6 +39,6 @@ void log_imu_err(IMU_err_t err);
 void log_gyr_acc_data(IMU_handle_t *imu_h);
 
 // bmi270 api needs access to these functions
-int8_t imu_spi_read_reg(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr); // function pointers with api from bmi270
-int8_t imu_spi_write_reg(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr);
-void imu_delay_us(uint32_t period, void *intf_ptr);
+int8_t imu_spi_soft_trx_wrapper(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr); // function pointers with api from bmi270
+int8_t imu_spi_soft_tx_wrapper(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr);
+void imu_delay_us_wrapper(uint32_t period, void *intf_ptr);

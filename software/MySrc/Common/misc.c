@@ -18,6 +18,7 @@
 
 
 volatile uint32_t millis = 0;
+TIM_HandleTypeDef delay_timer_h;
 
 void LED_toggle(void)
 {
@@ -115,27 +116,7 @@ void reboot_into_dfu() {
     NVIC_SystemReset(); // reset mcu
 }
 
-void delay(uint32_t ms) {
-    HAL_Delay(ms);
-}
 
-// 1000us = 970 actual us, 10us = 15 actual us
-void delay_us(uint32_t us) {
-
-    /* //not working
-    //uint32_t mcu_clock_speed = get_mcu_clock_speed();
-    uint32_t startTick = SysTick->VAL; // current tick count
-    uint32_t ticks = (192000000 / 1000000) * us; //tick count for us delay
-    while ((SysTick->VAL - startTick) < ticks);
-    */
-
-    float nops_per_us = 5.56; //calculated using logic analyzer
-    float total_nops = (float)us * nops_per_us;
-
-    uint32_t nops_to_execute = (uint32_t)ceilf(total_nops);
-
-    delay_nop(nops_to_execute);
-}
 
 uint16_t char_to_uint16(char *str) {
     char *endptr;
@@ -167,6 +148,31 @@ uint8_t* byte_to_binary_str(uint16_t x) {
     return b;
 }
 
-__attribute__((optimize("O0")))  void delay_nop(uint32_t nops) {
+void delay(uint32_t ms) {
+    HAL_Delay(ms);
+}
+
+void delay_nop(uint32_t nops) {
     while (nops--) {__NOP();}
+}
+
+// for setting up tim3 for delay_us
+void setup_delay_us_tim() {
+    __HAL_RCC_TIM3_CLK_ENABLE();
+    delay_timer_h.Instance = TIM3;
+    delay_timer_h.Init.Prescaler = 95;  // APB2 - 1
+    delay_timer_h.Init.CounterMode = TIM_COUNTERMODE_UP;
+    delay_timer_h.Init.Period = 0xFFFF;  //max period
+    delay_timer_h.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    delay_timer_h.Init.RepetitionCounter = 0;
+    HAL_TIM_Base_Init(&delay_timer_h); //hal init
+}
+
+
+// delay_us uses tim3 to delay for x us (inaccurate at very low us values due to HAL, 1us -> ~3us, 10us -> ~11us, 100us -> ~100us)
+void delay_us(uint16_t us) {
+    __HAL_TIM_SET_COUNTER(&delay_timer_h , 0); //reset cnt
+    HAL_TIM_Base_Start(&delay_timer_h);
+    while (__HAL_TIM_GET_COUNTER(&delay_timer_h) < us) {}
+    HAL_TIM_Base_Stop(&delay_timer_h);
 }

@@ -62,9 +62,9 @@ IMU_err_t imu_init(IMU_handle_t *imu_h) {
 
     imu_h->bmi.intf_ptr = &imu_h->spi_h;
     imu_h->bmi.intf = BMI2_SPI_INTF;
-    imu_h->bmi.read = (bmi2_read_fptr_t)imu_spi_read_reg;
-    imu_h->bmi.write = (bmi2_write_fptr_t)imu_spi_write_reg;
-    imu_h->bmi.delay_us = (bmi2_delay_fptr_t)delay_us;
+    imu_h->bmi.read = (bmi2_read_fptr_t) imu_spi_soft_trx_wrapper;
+    imu_h->bmi.write = (bmi2_write_fptr_t) imu_spi_soft_tx_wrapper;
+    imu_h->bmi.delay_us = (bmi2_delay_fptr_t) imu_delay_us_wrapper;
 
     LOGI("bmi270 init");
     delay(10); // RWBA
@@ -138,7 +138,7 @@ void imu_process(IMU_handle_t *imu_h) {
     LOGD("acc: %f | %f | %f, gyr: %.2f | %.2f | %.2f", imu_h->acc_x, imu_h->acc_y, imu_h->acc_z, imu_h->gyr_x, imu_h->gyr_y, imu_h->gyr_z);
 }
 // alias for SPI_soft_read (to feed in spi_h handler struct)
-int8_t imu_spi_read_reg(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {
+int8_t imu_spi_soft_trx_wrapper(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {
     len++; // add one byte for the reg_addr
 
     uint8_t tx_buffer[len];
@@ -166,7 +166,7 @@ int8_t imu_spi_read_reg(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void 
 
 
 // alias for SPI_soft_write (to feed in spi_h handler struct)
-int8_t imu_spi_write_reg(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr) {
+int8_t imu_spi_soft_tx_wrapper(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr) {
     uint8_t tx_buffer[len + 1];
     tx_buffer[0] = reg_addr;
 
@@ -180,10 +180,64 @@ int8_t imu_spi_write_reg(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len
     return 0;
 }
 
-
-void imu_delay_us(uint32_t period, void *intf_ptr) {
-    delay(1);
+// delay_us has a max delay of 65535 us, compensate for this
+void imu_delay_us_wrapper(uint32_t period, void *intf_ptr) {
+    period += 3; //to insure the api is not too tight on its timings
+    if (period > 65500) { //for safety using 65500 instead of 65535
+        uint32_t delay = period;
+        while (delay > 65500) {
+            delay -= 65500;
+            delay_us(65500);
+        }
+        delay_us(delay);
+    } else {
+        delay_us(period);
+    }
 }
+
+void log_imu_err(IMU_err_t err) {
+    switch (err) {
+        case IMU_OK:
+            LOGI("IMU_OK");
+            break;
+        case IMU_ERR_BMI_INIT:
+            LOGE("IMU_ERR_BMI_INIT (imu_init)");
+            break;
+        case IMU_ERR_ACC_GYR_CONFIG:
+            LOGE("IMU_ERR_ACC_GYR_CONFIG (imu_init)");
+            break;
+        case IMU_ERR_SENSOR_ENABLE:
+            LOGE("IMU_ERR_SENSOR_ENABLE (imu_init)");
+            break;
+        case IMU_ERR_GET_SENSOR_CONFIG:
+            LOGE("IMU_ERR_GET_SENSOR_CONFIG (imu_init)");
+            break;
+        case IMU_ERR_GET_SENSOR_DATA:
+            LOGE("IMU_ERR_GET_SENSOR_DATA (imu_process)");
+            break;
+        case IMU_WARN_GYRO_READ_NOT_READY:
+            LOGW("IMU_WARN_GYRO_READ_NOT_READY (imu_process)");
+            break;
+        case IMU_WARN_ACC_READ_NOT_READY:
+            LOGW("IMU_WARN_ACC_READ_NOT_READY (imu_process)");
+            break;
+        case IMU_WARN_GYRO_AND_ACC_READ_NOT_READY:
+            LOGW("IMU_WARN_GYRO_AND_ACC_READ_NOT_READY (imu_process)");
+            break;
+        default:
+            LOGE("Unknown IMU_err_t: %d", err);
+            break;
+    }
+}
+
+// logs gyro and acc data on one line
+void log_imu_data(IMU_handle_t *imu_h) {
+    LOGD("acc: %f %f %f, gyr: %f %f %f", imu_h->acc_x, imu_h->acc_y, imu_h->acc_z, imu_h->gyr_x, imu_h->gyr_y, imu_h->gyr_z);
+}
+
+
+// ----------------------- API Functions from Bosch BMI270 example ----------------------- //
+
 
 /*!
  * @brief This internal API is used to set configurations for accel and gyro.
@@ -435,42 +489,3 @@ void bmi2_error_codes_print_result(int8_t rslt)
     }
 }
 
-void log_imu_err(IMU_err_t err) {
-    switch (err) {
-        case IMU_OK:
-            LOGI("IMU_OK");
-            break;
-        case IMU_ERR_BMI_INIT:
-            LOGE("IMU_ERR_BMI_INIT (imu_init)");
-            break;
-        case IMU_ERR_ACC_GYR_CONFIG:
-            LOGE("IMU_ERR_ACC_GYR_CONFIG (imu_init)");
-            break;
-        case IMU_ERR_SENSOR_ENABLE:
-            LOGE("IMU_ERR_SENSOR_ENABLE (imu_init)");
-            break;
-        case IMU_ERR_GET_SENSOR_CONFIG:
-            LOGE("IMU_ERR_GET_SENSOR_CONFIG (imu_init)");
-            break;
-        case IMU_ERR_GET_SENSOR_DATA:
-            LOGE("IMU_ERR_GET_SENSOR_DATA (imu_process)");
-            break;
-        case IMU_WARN_GYRO_READ_NOT_READY:
-            LOGW("IMU_WARN_GYRO_READ_NOT_READY (imu_process)");
-            break;
-        case IMU_WARN_ACC_READ_NOT_READY:
-            LOGW("IMU_WARN_ACC_READ_NOT_READY (imu_process)");
-            break;
-        case IMU_WARN_GYRO_AND_ACC_READ_NOT_READY:
-            LOGW("IMU_WARN_GYRO_AND_ACC_READ_NOT_READY (imu_process)");
-            break;
-        default:
-            LOGE("Unknown IMU_err_t: %d", err);
-            break;
-    }
-}
-
-// logs gyro and acc data on one line
-void log_imu_data(IMU_handle_t *imu_h) {
-    LOGD("acc: %f %f %f, gyr: %f %f %f", imu_h->acc_x, imu_h->acc_y, imu_h->acc_z, imu_h->gyr_x, imu_h->gyr_y, imu_h->gyr_z);
-}
