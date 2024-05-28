@@ -77,11 +77,11 @@ void myinit(void) {
     pid_init(&pids_h);
 //
     // motors init
-    motors_init(&motors_h, &m1_h, &m2_h, &m3_h, &m4_h);
     dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);
     dshot_init(&m2_h, &htim1, &hdma_tim1_ch1, TIM_CHANNEL_1);
     dshot_init(&m3_h, &htim8, &hdma_tim8_ch4_trig_com, TIM_CHANNEL_4);
     dshot_init(&m4_h, &htim8, &hdma_tim8_ch3, TIM_CHANNEL_3);
+    motors_init(&motors_h, &m1_h, &m2_h, &m3_h, &m4_h);
 //     ----- end initialization code ----- //
 
     delay(1);
