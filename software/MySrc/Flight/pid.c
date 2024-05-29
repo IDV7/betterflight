@@ -64,7 +64,7 @@ int16_t pid_controller_update(pid_handle_t *pid_h, int16_t *pid, int16_t setp, i
        *pid = pid_h->limits.min_output;
     }
     //LOGD("Error: %d, setp: %d, measurement %d, pid: %d", error, setp, measurement, *pid);
-    delay(10);
+    //delay(10);
     pid_h->prev_error = error;
     pid_h->prev_measurement = measurement;
 

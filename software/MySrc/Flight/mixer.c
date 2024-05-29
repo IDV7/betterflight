@@ -12,7 +12,7 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
 
 
     //LOGD("Throttle: %f, roll %f, pitch %f, yaw %f", throttle, roll, pitch, yaw);
-    HAL_Delay(10);
+    //HAL_Delay(10);
     motor_output->motor1 = (int16_t)((throttle + roll- pitch - yaw));
     motor_output->motor2 = (int16_t)((throttle - roll - pitch + yaw));
     motor_output->motor3 = (int16_t)((throttle - roll + pitch - yaw));
