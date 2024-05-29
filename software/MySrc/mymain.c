@@ -67,7 +67,7 @@ static void flight_ctrl_cycle(void);
 void myinit(void) {
     cli_h.halt_until_connected_opt = false; //set to false if you don't want to wait for a connection
     cli_h.enable_tx_buffering_opt = false; //false for init (procces has to be runned to put out buffered data)
-    cli_h.cli_disable_log_opt = false; // completely disables logging (returns from log functions immediately to save CPU time)
+    cli_h.disable_log_opt = false; // completely disables logging (returns from log functions immediately to save CPU time)
 
 
 
@@ -106,8 +106,8 @@ void myinit(void) {
     LED_blink_pattern(20, 2, 50, 50);
     LED_off();
 
-    cli_h.enable_tx_buffering_opt = false; //enable tx buffering NOTE: data will be buffered from now on, and ONLY be sent when cli_process is called!!
-    cli_h.cli_disable_log_opt = true;
+    cli_h.enable_tx_buffering_opt = true; //enable tx buffering NOTE: data will be buffered from now on, and ONLY be sent when cli_process is called!!
+    cli_h.disable_log_opt = false;
 }
 
 

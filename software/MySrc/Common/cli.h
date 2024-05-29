@@ -24,7 +24,7 @@ typedef struct {
 typedef struct {
     // flags/options
     bool halt_until_connected_opt; // set to true if you want to wait for a "connect" command before starting the main application (useful for debugging)
-    bool cli_disable_log_opt; // set to true if you want to disable logging from the CLI, AND SAVE CPU TIME
+    bool disable_log_opt; // set to true if you want to disable logging from the CLI, AND SAVE CPU TIME
     bool cli_connected_flag;
     bool new_data_flag;
 

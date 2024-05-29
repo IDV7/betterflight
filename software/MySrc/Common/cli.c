@@ -182,7 +182,7 @@ void cli_rx_callback(cli_handle_t* CLI_h) {
 #define RETRY_DELAY_US 100 //us
 
 int _write(int file, char *ptr, int len) {
-    if (cli_h.cli_disable_log_opt) return 0; //return 0 "success but no bytes were sent"
+    if (cli_h.disable_log_opt) return 0; //return 0 "success but no bytes were sent"
 
     if (file == STDOUT_FILENO || file == STDERR_FILENO) {
         if (cli_h.enable_tx_buffering_opt && cli_h.cli_connected_flag) {
