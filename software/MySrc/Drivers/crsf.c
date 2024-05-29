@@ -5,7 +5,7 @@
 #include "stm32f7xx_hal_uart.h"
 #include "stm32f7xx_hal.h"
 #include "string.h"
-
+#include "common_structs.h"
 
 
 
@@ -21,7 +21,7 @@ bool print_start_flag = false;
 uint8_t crc8;
 uint8_t crc8_calculate(uint8_t *data, uint8_t len);
 static void crsf_uart_setup(crsf_handle_t *crsf_h);
-static void unpack_channels(uint8_t const * payload, uint32_t * dest);
+static void unpack_channels(uint8_t const * payload, int16_t * dest);
 static void crsf_telemetry_send(crsf_handle_t *crsf_h, crsf_frametype_t frame_type, uint8_t *data);
 
 
@@ -64,7 +64,7 @@ void crsf_init(crsf_handle_t * crsf_h, UART_HandleTypeDef *huart) {
     crsf_uart_setup(crsf_h);
 }
 
-static void unpack_channels(uint8_t const * payload, uint32_t * dest)
+static void unpack_channels(uint8_t const * payload, int16_t * dest)
 {
 
     const unsigned dstBits = 32;
@@ -72,7 +72,7 @@ static void unpack_channels(uint8_t const * payload, uint32_t * dest)
 
     // code from BetaFlight rx/crsf.cpp / bitpacker_unpack
     uint8_t bitsMerged = 0;
-    uint32_t readValue = 0;
+    int16_t readValue = 0;
     unsigned readByteIndex = 0;
     for (uint8_t n = 0; n < NUM_CHANNELS; n++)
     {
@@ -83,24 +83,36 @@ static void unpack_channels(uint8_t const * payload, uint32_t * dest)
             bitsMerged += 8;
         }
         //printf("rv=%x(%x) bm=%u\n", readValue, (readValue & inputChannelMask), bitsMerged);
-        dest[n] = (readValue & inputChannelMask);
+        dest[n] = (int16_t)(readValue & inputChannelMask);
         readValue >>= CHANNEL_SIZE;
         bitsMerged -= CHANNEL_SIZE;
     }
 }
 
-void crsf_process(crsf_handle_t * crsf_h){
+void crsf_process(crsf_handle_t * crsf_h, int16_t *data){
     if(state == processing_data){
 
         if(start_data_saved[2] == CRSF_FRAMETYPE_RC_CHANNELS_PACKED){
-            LOGD("Processing data");
-            HAL_Delay(10);
-            uint32_t channels[16];
+            //LOGD("Processing data");
+            //HAL_Delay(10);
+            //uint32_t channels[16];
             crc8 = incoming_data_saved[frame_length-2];
             uint8_t incoming_frame_lenght = frame_length;
-            LOGD("Frame length: %u", incoming_frame_lenght);
-            HAL_Delay(10);
-            unpack_channels(incoming_data_saved, channels);
+            //LOGD("Frame length: %u", incoming_frame_lenght);
+            //HAL_Delay(10);
+            unpack_channels(incoming_data_saved, data);
+
+
+
+           // LOGD("Data: yaw=%d pitch=%d thr=%d roll=%d, arm: %d", data[0], data[1], data[2], data[3],data[4]);
+/*
+            data->yaw = channels[0];
+            data->pitch = channels[1];
+            data->thr = channels[2];
+            data->roll = channels[3];
+            */
+
+/*
 
             for (unsigned ch=0; ch<16; ++ch){
                 LOGD("ch%02u=%u", ch+1, channels[ch]);
@@ -108,6 +120,12 @@ void crsf_process(crsf_handle_t * crsf_h){
                 HAL_Delay(10);
             }
             LOGD("CRC8=%u", crc8);
+            */
+            state = wait_for_sync;
+            HAL_UART_Receive_IT(crsf_h->huart, start_data, 3);
+        }
+        else{
+            //LOGD("wrong frame type");
             state = wait_for_sync;
             HAL_UART_Receive_IT(crsf_h->huart, start_data, 3);
         }
@@ -116,7 +134,7 @@ void crsf_process(crsf_handle_t * crsf_h){
     }
     else if(state == wait_for_sync){
         HAL_UART_Receive_IT(crsf_h->huart, start_data, 3);
-        LOGD("Waiting for sync");
+       // LOGD("Waiting for sync");
         HAL_Delay(10);
     }
     else if(state == receiving_data){
@@ -127,7 +145,7 @@ void crsf_process(crsf_handle_t * crsf_h){
         if (print_start_flag == true){
             for (int i = 0; i < 3; ++i) {
 
-                LOGD("start_data[%u]=%u ", i, start_data_saved[i]);
+               // LOGD("start_data[%u]=%u ", i, start_data_saved[i]);
                 HAL_Delay(10);
             }
             print_start_flag = false;
@@ -214,7 +232,7 @@ void crsf_send_frame_test(UART_HandleTypeDef *huart){
 }
 
 void crsf_unpack_channels_test(){
-    uint32_t dst[16];
+    int16_t dst[16];
     uint8_t src[] = {
             0xc8, 0x18, 0x16,
             0xe0, 0x03, 0x1f, 0xf8, 0xc0, 0x07, 0x3e, 0xf0, 0x81, 0x0f, 0x7c,

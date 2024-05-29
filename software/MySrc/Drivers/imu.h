@@ -7,7 +7,7 @@
 
 #include "spi_soft.h"
 #include "bmi270.h"
-
+#include "common_structs.h"
 
 typedef enum {
     IMU_OK = 0,

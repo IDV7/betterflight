@@ -38,4 +38,6 @@ uint8_t *byte_to_binary_str(uint16_t x);
 
 void delay_nop(uint32_t nops);
 
+int16_t map(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t out_max);
+
 #endif //BETTERFLIGHT_MISC_H
