@@ -16,13 +16,8 @@
 #define LOG_LEVEL LOG_LEVEL_DEBUG
 
 // for precise timing related debugging (measured with logic analyzer)
-#define SET_S2(x) ((x) ? (GPIOB->BSRR = (GPIO_PIN_4 << 16)) : (GPIOB->BSRR = GPIO_PIN_4))
-#define SET_S3(x) ((x) ? (GPIOB->BSRR = (GPIO_PIN_5 << 16)) : (GPIOB->BSRR = GPIO_PIN_5))
-#define SET_S4(x) ((x) ? (GPIOB->BSRR = (GPIO_PIN_0 << 16)) : (GPIOB->BSRR = GPIO_PIN_0))
-#define SET_S5(x) ((x) ? (GPIOB->BSRR = (GPIO_PIN_1 << 16)) : (GPIOB->BSRR = GPIO_PIN_1))
-#define SHIGH 1
-#define SLOW 0
-
+#define S2_HIGH (GPIOB->BSRR = GPIO_PIN_4)
+#define S2_LOW (GPIOB->BSRR = (GPIO_PIN_4 << 16))
 
 IMU_handle_t imu_h;
 cli_handle_t cli_h;
@@ -57,7 +52,7 @@ static void flight_ctrl_cycle(void);
 void myinit(void) {
     cli_h.halt_until_connected_opt = true; //set to false if you don't want to wait for a connection
     cli_h.enable_tx_buffering_opt = false; //false for init (procces has to be runned to put out buffered data)
-    cli_h.cli_disable_log_opt = false;
+    cli_h.cli_disable_log_opt = false; // completely disables logging (returns from log functions immediately to save CPU time)
 
 
 
@@ -90,18 +85,6 @@ void myinit(void) {
 
     LOGI("Finished Initialization");
 
-//    SET_S2(SHIGH);
-//    SET_S3(SHIGH);
-//    SET_S4(SHIGH);
-//    SET_S5(SHIGH);
-//
-//    delay_us(25);
-//
-//    SET_S2(SLOW);
-//    SET_S3(SLOW);
-//    SET_S4(SLOW);
-//    SET_S5(SLOW);
-
 
     LED_blink_pattern(20, 2, 50, 50);
     LED_off();
@@ -117,22 +100,5 @@ void mymain(void) {
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
         none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
         none_blocking_delay(500, &imu_process_last_ms, (callback_t) imu_process, &imu_h);
-        //flight_ctrl_cycle();
     }
 }
-
-//static void flight_ctrl_cycle(void) {
-//    //crsf + imu =>pid's=>motor mixer
-//
-//    // update imu data
-//    if (imu_h.last_err == IMU_OK) {
-//        imu_process(&imu_h);
-//    }
-//
-//    // update elrs channels
-//    crsf_process(&crsf_h);
-//
-//    // update pid controllers
-//
-//}
-
