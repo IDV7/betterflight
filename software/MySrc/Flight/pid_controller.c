@@ -19,9 +19,9 @@
 
 void pid_init(flight_pids_t *drone_pids){
 
-    pid_controller_init(&drone_pids->pid.yaw_pid, (float).4, (float)0.3, (float)0.3, (float)0.05, -500, 500, 1000, 2000);
-    pid_controller_init(&drone_pids->pid.roll_pid, (float).4, (float)0.3, (float)0.3, (float)0.05, -500, 500, 1000, 2000);
-    pid_controller_init(&drone_pids->pid.pitch_pid, (float).4, (float)0.3, (float)0.3, (float)0.05, -500, 500, 1000, 2000);
+    pid_controller_init(&drone_pids->pid.yaw_pid, (float).6, (float)0.2, (float)0.2, (float)0.05, -500, 500, 1000, 2000);
+    pid_controller_init(&drone_pids->pid.roll_pid, (float).6, (float)0.2, (float)0.2, (float)0.05, -500, 500, 1000, 2000);
+    pid_controller_init(&drone_pids->pid.pitch_pid, (float).6, (float)0.2, (float)0.2, (float)0.05, -500, 500, 1000, 2000);
 
     limits_init(&drone_pids->setp, drone_pids->pid.yaw_pid.limits.min_output, drone_pids->pid.yaw_pid.limits.max_output);
     limits_init(&drone_pids->setp, drone_pids->pid.roll_pid.limits.min_output, drone_pids->pid.roll_pid.limits.max_output);

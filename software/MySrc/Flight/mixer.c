@@ -2,7 +2,7 @@
 
 void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
     //LOGD("Throttle input: %d, roll input  %d, pitch input %d, yaw input %d", mixer_h->input.throttle, mixer_h->input.roll, mixer_h->input.pitch, mixer_h->input.yaw);
-    HAL_Delay(10);
+    //HAL_Delay(10);
     float throttle = ((float)mixer_h->input.throttle)*mixer_h->percentages.throttle;
     float roll = ((float)mixer_h->input.roll)* mixer_h->percentages.roll;
     float pitch = ((float)mixer_h->input.pitch)* mixer_h->percentages.pitch;
@@ -53,10 +53,10 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
         }
 
 
+/*
 
-
-        if (motor_output->motor1 < 0) {
-            temp = 50 - (motor_output->motor1);
+        if (motor_output->motor1 < 100) {
+            temp = 100 - (motor_output->motor1);
            // LOGD("TEMP1: %d", temp);
             //delay(10);
             motor_output->motor1 += temp;
@@ -65,8 +65,8 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
             motor_output->motor4 += (int16_t) motor_output->motor1;
 
         }
-        if (motor_output->motor2 < 0) {
-            temp = 50 - (motor_output->motor2);
+        if (motor_output->motor2 < 100) {
+            temp = 100 - (motor_output->motor2);
           //  LOGD("TEMP2: %d", temp);
             //delay(10);
             motor_output->motor2 += temp;
@@ -75,8 +75,8 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
             motor_output->motor4 += (int16_t) motor_output->motor2;
 
         }
-        if (motor_output->motor3 < 0) {
-            temp = 50 - (motor_output->motor3);
+        if (motor_output->motor3 < 100) {
+            temp = 100 - (motor_output->motor3);
            // LOGD("TEMP3: %d", temp);
            // delay(10);
             motor_output->motor3 += temp;
@@ -85,8 +85,8 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
             motor_output->motor4 += (int16_t) motor_output->motor3;
 
         }
-        if (motor_output->motor4 < 0) {
-            temp = 50 - (motor_output->motor4);
+        if (motor_output->motor4 < 100) {
+            temp = 100 - (motor_output->motor4);
             //LOGD("TEMP4: %d", temp);
             //delay(10);
             motor_output->motor4 += temp;
@@ -94,31 +94,31 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
             motor_output->motor2 += (int16_t) motor_output->motor4;
             motor_output->motor3 += (int16_t) motor_output->motor4;
 
+        }*/
+        if(motor_output->motor1 > 1000){
+            motor_output->motor1 = 1000;
         }
-        if(motor_output->motor1 > 2000){
-            motor_output->motor1 = 2000;
+        if(motor_output->motor2 > 1000){
+            motor_output->motor2 = 1000;
         }
-        if(motor_output->motor2 > 2000){
-            motor_output->motor2 = 2000;
+        if(motor_output->motor3 > 1000){
+            motor_output->motor3 = 1000;
         }
-        if(motor_output->motor3 > 2000){
-            motor_output->motor3 = 2000;
-        }
-        if(motor_output->motor4 > 2000){
-            motor_output->motor4 = 2000;
+        if(motor_output->motor4 > 1000){
+            motor_output->motor4 = 1000;
         }
 
-    if(motor_output->motor1 < 50){
-        motor_output->motor1 = 50;
+    if(motor_output->motor1 < 100){
+        motor_output->motor1 = 100;
     }
-    if(motor_output->motor2 <50 ){
-        motor_output->motor2 = 50;
+    if(motor_output->motor2 < 100){
+        motor_output->motor2 = 100;
     }
-    if(motor_output->motor3 < 50){
-        motor_output->motor3 = 50;
+    if(motor_output->motor3 < 100){
+        motor_output->motor3 = 100;
     }
-    if(motor_output->motor4 < 50){
-        motor_output->motor4 = 50;
+    if(motor_output->motor4 < 100){
+        motor_output->motor4 = 100;
     }
 
 
@@ -137,8 +137,8 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
 }
 
 void init_mixer_percentages(mixer_handle_t *mixer_h){
-    mixer_h->percentages.roll = 0.50;
-    mixer_h->percentages.pitch = 0.50;
-    mixer_h->percentages.yaw = 0.50;
-    mixer_h->percentages.throttle = 1.0;
+    mixer_h->percentages.roll = 0.25;
+    mixer_h->percentages.pitch = 0.25;
+    mixer_h->percentages.yaw = 0.25;
+    mixer_h->percentages.throttle = 0.55;
 }

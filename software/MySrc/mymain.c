@@ -15,6 +15,8 @@
 #define LOG_LEVEL LOG_LEVEL_DEBUG
 // check version.h for version settings
 
+
+
 /* EOF SETTINGS */
 
 IMU_handle_t imu_h;
@@ -57,18 +59,18 @@ int16_t received_data[16];
 
 bool is_armed_flag = false;
 
-cli_handle_t cli_h;
+//cli_handle_t cli_h;
 crsf_handle_t crsf_h;
 
 static void flight_ctrl_cycle(void);
 
 void myinit(void) {
     cli_h.halt_until_connected_flag = true; //set to false if you don't want to wait for a connection
-
+    //delay(3000);
     log_init(LOG_LEVEL, true);
     LED_on();
 
-    cli_init(&cli_h); //will block if halt_until_connected_flag is true
+   cli_init(&cli_h); //will block if halt_until_connected_flag is true
 
     delay(1);
     LOGI("Starting Initialization...");
@@ -78,6 +80,8 @@ void myinit(void) {
 
 
     //init imu
+
+
     log_imu_err(imu_init(&imu_h));
 
     //elrs init
@@ -85,13 +89,16 @@ void myinit(void) {
 
     init_mixer_percentages(&motor_mixer_h);
     pid_init(&pids_h);
-
+    //delay(10);
     // motors init
-//    motors_init(&motors_h, &m1_h, &m2_h, &m3_h, &m4_h);
-//    dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);
-//    dshot_init(&m2_h, &htim1, &hdma_tim1_ch1, TIM_CHANNEL_1);
-//    dshot_init(&m3_h, &htim8, &hdma_tim8_ch4_trig_com, TIM_CHANNEL_4);
-//    dshot_init(&m4_h, &htim8, &hdma_tim8_ch3, TIM_CHANNEL_3);
+
+    //delay(10);
+    dshot_init(&m1_h, &htim1, &hdma_tim1_ch2, TIM_CHANNEL_2);
+    dshot_init(&m2_h, &htim1, &hdma_tim1_ch1, TIM_CHANNEL_1);
+    dshot_init(&m3_h, &htim8, &hdma_tim8_ch4_trig_com, TIM_CHANNEL_4);
+    dshot_init(&m4_h, &htim8, &hdma_tim8_ch3, TIM_CHANNEL_3);
+    motors_init(&motors_h, &m1_h, &m2_h, &m3_h, &m4_h);
+
 //     ----- end initialization code ----- //
 
     delay(1);
@@ -110,7 +117,7 @@ void mymain(void) {
     while (1) { //todo has to be replaced by a scheduler
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-        //none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
+        none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
         //none_blocking_delay(500, &imu_process_last_ms, (callback_t) imu_process, &imu_h);
         flight_ctrl_cycle();
     }
@@ -130,6 +137,7 @@ static void flight_ctrl_cycle(void) {
     channel_data.thr= map(received_data[2], 172, 1811, 50, 2012);
     channel_data.roll = map(received_data[3], 172, 1811, -500, 500);
     temp = map(received_data[4],172,1811,988,2012);
+
     if(((int16_t) received_data[4]) > 1500){
         is_armed_flag = true;
     }
@@ -178,5 +186,11 @@ static void flight_ctrl_cycle(void) {
     motor_set_throttle(&motors_h,4, motor_output.motor4);
 
 }
-   delay(50);
+    else{
+        //motor_stop(&motors_h,1);
+        motors_stop(&motors_h);
+        LOGD("Motors stopped");
+    }
+    //delay(1);
+   //delay(50);
 }

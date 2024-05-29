@@ -64,7 +64,7 @@ IMU_err_t imu_init(IMU_handle_t *imu_h) {
     imu_h->bmi.intf = BMI2_SPI_INTF;
     imu_h->bmi.read = (bmi2_read_fptr_t)imu_spi_read_reg;
     imu_h->bmi.write = (bmi2_write_fptr_t)imu_spi_write_reg;
-    imu_h->bmi.delay_us = (bmi2_delay_fptr_t)delay_us;
+    imu_h->bmi.delay_us = (bmi2_delay_fptr_t)imu_delay_us;
 
     LOGI("bmi270 init");
     delay(10); // RWBA

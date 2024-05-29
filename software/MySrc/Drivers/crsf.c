@@ -125,7 +125,7 @@ void crsf_process(crsf_handle_t * crsf_h, int16_t *data){
             HAL_UART_Receive_IT(crsf_h->huart, start_data, 3);
         }
         else{
-            LOGD("wrong frame type");
+            //LOGD("wrong frame type");
             state = wait_for_sync;
             HAL_UART_Receive_IT(crsf_h->huart, start_data, 3);
         }
