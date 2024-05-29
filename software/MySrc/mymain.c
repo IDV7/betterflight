@@ -130,7 +130,7 @@ static void flight_ctrl_cycle(void) {
     crsf_process(&crsf_h, received_data);
 
     //LOGD("Data: yaw=%d pitch=%d thr=%d roll=%d, arm: %d", received_data[0], received_data[1], received_data[2], received_data[3],received_data[4]);
-    delay(10);
+    //delay(10);
     channel_data.yaw = map( received_data[0], 172, 1811, -500, 500);
     channel_data.pitch = map(received_data[1], 172, 1811, -500, 500);
     channel_data.thr= map(received_data[2], 172, 1811, 50, 2012);

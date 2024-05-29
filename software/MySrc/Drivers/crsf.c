@@ -135,7 +135,7 @@ void crsf_process(crsf_handle_t * crsf_h, int16_t *data){
     else if(state == wait_for_sync){
         HAL_UART_Receive_IT(crsf_h->huart, start_data, 3);
        // LOGD("Waiting for sync");
-        HAL_Delay(10);
+        //HAL_Delay(10);
     }
     else if(state == receiving_data){
 
@@ -143,11 +143,12 @@ void crsf_process(crsf_handle_t * crsf_h, int16_t *data){
         HAL_UART_Receive_IT(crsf_h->huart, incoming_data, start_data_saved[1]);
         //LOGD("Receiving data");
         if (print_start_flag == true){
+            /*
             for (int i = 0; i < 3; ++i) {
 
                // LOGD("start_data[%u]=%u ", i, start_data_saved[i]);
-                HAL_Delay(10);
-            }
+                //HAL_Delay(10);
+            }*/
             print_start_flag = false;
         }
 
