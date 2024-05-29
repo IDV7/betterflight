@@ -9,6 +9,8 @@
 #include <string.h>
 
 #include "misc.h"
+#include "mymain.h"
+#include "cli.h"
 
 log_handle_t logging;
 
@@ -66,6 +68,7 @@ void log_msg(log_level_t log_level, const char *format, va_list args) {
 }
 
 void LOGD(const char *format, ...) {
+    if (cli_h.cli_disable_log_opt) return; // to save cpu time when needed
     va_list args;
     va_start(args, format);
     log_msg(LOG_LEVEL_DEBUG, format, args);
@@ -73,6 +76,7 @@ void LOGD(const char *format, ...) {
 }
 
 void LOGI(const char *format, ...) {
+    if (cli_h.cli_disable_log_opt) return; // to save cpu time when needed
     va_list args;
     va_start(args, format);
     log_msg(LOG_LEVEL_INFO, format, args);
@@ -80,6 +84,7 @@ void LOGI(const char *format, ...) {
 }
 
 void LOGW(const char *format, ...) {
+    if (cli_h.cli_disable_log_opt) return; // to save cpu time when needed
     va_list args;
     va_start(args, format);
     log_msg(LOG_LEVEL_WARN, format, args);
@@ -87,6 +92,7 @@ void LOGW(const char *format, ...) {
 }
 
 void LOGE(const char *format, ...) {
+    if (cli_h.cli_disable_log_opt) return; // to save cpu time when needed
     va_list args;
     va_start(args, format);
     log_msg(LOG_LEVEL_ERROR, format, args);
@@ -94,6 +100,7 @@ void LOGE(const char *format, ...) {
 }
 
 void LOG(const char *format, ...) {
+    if (cli_h.cli_disable_log_opt) return; // to save cpu time when needed
     va_list args;
     va_start(args, format);
 

@@ -11,11 +11,18 @@
 #include "imu.h"
 #include "crsf.h"
 #include "pid_controller.h"
-/* SETTINGS */
-#define LOG_LEVEL LOG_LEVEL_DEBUG
-// check version.h for version settings
 
-/* EOF SETTINGS */
+
+#define LOG_LEVEL LOG_LEVEL_DEBUG
+
+// for precise timing related debugging (measured with logic analyzer)
+#define SET_S2(x) ((x) ? (GPIOB->BSRR = (GPIO_PIN_4 << 16)) : (GPIOB->BSRR = GPIO_PIN_4))
+#define SET_S3(x) ((x) ? (GPIOB->BSRR = (GPIO_PIN_5 << 16)) : (GPIOB->BSRR = GPIO_PIN_5))
+#define SET_S4(x) ((x) ? (GPIOB->BSRR = (GPIO_PIN_0 << 16)) : (GPIOB->BSRR = GPIO_PIN_0))
+#define SET_S5(x) ((x) ? (GPIOB->BSRR = (GPIO_PIN_1 << 16)) : (GPIOB->BSRR = GPIO_PIN_1))
+#define SHIGH 1
+#define SLOW 0
+
 
 IMU_handle_t imu_h;
 cli_handle_t cli_h;
@@ -48,29 +55,26 @@ crsf_handle_t crsf_h;
 static void flight_ctrl_cycle(void);
 
 void myinit(void) {
-    cli_h.halt_until_connected_flag = true; //set to false if you don't want to wait for a connection
+    cli_h.halt_until_connected_opt = true; //set to false if you don't want to wait for a connection
+    cli_h.enable_tx_buffering_opt = false; //false for init (procces has to be runned to put out buffered data)
+    cli_h.cli_disable_log_opt = false;
+
+
 
     log_init(LOG_LEVEL, true);
     LED_on();
 
     setup_delay_us_tim();
 
-    cli_init(&cli_h); //will block if halt_until_connected_flag is true
+    cli_init(&cli_h); //will block(halt) if halt_until_connected_opt is true (until a connection is made)
 
-    delay(1);
     LOGI("Starting Initialization...");
-    delay(1);
 
     // ----- all initialization code goes here ----- //
 
 
     //init imu
-    if(imu_init(&imu_h) == IMU_OK) {
-        for (int i = 0; i < 100; i++) {
-            LED_toggle();
-            delay(20);
-        }
-    };
+    log_imu_err(imu_init(&imu_h));
 
     //elrs init
     crsf_init(&crsf_h, &huart2);
@@ -84,14 +88,25 @@ void myinit(void) {
     motors_init(&motors_h, &m1_h, &m2_h, &m3_h, &m4_h);
 //     ----- end initialization code ----- //
 
-    delay(1);
     LOGI("Finished Initialization");
-    delay(1);
+
+//    SET_S2(SHIGH);
+//    SET_S3(SHIGH);
+//    SET_S4(SHIGH);
+//    SET_S5(SHIGH);
+//
+//    delay_us(25);
+//
+//    SET_S2(SLOW);
+//    SET_S3(SLOW);
+//    SET_S4(SLOW);
+//    SET_S5(SLOW);
 
 
     LED_blink_pattern(20, 2, 50, 50);
     LED_off();
 
+   // cli_h.enable_tx_buffering_opt = false; //enable tx buffering NOTE: data will be buffered from now on, and ONLY be sent when cli_process is called!!
 }
 
 
@@ -120,3 +135,4 @@ void mymain(void) {
 //    // update pid controllers
 //
 //}
+

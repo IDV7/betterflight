@@ -67,11 +67,11 @@ IMU_err_t imu_init(IMU_handle_t *imu_h) {
     imu_h->bmi.delay_us = (bmi2_delay_fptr_t) imu_delay_us_wrapper;
 
     LOGI("bmi270 init");
-    delay(10); // RWBA
+    delay(1);
     rslt = bmi270_init(&imu_h->bmi);
-    delay(10); // RWBA
+    delay(1);
     bmi2_error_codes_print_result(rslt);
-    delay(10); // RWBA
+    delay(1);
 
     if (rslt != BMI2_OK) return IMU_ERR_BMI_INIT;
 
@@ -135,7 +135,7 @@ void imu_process(IMU_handle_t *imu_h) {
         else // if only gyro is not ready
             imu_h->last_err = IMU_WARN_GYRO_READ_NOT_READY;
     }
-    LOGD("acc: %f | %f | %f, gyr: %.2f | %.2f | %.2f", imu_h->acc_x, imu_h->acc_y, imu_h->acc_z, imu_h->gyr_x, imu_h->gyr_y, imu_h->gyr_z);
+    //LOGD("acc: %f | %f | %f, gyr: %.2f | %.2f | %.2f", imu_h->acc_x, imu_h->acc_y, imu_h->acc_z, imu_h->gyr_x, imu_h->gyr_y, imu_h->gyr_z);
 }
 // alias for SPI_soft_read (to feed in spi_h handler struct)
 int8_t imu_spi_soft_trx_wrapper(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {

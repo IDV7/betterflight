@@ -28,6 +28,8 @@
 void cli_handle_cmd(cli_handle_t *cli_h);
 
 void cli_process(void *arg) {
+
+
     if (arg == NULL) {
         LOGE("cli_process: arg is NULL! Not processing cli... unsafe!");
         return;
@@ -42,12 +44,20 @@ void cli_process(void *arg) {
     }
 
     //write data (from buffer)
+    if (CLI_h->enable_tx_buffering_opt && !CLI_h->tx_buff_empty_flag) { //if we are told there is data or if there is any data left
+        CDC_Transmit_FS((uint8_t*) CLI_h->cli_tx_buffer, CLI_h->tx_buffer_len);
+        CLI_h->tx_buff_empty_flag = true;
+        CLI_h->tx_buffer_len = 0;
+    }
 }
 
 void cli_init(cli_handle_t *CLI_h) {
     LOGD("CLI Init...");
 
     CLI_h->cli_connected_flag = false;
+    CLI_h->new_data_flag = false;
+    CLI_h->tx_buff_empty_flag = true;
+    CLI_h->tx_buffer_len = 0;
 
     uint8_t version_string[10];
     VERSION_TO_STRING(CLI_VERSION, version_string);
@@ -59,13 +69,12 @@ void cli_init(cli_handle_t *CLI_h) {
         CLI_h->cmd_list[i].cmd_callback = NULL;
     }
 
-    CLI_h->new_data_flag = false;
 
     //TODO: memory leak/buffer overflow here... fix before uncommenting 'add_commands(CLI_h);'
     add_commands(CLI_h);
 
     //wait for connection
-    if (CLI_h->cli_connected_flag == false && CLI_h->halt_until_connected_flag == true) {
+    if (CLI_h->cli_connected_flag == false && CLI_h->halt_until_connected_opt == true) {
         LOGD("Waiting for connection...");
         while (CLI_h->cli_connected_flag == false) {
             LED_toggle();
@@ -169,11 +178,41 @@ void cli_rx_callback(cli_handle_t* CLI_h) {
     //TODO: Add a true callback...
 }
 
+#define RETRIES 5
+#define RETRY_DELAY_US 100 //us
+
 int _write(int file, char *ptr, int len) {
+    if (cli_h.cli_disable_log_opt) return 0; //return 0 "success but no bytes were sent"
+
     if (file == STDOUT_FILENO || file == STDERR_FILENO) {
-        CDC_Transmit_FS((uint8_t *)ptr, len);
+        if (cli_h.enable_tx_buffering_opt && cli_h.cli_connected_flag) {
+            for (int i = 0; i < len; i++) {
+                if (cli_h.tx_buffer_len > CLI_TX_BUFF_SIZE - 1) {
+                    break;
+                }
+                cli_h.cli_tx_buffer[cli_h.tx_buffer_len] = ptr[i];
+                cli_h.tx_buffer_len++;
+            }
+            //add \n
+            cli_h.tx_buffer_len++;
+            cli_h.cli_tx_buffer[cli_h.tx_buffer_len] = '\n';
+
+            cli_h.tx_buff_empty_flag = false;
+        }
+        else if (cli_h.cli_connected_flag) {
+            uint8_t rslt = CDC_Transmit_FS((uint8_t*)ptr, len);
+            if (rslt == USBD_BUSY){
+                for (int i = 0; i < RETRIES; i++){
+                    delay_us(RETRY_DELAY_US);
+                    rslt = CDC_Transmit_FS((uint8_t*)ptr, len);
+                    if (rslt == USBD_OK){
+                        break;
+                    }
+                }
+            }
+        }
         return len;
     }
-    errno = EBADF;
-    return -1;
+        errno = EBADF;
+        return -1;
 }

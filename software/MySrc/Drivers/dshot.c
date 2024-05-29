@@ -62,12 +62,12 @@ void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleType
 void dshot_process(dshot_handle_t * dshot_h) {
 
     // warm user if dshot_process is not called every 2ms, esc might disarm if not send a new frame every so often
-    static uint64_t last_time = 0;
-    uint64_t current_time = millis;
-    if (last_time != 0 && (current_time - last_time) > 2) {
-        LOGW((uint8_t*)"More than 1ms has been past since DSHOT PROCESS has been called, motor may disconnect!");
-    }
-    last_time = current_time;
+//    static uint64_t last_time = 0;
+//    uint64_t current_time = millis;
+//    if (last_time != 0 && (current_time - last_time) > 2) {
+//        LOGW((uint8_t*)"More than 1ms has been past since DSHOT PROCESS has been called, motor may disconnect!");
+//    }
+//    last_time = current_time;
 
     //cmd timeout
     if (dshot_h->cmd_cnts->send_count == -1) {
