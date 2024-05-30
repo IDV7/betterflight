@@ -15,9 +15,6 @@
 
 #define LOG_LEVEL LOG_LEVEL_DEBUG
 
-// for precise timing related debugging (measured with logic analyzer)
-#define S2_HIGH (GPIOB->BSRR = GPIO_PIN_4)
-#define S2_LOW (GPIOB->BSRR = (GPIO_PIN_4 << 16))
 
 IMU_handle_t imu_h;
 cli_handle_t cli_h;
@@ -107,37 +104,44 @@ void myinit(void) {
     LED_off();
 
     cli_h.enable_tx_buffering_opt = true; //enable tx buffering NOTE: data will be buffered from now on, and ONLY be sent when cli_process is called!!
-    cli_h.disable_log_opt = false;
+    cli_h.disable_log_opt = true;
 }
 
-
+static void S2_toggle(void) {
+    static uint8_t state = 0;
+    if (state) {
+        S2_HIGH;
+    } else {
+        S2_LOW;
+    }
+    state = !state;
+}
 
 void mymain(void) {
     while (1) { //todo has to be replaced by a scheduler
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
         none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-        none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
-        //none_blocking_delay(500, &imu_process_last_ms, (callback_t) imu_process, &imu_h);
+        //none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
+
+//        S2_HIGH;
         flight_ctrl_cycle();
+//        S2_LOW;
+        delay_us(500);
     }
 }
 
 static void flight_ctrl_cycle(void) {
-    //crsf + imu =>pid's=>motor mixe
-    int16_t temp;
 
     // update elrs channels
     crsf_process(&crsf_h, received_data);
 
     //LOGD("Data: yaw=%d pitch=%d thr=%d roll=%d, arm: %d", received_data[0], received_data[1], received_data[2], received_data[3],received_data[4]);
-    //delay(10);
     channel_data.yaw = map( received_data[0], 172, 1811, -500, 500);
     channel_data.pitch = map(received_data[1], 172, 1811, -500, 500);
     channel_data.thr= map(received_data[2], 172, 1811, 50, 2012);
     channel_data.roll = map(received_data[3], 172, 1811, -500, 500);
-    temp = map(received_data[4],172,1811,988,2012);
 
-    if(((int16_t) received_data[4]) > 1500){
+    if(map(received_data[4],172,1811,988,2012) > 1500){
         is_armed_flag = true;
     }
     else{
@@ -145,51 +149,51 @@ static void flight_ctrl_cycle(void) {
     }
     //LOGD("Channel data: roll=%d pitch=%d yaw=%d throttle=%d, arm %d", channel_data.roll, channel_data.pitch, channel_data.yaw, channel_data.thr, temp);
 
+//    static bool last_armed_state = false;
+//    if(is_armed_flag != last_armed_state){
+//        if(is_armed_flag){
+//            LOGI("Armed");
+//        } else{
+//            LOGI("Disarmed");
+//        }
+//        last_armed_state = is_armed_flag;
+//    }
 
-    if(is_armed_flag == true){
 
+    if(is_armed_flag == true) {
+        // update imu data
+        if (imu_h.last_err == IMU_OK) {
+            imu_process(&imu_h);
+            imu_data.roll = imu_h.gyr_x;
+            imu_data.pitch = imu_h.gyr_y;
+            imu_data.yaw = imu_h.gyr_z;
+        }
+        //calculate setpoints
+        s_points.roll_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.roll, (float) 0.2, (float) 0.2);
+        s_points.pitch_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.pitch, (float) 0.2, (float) 0.2);
+        s_points.yaw_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.yaw, (float) 0.2, (float) 0.2);
 
-    // update imu data
-    if (imu_h.last_err == IMU_OK) {
-        imu_process(&imu_h);
-    }
-    imu_data.roll = imu_h.gyr_x;
-    imu_data.pitch = imu_h.gyr_y;
-    imu_data.yaw = imu_h.gyr_z;
+        //LOGD("setpoints: roll=%d pitch=%d yaw=%d", s_points.roll_set_point.sp, s_points.pitch_set_point.sp, s_points.yaw_set_point.sp);
+        // update pid controllers
+        //LOGD("imu data: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
+        set_pids(&pids_h, &imu_data, &s_points, &pid_vals);
+        //LOGD("pid vals: roll=%d pitch=%d yaw=%d throttle %d", pid_vals.roll_pid, pid_vals.pitch_pid, pid_vals.yaw_pid, channel_data.thr);
 
-    //calculate setpoints
-    s_points.roll_set_point.sp = set_point_calculation(&pids_h.setp,channel_data.roll,(float) 0.2,(float)0.2);
-    s_points.pitch_set_point.sp = set_point_calculation(&pids_h.setp,channel_data.pitch,(float)0.2,(float)0.2);
-    s_points.yaw_set_point.sp = set_point_calculation(&pids_h.setp,channel_data.yaw,(float)0.2,(float)0.2);
+        // update motor mixer
+        motor_mixer_h.input.yaw = pid_vals.yaw_pid;
+        motor_mixer_h.input.roll = pid_vals.roll_pid;
+        motor_mixer_h.input.pitch = pid_vals.pitch_pid;
+        motor_mixer_h.input.throttle = channel_data.thr;
+        mixing(&motor_mixer_h, &motor_output);
+//        LOGD("motor output: motor1=%d motor2=%d motor3=%d motor4=%d", motor_output.motor1, motor_output.motor2,
+//             motor_output.motor3, motor_output.motor4);
+        motor_set_throttle(&motors_h, 1, motor_output.motor1);
+        motor_set_throttle(&motors_h, 2, motor_output.motor2);
+        motor_set_throttle(&motors_h, 3, motor_output.motor3);
+        motor_set_throttle(&motors_h, 4, motor_output.motor4);
 
-    //LOGD("setpoints: roll=%d pitch=%d yaw=%d", s_points.roll_set_point.sp, s_points.pitch_set_point.sp, s_points.yaw_set_point.sp);
-        //delay(10);
-    // update pid controllers
-    //LOGD("imu data: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
-       // delay(10);
-    set_pids(&pids_h, &imu_data, &s_points, &pid_vals);
-    //LOGD("pid vals: roll=%d pitch=%d yaw=%d throttle %d", pid_vals.roll_pid, pid_vals.pitch_pid, pid_vals.yaw_pid, channel_data.thr);
-      //  delay(10);
-    // update motor mixer
-
-   // delay(1);
-    motor_mixer_h.input.yaw = pid_vals.yaw_pid;
-    motor_mixer_h.input.roll = pid_vals.roll_pid;
-    motor_mixer_h.input.pitch = pid_vals.pitch_pid;
-    motor_mixer_h.input.throttle = channel_data.thr;
-    mixing(&motor_mixer_h, &motor_output);
-    LOGD("motor output: motor1=%d motor2=%d motor3=%d motor4=%d", motor_output.motor1, motor_output.motor2, motor_output.motor3, motor_output.motor4);
-    motor_set_throttle(&motors_h,1, motor_output.motor1);
-    motor_set_throttle(&motors_h,2, motor_output.motor2);
-    motor_set_throttle(&motors_h,3, motor_output.motor3);
-    motor_set_throttle(&motors_h,4, motor_output.motor4);
-
-}
-    else{
-        //motor_stop(&motors_h,1);
+    } else{
         motors_stop(&motors_h);
-//        LOGD("Motors stopped");
     }
-    //delay(1);
-   //delay(50);
+    motors_process(&motors_h);
 }

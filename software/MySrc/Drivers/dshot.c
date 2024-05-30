@@ -68,7 +68,7 @@ void dshot_process(dshot_handle_t * dshot_h) {
 //        LOGW((uint8_t*)"More than 1ms has been past since DSHOT PROCESS has been called, motor may disconnect!");
 //    }
 //    last_time = current_time;
-
+        /*
     //cmd timeout
     if (dshot_h->cmd_cnts->send_count == -1) {
         dshot_h->cmd_cnts->delayms_after_cmd--;
@@ -88,7 +88,7 @@ void dshot_process(dshot_handle_t * dshot_h) {
         delay(260); //wait for beep to finish
         dshot_h->cmd_cnts->send_count--;
         return;
-    }
+    }*/
 
     //send stored value to motor
     dshot_send(dshot_h, dshot_h->throttle_value);

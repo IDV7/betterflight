@@ -6,7 +6,14 @@
 #include "cli.h"
 #include "motors.h"
 
+// for precise timing related debugging (measured with logic analyzer)
+#define S2_HIGH (GPIOB->BSRR = GPIO_PIN_4)
+#define S2_LOW (GPIOB->BSRR = (GPIO_PIN_4 << 16))
+
+
 extern cli_handle_t cli_h;
+
+
 
 //motors
 //extern dshot_handle_t *m1_h; // TIM1 CH2
