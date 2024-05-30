@@ -16,9 +16,9 @@ float power5(float x) {
 void limits_init(set_point_handle_t *set_point, int16_t min_imu_output, int16_t max_imu_output){
     set_point->stick_limits.min_stick_output = 1000;
     set_point->stick_limits.max_stick_output = 2000;
-    set_point->actual_rates.rc_rates = (float) 0.5;
+    set_point->actual_rates.rc_rates = (float) 0.7;
     set_point->actual_rates.rc_expo = (float) 0.1;
-    set_point->actual_rates.rates = (float) 0.7;
+    set_point->actual_rates.rates = (float) 0.8;
 }
 
 int16_t set_point_calculation(set_point_handle_t *set_point, int16_t stick_output,float rc_commandf, const float rc_commandfabs){

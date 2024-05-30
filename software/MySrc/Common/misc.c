@@ -178,5 +178,10 @@ void delay_us(uint16_t us) {
 }
 
 int16_t map(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t out_max) {
+    if(x < in_min) {
+       return out_min;
+    } else if(x > in_max) {
+        return out_max;
+    }
     return (int16_t )((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
 }

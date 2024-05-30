@@ -140,5 +140,5 @@ void init_mixer_percentages(mixer_handle_t *mixer_h){
     mixer_h->percentages.roll = 0.25;
     mixer_h->percentages.pitch = 0.25;
     mixer_h->percentages.yaw = 0.25;
-    mixer_h->percentages.throttle = 0.55;
+    mixer_h->percentages.throttle = 0.7;
 }

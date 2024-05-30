@@ -19,7 +19,7 @@
 IMU_handle_t imu_h;
 cli_handle_t cli_h;
 
-
+bool crc8_confirmed_flag = false;
 //general
 flight_axis_t channel_data;
 flight_measurements_t imu_data;
@@ -54,7 +54,7 @@ uint64_t flight_ctrl_cycle_last_ms = 0;
 
 crsf_handle_t crsf_h;
 
-int16_t received_data[16];
+uint32_t received_data[16];
 
 bool is_armed_flag = false;
 
@@ -103,8 +103,8 @@ void myinit(void) {
     LED_blink_pattern(20, 2, 50, 50);
     LED_off();
 
-    cli_h.enable_tx_buffering_opt = true; //enable tx buffering NOTE: data will be buffered from now on, and ONLY be sent when cli_process is called!!
-    cli_h.disable_log_opt = true;
+    cli_h.enable_tx_buffering_opt = false; //enable tx buffering NOTE: data will be buffered from now on, and ONLY be sent when cli_process is called!!
+    cli_h.disable_log_opt = false;
 }
 
 static void S2_toggle(void) {
@@ -117,6 +117,7 @@ static void S2_toggle(void) {
     state = !state;
 }
 
+
 void mymain(void) {
     while (1) { //todo has to be replaced by a scheduler
         none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
@@ -124,6 +125,7 @@ void mymain(void) {
         //none_blocking_delay(1, &motors_process_last_ms, (callback_t) motors_process, &motors_h);
 
 //        S2_HIGH;
+        motors_process(&motors_h);
         flight_ctrl_cycle();
 //        S2_LOW;
         delay_us(500);
@@ -133,34 +135,45 @@ void mymain(void) {
 static void flight_ctrl_cycle(void) {
 
     // update elrs channels
-    crsf_process(&crsf_h, received_data);
+    crsf_process(&crsf_h, received_data, &crc8_confirmed_flag);
 
-    //LOGD("Data: yaw=%d pitch=%d thr=%d roll=%d, arm: %d", received_data[0], received_data[1], received_data[2], received_data[3],received_data[4]);
-    channel_data.yaw = map( received_data[0], 172, 1811, -500, 500);
-    channel_data.pitch = map(received_data[1], 172, 1811, -500, 500);
-    channel_data.thr= map(received_data[2], 172, 1811, 50, 2012);
-    channel_data.roll = map(received_data[3], 172, 1811, -500, 500);
+if(crc8_confirmed_flag){
+    int16_t ch5 = map(received_data[4],172,1811,988,2012);
+    LOGD("received data ch5 %d, mapped ch5 %d", received_data[4], ch5);
 
-    if(map(received_data[4],172,1811,988,2012) > 1500){
+    if(ch5 > 1700){
         is_armed_flag = true;
     }
     else{
         is_armed_flag = false;
     }
-    //LOGD("Channel data: roll=%d pitch=%d yaw=%d throttle=%d, arm %d", channel_data.roll, channel_data.pitch, channel_data.yaw, channel_data.thr, temp);
 
-//    static bool last_armed_state = false;
-//    if(is_armed_flag != last_armed_state){
-//        if(is_armed_flag){
-//            LOGI("Armed");
-//        } else{
-//            LOGI("Disarmed");
-//        }
-//        last_armed_state = is_armed_flag;
-//    }
+
+
+
+    static bool last_armed_state = false;
+    if(is_armed_flag != last_armed_state){
+        if(is_armed_flag){
+            LOGI("Armed");
+        } else{
+            LOGI("Disarmed");
+        }
+        last_armed_state = is_armed_flag;
+    }
+  //see if arm and disarm work properly
+
 
 
     if(is_armed_flag == true) {
+        //LOGD("Data: yaw=%d pitch=%d thr=%d roll=%d, arm: %d", received_data[0], received_data[1], received_data[2], received_data[3],received_data[4]);
+        channel_data.yaw = map( received_data[0], 172, 1811, -300, 300);
+        channel_data.pitch = map(received_data[1], 172, 1811, -300, 300);
+        channel_data.thr= map(received_data[2], 172, 1811, 50, 2012);
+        channel_data.roll = map(received_data[3], 172, 1811, -300, 300);
+
+//        LOGD("Channel data: roll=%d pitch=%d yaw=%d throttle=%d, arm %d", channel_data.roll, channel_data.pitch, channel_data.yaw, channel_data.thr, map(received_data[4],172,1811,988,2012) );
+
+
         // update imu data
         if (imu_h.last_err == IMU_OK) {
             imu_process(&imu_h);
@@ -169,11 +182,11 @@ static void flight_ctrl_cycle(void) {
             imu_data.yaw = imu_h.gyr_z;
         }
         //calculate setpoints
-        s_points.roll_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.roll, (float) 0.2, (float) 0.2);
-        s_points.pitch_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.pitch, (float) 0.2, (float) 0.2);
-        s_points.yaw_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.yaw, (float) 0.2, (float) 0.2);
+        s_points.roll_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.roll, (float) 0.1, (float) 0.2);
+        s_points.pitch_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.pitch, (float) 0.1, (float) 0.2);
+        s_points.yaw_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.yaw, (float) 0.1, (float) 0.2);
 
-        //LOGD("setpoints: roll=%d pitch=%d yaw=%d", s_points.roll_set_point.sp, s_points.pitch_set_point.sp, s_points.yaw_set_point.sp);
+        LOGD("setpoints: roll=%d pitch=%d yaw=%d", s_points.roll_set_point.sp, s_points.pitch_set_point.sp, s_points.yaw_set_point.sp);
         // update pid controllers
         //LOGD("imu data: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
         set_pids(&pids_h, &imu_data, &s_points, &pid_vals);
@@ -185,8 +198,7 @@ static void flight_ctrl_cycle(void) {
         motor_mixer_h.input.pitch = pid_vals.pitch_pid;
         motor_mixer_h.input.throttle = channel_data.thr;
         mixing(&motor_mixer_h, &motor_output);
-//        LOGD("motor output: motor1=%d motor2=%d motor3=%d motor4=%d", motor_output.motor1, motor_output.motor2,
-//             motor_output.motor3, motor_output.motor4);
+        LOGD("motor output: motor1=%d motor2=%d motor3=%d motor4=%d", motor_output.motor1, motor_output.motor2,motor_output.motor3, motor_output.motor4);
         motor_set_throttle(&motors_h, 1, motor_output.motor1);
         motor_set_throttle(&motors_h, 2, motor_output.motor2);
         motor_set_throttle(&motors_h, 3, motor_output.motor3);
@@ -195,5 +207,6 @@ static void flight_ctrl_cycle(void) {
     } else{
         motors_stop(&motors_h);
     }
-    motors_process(&motors_h);
+    crc8_confirmed_flag = false;
+}
 }
