@@ -2,7 +2,7 @@
 
 void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
     int16_t motor_low_limit = 200;
-    int16_t motor_high_limit = 1000;
+    int16_t motor_high_limit = 1850;
 
     float throttle = ((float)mixer_h->input.throttle)*mixer_h->percentages.throttle;
     float roll = ((float)mixer_h->input.roll)* mixer_h->percentages.roll;
@@ -13,10 +13,10 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
 
 
 
-    motor_output->motor1 = (int16_t)((throttle + roll- pitch - yaw));
-    motor_output->motor2 = (int16_t)((throttle - roll - pitch + yaw));
-    motor_output->motor3 = (int16_t)((throttle - roll + pitch - yaw));
-    motor_output->motor4 = (int16_t)((throttle + roll + pitch + yaw));
+    motor_output->motor4 = (int16_t)((throttle + roll- pitch - yaw)); //must be motor 4 was motor 1
+    motor_output->motor3 = (int16_t)((throttle - roll - pitch + yaw)); //must be motor 3 was motor 2
+    motor_output->motor1 = (int16_t)((throttle - roll + pitch - yaw)); //must be motor 1 was motor 3
+    motor_output->motor2 = (int16_t)((throttle + roll + pitch + yaw)); //must be motor 2 was motor 4
 
         if(motor_output->motor1 > motor_high_limit){
             temp = motor_output->motor1 - motor_high_limit;
@@ -128,8 +128,8 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
 }
 
 void init_mixer_percentages(mixer_handle_t *mixer_h){
-    mixer_h->percentages.roll = 0.5;
-    mixer_h->percentages.pitch = 0.5;
-    mixer_h->percentages.yaw = 0.5;
-    mixer_h->percentages.throttle = 0.85;
+    mixer_h->percentages.roll = 0.8;
+    mixer_h->percentages.pitch = 0.8;
+    mixer_h->percentages.yaw = 0.8;
+    mixer_h->percentages.throttle = 0.8;
 }
