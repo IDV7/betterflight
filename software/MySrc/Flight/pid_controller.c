@@ -12,9 +12,9 @@
 
 
 #define TAU 0.00065
-#define KD 0.6
-#define KI 0.4
-#define KP 1.2
+#define KP 0.6
+#define KI 0.2
+#define KD 1.8
 
 
 

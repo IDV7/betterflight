@@ -147,6 +147,7 @@ void mymain(void) {
 
         //imu_process(&imu_h);
         flight_ctrl_cycle();
+
         motors_process(&motors_h);
 
 
