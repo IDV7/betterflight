@@ -1,7 +1,7 @@
 #include "mymain.h"
 
 #include <stdio.h>
-
+#include "math.h"
 #include "main.h"
 #include "misc.h"
 #include "log.h"
@@ -129,9 +129,9 @@ void log_stats(void){
     if (cli_h.cli_connected_flag) {
         //LOGD("HAL_TIM_CNT: %d", __HAL_TIM_GET_COUNTER(&htim2));
 //        LOGI("Flight cycle time (target is 625us): %dus", flight_cycle_time);
-        LOGD("gyr: roll=%.2f pitch=%.2f yaw=%.2f", imu_data.roll, imu_data.pitch, imu_data.yaw);
-        LOGD("gyr: roll=%.2f pitch=%.2f yaw=%.2f (from imu_h)", imu_h.gyr.roll, imu_h.gyr.pitch, imu_h.gyr.yaw);
 
+        LOGD("gyr: roll=%.2f pitch=%.2f yaw=%.2f (from imu_h)", imu_h.gyr.roll, imu_h.gyr.pitch, imu_h.gyr.yaw);
+        LOGD("gyr: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
 //        LOGD("Armed: %d", is_armed_flag);
 
     }
@@ -145,7 +145,7 @@ void mymain(void) {
 
         // ----- times sensitive flight control code goes here ----- //
 
-        imu_process(&imu_h);
+        //imu_process(&imu_h);
         flight_ctrl_cycle();
         motors_process(&motors_h);
 
@@ -158,7 +158,7 @@ void mymain(void) {
                 // ----- all non-critical code goes here ----- //
                 none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
                 none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-                none_blocking_delay(1000, &log_stats_last_ms, (callback_t) log_stats, NULL);
+      //        none_blocking_delay(1000, &log_stats_last_ms, (callback_t) log_stats, NULL);
                 // ^^^^^ all non-critical code goes here ^^^^^ //
 
             }
@@ -201,18 +201,20 @@ static void flight_ctrl_cycle(void) {
             channel_data.yaw = map( received_data[3], 172, 1811, -500, 500);
 
             // update imu data
-//            if (imu_h.last_err == IMU_OK) {
-//                imu_process(&imu_h);
-                imu_data.roll = imu_h.gyr.roll;
-                imu_data.pitch = imu_h.gyr.pitch;
-                imu_data.yaw = imu_h.gyr.yaw;
-//            }
-//            else {
-//                imu_data.roll = 0;
-//                imu_data.pitch = 0;
-//                imu_data.yaw = 0;
-//                LOGE("IMU error: %d, was unable to read", imu_h.last_err);
-//            }
+            if (imu_h.last_err == IMU_OK) {
+                imu_process(&imu_h);
+                imu_data.roll = (int16_t) (imu_h.gyr.roll);
+                imu_data.pitch = (int16_t) imu_h.gyr.pitch;
+                imu_data.yaw = (int16_t) imu_h.gyr.yaw;
+                LOGD("gyr: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
+            }
+
+            else {
+                imu_data.roll = 0;
+                imu_data.pitch = 0;
+                imu_data.yaw = 0;
+                LOGE("IMU error: %d, was unable to read", imu_h.last_err);
+            }
 
             //calculate setpoints
             s_points.roll_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.roll, (float) 0.1, (float) 0.2);
