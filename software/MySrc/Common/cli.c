@@ -28,8 +28,6 @@
 void cli_handle_cmd(cli_handle_t *cli_h);
 
 void cli_process(void *arg) {
-
-
     if (arg == NULL) {
         LOGE("cli_process: arg is NULL! Not processing cli... unsafe!");
         return;

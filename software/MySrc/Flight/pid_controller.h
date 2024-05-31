@@ -21,7 +21,7 @@ typedef struct{
 }flight_pids_t;
 
 void get_set_points(flight_pids_t *drone_pids);
-void set_pids(flight_pids_t *drone_pids, flight_measurements_t *flight_measurements, set_points_t *set_ps, pids_val_t *pid_vals);
+void set_pids(flight_pids_t *drone_pids, flight_axis_int16_t *flight_measurements, set_points_t *set_ps, pids_val_t *pid_vals);
 void test_pid_controller(void);
 void pid_init(flight_pids_t *drone_pids);
 void pid_process(mixer_handle_t *mixer, flight_pids_t *drone_pids);

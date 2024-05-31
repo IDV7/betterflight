@@ -158,8 +158,8 @@ void delay_nop(uint32_t nops) {
 
 // for setting up tim3 for delay_us
 void setup_delay_us_tim() {
-    __HAL_RCC_TIM3_CLK_ENABLE();
-    delay_timer_h.Instance = TIM3;
+    __HAL_RCC_TIM12_CLK_ENABLE();
+    delay_timer_h.Instance = TIM12;
     delay_timer_h.Init.Prescaler = 95;  // APB2 - 1
     delay_timer_h.Init.CounterMode = TIM_COUNTERMODE_UP;
     delay_timer_h.Init.Period = 0xFFFF;  //max period

@@ -29,7 +29,7 @@ void pid_init(flight_pids_t *drone_pids){
 
 }
 
-void set_pids(flight_pids_t *drone_pids, flight_measurements_t *flight_measurements, set_points_t *set_ps, pids_val_t *pid_vals){
+void set_pids(flight_pids_t *drone_pids, flight_axis_int16_t *flight_measurements, set_points_t *set_ps, pids_val_t *pid_vals){
     //LOGD("Yaw setpoint: %d, Roll setpoint: %d, Pitch setpoint: %d", set_ps->yaw_set_point.sp, set_ps->roll_set_point.sp, set_ps->pitch_set_point.sp);
     drone_pids->pid_val.yaw_pid = pid_controller_update(&drone_pids->pid.yaw_pid, &pid_vals->yaw_pid, set_ps->yaw_set_point.sp, flight_measurements->yaw);
     drone_pids->pid_val.roll_pid = pid_controller_update(&drone_pids->pid.roll_pid, &pid_vals->roll_pid, set_ps->roll_set_point.sp, flight_measurements->roll);

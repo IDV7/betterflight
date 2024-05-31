@@ -62,7 +62,7 @@ void SPI_soft_init(SPI_handle_t *spi_h) {
 
 
 #define NOP_CNT 1 //5
-void SPI_soft_trx(SPI_handle_t *spi_h, uint8_t *tx_data, uint8_t *rx_data, uint32_t len) {
+void SPI_soft_trx(SPI_handle_t *spi_h, const uint8_t *tx_data, uint8_t *rx_data, uint32_t len) {
 
     // turn off interrupts
     __disable_irq();

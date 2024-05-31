@@ -8,16 +8,19 @@
 
 #include "imu.h"
 #include "bmi270.h" //has bmi2.h included => has bmi2_defs.h included
+#include "bmi2.h"
 #include <math.h>
 
 #include "log.h"
 #include "spi_soft.h"
+#include "mymain.h"
 
 
 #define GRAVITY_EARTH  (9.80665f)
 
 #define ACCEL          UINT8_C(0x00)
 #define GYRO           UINT8_C(0x01)
+
 
 
 static int8_t set_accel_gyro_config(struct bmi2_dev *bmi);
@@ -28,6 +31,7 @@ static int8_t set_accel_gyro_config(struct bmi2_dev *bmi);
 static float lsb_to_mps2(int16_t val, float g_range, uint8_t bit_width);
 static float lsb_to_dps(int16_t val, float dps, uint8_t bit_width);
 void bmi2_error_codes_print_result(int8_t rslt);
+
 
 
 // Initializes the BMI270 using the Bosch BMI270 API
@@ -57,14 +61,19 @@ IMU_err_t imu_init(IMU_handle_t *imu_h) {
     struct bmi2_sens_data sensor_data = { { 0 } };
     imu_h->sensor_data = sensor_data;
 
-    imu_h->acc_x = 0; imu_h->acc_y = 0; imu_h->acc_z = 0;
-    imu_h->gyr_x = 0; imu_h->gyr_y = 0; imu_h->gyr_z = 0;
+    //clear axis stucts
+    imu_h->acc.roll = 0;
+    imu_h->acc.pitch = 0;
+    imu_h->acc.yaw = 0;
+    imu_h->gyr.roll = 0;
+    imu_h->gyr.pitch = 0;
+    imu_h->gyr.yaw = 0;
 
     imu_h->bmi.intf_ptr = &imu_h->spi_h;
     imu_h->bmi.intf = BMI2_SPI_INTF;
-    imu_h->bmi.read = (bmi2_read_fptr_t) imu_spi_soft_trx_wrapper;
-    imu_h->bmi.write = (bmi2_write_fptr_t) imu_spi_soft_tx_wrapper;
-    imu_h->bmi.delay_us = (bmi2_delay_fptr_t) imu_delay_us_wrapper;
+    imu_h->bmi.read = (bmi2_read_fptr_t) spi_trx_api_wrapper;
+    imu_h->bmi.write = (bmi2_write_fptr_t) spi_tx_api_wrapper;
+    imu_h->bmi.delay_us = (bmi2_delay_fptr_t) delay_us_api_wrapper;
 
     LOGI("bmi270 init");
     delay(1);
@@ -85,12 +94,14 @@ IMU_err_t imu_init(IMU_handle_t *imu_h) {
 
     if (rslt != BMI2_OK) return IMU_ERR_SENSOR_ENABLE;
 
-    imu_h->config.type = BMI2_ACCEL;
     rslt = bmi2_get_sensor_config(&imu_h->config, 1, &imu_h->bmi);
     bmi2_error_codes_print_result(rslt);
 
     if (rslt != BMI2_OK) return IMU_ERR_GET_SENSOR_CONFIG;
 
+
+
+    imu_h->bmi.delay_us = (bmi2_delay_fptr_t) imu_no_delay_wrapper; // dummy delay funcptr to prevent api from delaying unnecessarily
     LOGI("bmi270 succesfully initialized");
     return IMU_OK;
 }
@@ -100,8 +111,6 @@ IMU_err_t imu_init(IMU_handle_t *imu_h) {
 // reads out the accelerometer and gyroscope data from the BMI270 and stores it in the IMU_handle_t struct
 void imu_process(IMU_handle_t *imu_h) {
     int8_t rslt;
-
-    struct bmi2_sens_data sensor_data = { { 0 } };
 
     rslt = bmi2_get_sensor_data(&imu_h->sensor_data, &imu_h->bmi);
     bmi2_error_codes_print_result(rslt);
@@ -115,9 +124,9 @@ void imu_process(IMU_handle_t *imu_h) {
     imu_h->last_err = IMU_OK; // "reset" last error
 
     if (imu_h->sensor_data.status & BMI2_DRDY_ACC) {
-        imu_h->acc_x = lsb_to_mps2(imu_h->sensor_data.acc.x, 2, 16);
-        imu_h->acc_y = lsb_to_mps2(imu_h->sensor_data.acc.y, 2, 16);
-        imu_h->acc_z = lsb_to_mps2(imu_h->sensor_data.acc.z, 2, 16);
+        imu_h->acc.roll = lsb_to_mps2(imu_h->sensor_data.acc.x, 2, 16);
+        imu_h->acc.pitch = lsb_to_mps2(imu_h->sensor_data.acc.y, 2, 16);
+        imu_h->acc.yaw = lsb_to_mps2(imu_h->sensor_data.acc.z, 2, 16);
 
     }
     else {
@@ -125,9 +134,9 @@ void imu_process(IMU_handle_t *imu_h) {
     }
 
     if (imu_h->sensor_data.status & BMI2_DRDY_GYR) {
-        imu_h->gyr_x = roundf(lsb_to_dps(imu_h->sensor_data.gyr.x, 2000, 16) * 100) / 100;
-        imu_h->gyr_y = roundf(lsb_to_dps(imu_h->sensor_data.gyr.y, 2000, 16) * 100) / 100;
-        imu_h->gyr_z = roundf(lsb_to_dps(imu_h->sensor_data.gyr.z, 2000, 16) * 100) / 100;
+        imu_h->gyr.roll = roundf(lsb_to_dps(imu_h->sensor_data.gyr.x, 2000, 16) * 100) / 100;
+        imu_h->gyr.pitch = roundf(lsb_to_dps(imu_h->sensor_data.gyr.y, 2000, 16) * 100) / 100;
+        imu_h->gyr.yaw = roundf(lsb_to_dps(imu_h->sensor_data.gyr.z, 2000, 16) * 100) / 100;
     }
     else {
         if (imu_h->last_err == IMU_WARN_ACC_READ_NOT_READY)  // if both acc and gyro are not ready
@@ -137,8 +146,33 @@ void imu_process(IMU_handle_t *imu_h) {
     }
     //LOGD("acc: %f | %f | %f, gyr: %.2f | %.2f | %.2f", imu_h->acc_x, imu_h->acc_y, imu_h->acc_z, imu_h->gyr_x, imu_h->gyr_y, imu_h->gyr_z);
 }
+
+#define BMI270_SPI_READ_MASK 0x80
+
+#define BMI270_GYR_START_REG 0x12
+#define BMI270_ACC_START_REG 0x0C
+
+
+void imu_get_gyr_data(IMU_handle_t *imu_h) {
+    static uint8_t tx_buffer[8] = {BMI270_GYR_START_REG | BMI270_SPI_READ_MASK, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    uint8_t rx_buffer[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+    SPI_soft_trx(&imu_h->spi_h, tx_buffer, rx_buffer, 8);
+
+    int16_t x = (int16_t) (rx_buffer[2] | (rx_buffer[1] << 8)); // 2x 8bit to 1x 16bit reconstruction
+    int16_t y = (int16_t) (rx_buffer[4] | (rx_buffer[3] << 8));
+    int16_t z = (int16_t) (rx_buffer[6] | (rx_buffer[5] << 8));
+
+    imu_h->gyr.roll = roundf(lsb_to_dps(x, 2000, 16) * 100) / 100;
+    imu_h->gyr.pitch = roundf(lsb_to_dps(y, 2000, 16) * 100) / 100;
+    imu_h->gyr.yaw = roundf(lsb_to_dps(z, 2000, 16) * 100) / 100;
+
+}
+
+
+
 // alias for SPI_soft_read (to feed in spi_h handler struct)
-int8_t imu_spi_soft_trx_wrapper(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {
+int8_t spi_trx_api_wrapper(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {
     len++; // add one byte for the reg_addr
 
     uint8_t tx_buffer[len];
@@ -151,14 +185,12 @@ int8_t imu_spi_soft_trx_wrapper(uint8_t reg_addr, uint8_t *reg_data, uint32_t le
     tx_buffer[0] = reg_addr;
 
     uint8_t rx_buffer[len];
-
     SPI_soft_trx((SPI_handle_t *)intf_ptr, tx_buffer, rx_buffer, len);
 
 
     // Copy the received data into reg_data, starting from rx_buffer[1]
     for (uint32_t i = 0; i < len - 1; i++) {
         reg_data[i] = rx_buffer[i + 1];
-        delay(1);
     }
 
     return 0;
@@ -166,7 +198,7 @@ int8_t imu_spi_soft_trx_wrapper(uint8_t reg_addr, uint8_t *reg_data, uint32_t le
 
 
 // alias for SPI_soft_write (to feed in spi_h handler struct)
-int8_t imu_spi_soft_tx_wrapper(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr) {
+int8_t spi_tx_api_wrapper(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr) {
     uint8_t tx_buffer[len + 1];
     tx_buffer[0] = reg_addr;
 
@@ -181,7 +213,7 @@ int8_t imu_spi_soft_tx_wrapper(uint8_t reg_addr, const uint8_t *reg_data, uint32
 }
 
 // delay_us has a max delay of 65535 us, compensate for this
-void imu_delay_us_wrapper(uint32_t period, void *intf_ptr) {
+void delay_us_api_wrapper(uint32_t period, void *intf_ptr) {
     period += 3; //to insure the api is not too tight on its timings
     if (period > 65500) { //for safety using 65500 instead of 65535
         uint32_t delay = period;
@@ -193,6 +225,11 @@ void imu_delay_us_wrapper(uint32_t period, void *intf_ptr) {
     } else {
         delay_us(period);
     }
+}
+
+// since the bmi270 wants to to delays when it doesn't need to, we give it a dummy delay function for after init
+void imu_no_delay_wrapper(uint32_t period, void *intf_ptr) {
+    // do nothing
 }
 
 void log_imu_err(IMU_err_t err) {
@@ -224,6 +261,9 @@ void log_imu_err(IMU_err_t err) {
         case IMU_WARN_GYRO_AND_ACC_READ_NOT_READY:
             LOGW("IMU_WARN_GYRO_AND_ACC_READ_NOT_READY (imu_process)");
             break;
+        case IMU_ERR_POC:
+            LOGE("IMU_ERR_POC (imu_init)");
+            break;
         default:
             LOGE("Unknown IMU_err_t: %d", err);
             break;
@@ -232,7 +272,7 @@ void log_imu_err(IMU_err_t err) {
 
 // logs gyro and acc data on one line
 void log_imu_data(IMU_handle_t *imu_h) {
-    LOGD("acc: %f %f %f, gyr: %f %f %f", imu_h->acc_x, imu_h->acc_y, imu_h->acc_z, imu_h->gyr_x, imu_h->gyr_y, imu_h->gyr_z);
+    LOGD("acc: %f %f %f, gyr: %f %f %f", imu_h->acc.roll, imu_h->acc.pitch, imu_h->acc.yaw, imu_h->gyr.roll, imu_h->gyr.pitch, imu_h->gyr.yaw);
 }
 
 
@@ -291,7 +331,7 @@ static int8_t set_accel_gyro_config(struct bmi2_dev *bmi)
 
         /* The user can change the following configuration parameters according to their requirement. */
         /* Set Output Data Rate */
-        config[GYRO].cfg.gyr.odr = BMI2_GYR_ODR_200HZ;
+        config[GYRO].cfg.gyr.odr = BMI2_GYR_ODR_1600HZ; // -> 625us cycle time
 
         /* Gyroscope Angular Rate Measurement Range.By default the range is 2000dps. */
         config[GYRO].cfg.gyr.range = BMI2_GYR_RANGE_2000;
@@ -304,7 +344,7 @@ static int8_t set_accel_gyro_config(struct bmi2_dev *bmi)
          *  0 -> Ultra low power mode(Default)
          *  1 -> High performance mode
          */
-        config[GYRO].cfg.gyr.noise_perf = BMI2_POWER_OPT_MODE;
+        config[GYRO].cfg.gyr.noise_perf = BMI2_PERF_OPT_MODE;
 
         /* Enable/Disable the filter performance mode where averaging of samples
          * will be done based on above set bandwidth and ODR.
@@ -315,6 +355,8 @@ static int8_t set_accel_gyro_config(struct bmi2_dev *bmi)
         config[GYRO].cfg.gyr.filter_perf = BMI2_PERF_OPT_MODE;
 
         /* Set the accel and gyro configurations. */
+
+
         rslt = bmi2_set_sensor_config(config, 2, bmi);
         bmi2_error_codes_print_result(rslt);
     }

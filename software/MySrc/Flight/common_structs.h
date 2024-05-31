@@ -2,6 +2,7 @@
 #define COMMON_STRUCTS_H
 
 #include <stdio.h>
+#include <stdint.h>
 
 //needed for mixer and motor control
 typedef struct {
@@ -30,7 +31,6 @@ typedef struct {
     set_point_t yaw_set_point;
     set_point_t roll_set_point;
     set_point_t pitch_set_point;
-
 }set_points_t;
 
 typedef struct{
@@ -53,7 +53,13 @@ typedef struct
     int16_t roll;
     int16_t pitch;
 
-}flight_measurements_t;
+}flight_axis_int16_t;
+
+typedef struct {
+    float yaw;
+    float roll;
+    float pitch;
+} flight_axis_float_t;
 
 
 
