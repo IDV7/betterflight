@@ -130,7 +130,7 @@ void log_stats(void){
         //LOGD("HAL_TIM_CNT: %d", __HAL_TIM_GET_COUNTER(&htim2));
 //        LOGI("Flight cycle time (target is 625us): %dus", flight_cycle_time);
 
-        LOGD("gyr: roll=%.2f pitch=%.2f yaw=%.2f (from imu_h)", imu_h.gyr.roll, imu_h.gyr.pitch, imu_h.gyr.yaw);
+       // LOGD("gyr: roll=%.2f pitch=%.2f yaw=%.2f (from imu_h)", imu_h.gyr.roll, imu_h.gyr.pitch, imu_h.gyr.yaw);
         LOGD("gyr: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
 //        LOGD("Armed: %d", is_armed_flag);
 
@@ -159,7 +159,7 @@ void mymain(void) {
                 // ----- all non-critical code goes here ----- //
                 none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
                 none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-      //        none_blocking_delay(1000, &log_stats_last_ms, (callback_t) log_stats, NULL);
+//       none_blocking_delay(1000, &log_stats_last_ms, (callback_t) log_stats, NULL);
                 // ^^^^^ all non-critical code goes here ^^^^^ //
 
             }
@@ -197,17 +197,17 @@ static void flight_ctrl_cycle(void) {
         if(is_armed_flag == true) {
 
             channel_data.roll = map(received_data[0], 172, 1811, -500, 500);
-            channel_data.pitch = map(received_data[1], 172, 1811, -500, 500);
+            channel_data.pitch = -(map(received_data[1], 172, 1811, -500, 500));
             channel_data.thr= map(received_data[2], 172, 1811, 200, 1700);
             channel_data.yaw = map( received_data[3], 172, 1811, -500, 500);
 
             // update imu data
             if (imu_h.last_err == IMU_OK) {
                 imu_process(&imu_h);
-                imu_data.roll = (int16_t) (imu_h.gyr.roll);
-                imu_data.pitch = (int16_t) imu_h.gyr.pitch;
-                imu_data.yaw = (int16_t) imu_h.gyr.yaw;
-                LOGD("gyr: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
+                imu_data.roll = (int16_t) (-imu_h.gyr.roll); //invert roll => different coordinate system imu vs sticks //31/05   20:50
+                imu_data.pitch = (int16_t) (imu_h.gyr.pitch);
+                imu_data.yaw = (int16_t) (-imu_h.gyr.yaw); //invert yaw => different coordinate system imu vs sticks
+               // LOGD("gyr: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
             }
 
             else {
@@ -221,11 +221,11 @@ static void flight_ctrl_cycle(void) {
             s_points.roll_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.roll, (float) 0.1, (float) 0.2);
             s_points.pitch_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.pitch, (float) 0.1, (float) 0.2);
             s_points.yaw_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.yaw, (float) 0.1, (float) 0.2);
-            LOGD("Setpoints: roll=%d pitch=%d yaw=%d", s_points.roll_set_point.sp, s_points.pitch_set_point.sp, s_points.yaw_set_point.sp);
+            //LOGD("Setpoints: roll=%d pitch=%d yaw=%d", s_points.roll_set_point.sp, s_points.pitch_set_point.sp, s_points.yaw_set_point.sp);
              // update pid controllers
 
             set_pids(&pids_h, &imu_data, &s_points, &pid_vals);
-            LOGD ("pid vals: yaw=%d roll=%d pitch=%d, throttle = %d", pid_vals.yaw_pid, pid_vals.roll_pid, pid_vals.pitch_pid, channel_data.thr);
+//            LOGD ("pid vals: yaw=%d roll=%d pitch=%d, throttle = %d", pid_vals.yaw_pid, pid_vals.roll_pid, pid_vals.pitch_pid, channel_data.thr);
 
             // update motor mixer
             motor_mixer_h.input.yaw = pid_vals.yaw_pid;
@@ -235,7 +235,7 @@ static void flight_ctrl_cycle(void) {
 
             mixing(&motor_mixer_h, &motor_output);
 
-            LOGD("motor output: motor1=%d motor2=%d motor3=%d motor4=%d", motor_output.motor1, motor_output.motor2,motor_output.motor3, motor_output.motor4);
+//            LOGD("motor output: motor1=%d motor2=%d motor3=%d motor4=%d", motor_output.motor1, motor_output.motor2,motor_output.motor3, motor_output.motor4);
             motor_set_throttle(&motors_h, 1, motor_output.motor1);
             motor_set_throttle(&motors_h, 2, motor_output.motor2);
             motor_set_throttle(&motors_h, 3, motor_output.motor3);
