@@ -158,7 +158,7 @@ void mymain(void) {
                 // ----- all non-critical code goes here ----- //
                 none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
                 none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-                none_blocking_delay(1000, &log_stats_last_ms, (callback_t) log_stats, NULL);
+//                none_blocking_delay(1000, &log_stats_last_ms, (callback_t) log_stats, NULL);
                 // ^^^^^ all non-critical code goes here ^^^^^ //
 
             }
@@ -234,7 +234,7 @@ static void flight_ctrl_cycle(void) {
 
             mixing(&motor_mixer_h, &motor_output);
 
-//            LOGD("motor output: motor1=%d motor2=%d motor3=%d motor4=%d", motor_output.motor1, motor_output.motor2,motor_output.motor3, motor_output.motor4);
+            LOGD("motor output: motor1=%d motor2=%d motor3=%d motor4=%d", motor_output.motor1, motor_output.motor2,motor_output.motor3, motor_output.motor4);
             motor_set_throttle(&motors_h, 1, motor_output.motor1);
             motor_set_throttle(&motors_h, 2, motor_output.motor2);
             motor_set_throttle(&motors_h, 3, motor_output.motor3);

@@ -10,7 +10,13 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
     float yaw = ((float)mixer_h->input.yaw)* mixer_h->percentages.yaw;
 
     uint16_t temp;
-
+/*
+ * [4]-------[2]
+ * |          |
+ * |          |
+ * |          |
+ * [3]-------[1]
+ */
 
 
     motor_output->motor4 = (int16_t)((throttle + pitch + roll - yaw)); //must be motor 4 was motor 1
