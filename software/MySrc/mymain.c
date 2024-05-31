@@ -128,10 +128,10 @@ uint32_t flight_cycle_time = 0;
 void log_stats(void){
     if (cli_h.cli_connected_flag) {
         //LOGD("HAL_TIM_CNT: %d", __HAL_TIM_GET_COUNTER(&htim2));
-//        LOGI("Flight cycle time (target is 625us): %dus", flight_cycle_time);
+        LOGI("Flight cycle time (target is 625us): %dus", flight_cycle_time);
 
        // LOGD("gyr: roll=%.2f pitch=%.2f yaw=%.2f (from imu_h)", imu_h.gyr.roll, imu_h.gyr.pitch, imu_h.gyr.yaw);
-        LOGD("gyr: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
+//        LOGD("gyr: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
 //        LOGD("Armed: %d", is_armed_flag);
 
     }
@@ -147,19 +147,18 @@ void mymain(void) {
 
         //imu_process(&imu_h);
         flight_ctrl_cycle();
-
         motors_process(&motors_h);
 
 
         // ^^^^^ end of time sensitive flight control code ^^^^^ //
 
         while (__HAL_TIM_GET_COUNTER(&htim_flight_cycle) < FLIGHT_CYCLE_FREQUENCY) { // do other stuff while waiting
-            if (__HAL_TIM_GET_COUNTER(&htim_flight_cycle) < (FLIGHT_CYCLE_FREQUENCY - (FLIGHT_CYCLE_FREQUENCY / 5))) { // if we are not near the last 20% of wait_time_us, we can do other stuff. else don't take risk of missing next flight cycle
+            if (__HAL_TIM_GET_COUNTER(&htim_flight_cycle) < (FLIGHT_CYCLE_FREQUENCY - (FLIGHT_CYCLE_FREQUENCY / 3))) { // if we are not near the last 20% of wait_time_us, we can do other stuff. else don't take risk of missing next flight cycle
 
                 // ----- all non-critical code goes here ----- //
                 none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
                 none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-//       none_blocking_delay(1000, &log_stats_last_ms, (callback_t) log_stats, NULL);
+                none_blocking_delay(1000, &log_stats_last_ms, (callback_t) log_stats, NULL);
                 // ^^^^^ all non-critical code goes here ^^^^^ //
 
             }

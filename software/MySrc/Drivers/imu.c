@@ -26,6 +26,7 @@
 static int8_t set_accel_gyro_config(struct bmi2_dev *bmi);
 static float lsb_to_mps2(int16_t val, float g_range, uint8_t bit_width);
 static float lsb_to_dps(int16_t val, float dps, uint8_t bit_width);
+static float lsb_to_dps_shifting(int16_t val, float dps, uint8_t bit_width);
 
 static int8_t set_accel_gyro_config(struct bmi2_dev *bmi);
 static float lsb_to_mps2(int16_t val, float g_range, uint8_t bit_width);
@@ -124,8 +125,8 @@ void imu_process(IMU_handle_t *imu_h) {
     imu_h->last_err = IMU_OK; // "reset" last error
 
     if (imu_h->sensor_data.status & BMI2_DRDY_ACC) {
-        imu_h->acc.roll = lsb_to_mps2(imu_h->sensor_data.acc.x, 2, 16);
-        imu_h->acc.pitch = lsb_to_mps2(imu_h->sensor_data.acc.y, 2, 16);
+        imu_h->acc.pitch = lsb_to_mps2(imu_h->sensor_data.acc.x, 2, 16); // values are remapped acording to chip orientation on pcb
+        imu_h->acc.roll = lsb_to_mps2(imu_h->sensor_data.acc.y, 2, 16);
         imu_h->acc.yaw = lsb_to_mps2(imu_h->sensor_data.acc.z, 2, 16);
 
     }
@@ -134,9 +135,9 @@ void imu_process(IMU_handle_t *imu_h) {
     }
 
     if (imu_h->sensor_data.status & BMI2_DRDY_GYR) {
-        imu_h->gyr.roll = roundf(lsb_to_dps(imu_h->sensor_data.gyr.x, 2000, 16) * 100) / 100;
-        imu_h->gyr.pitch = roundf(lsb_to_dps(imu_h->sensor_data.gyr.y, 2000, 16) * 100) / 100;
-        imu_h->gyr.yaw = roundf(lsb_to_dps(imu_h->sensor_data.gyr.z, 2000, 16) * 100) / 100;
+        imu_h->gyr.pitch = roundf(lsb_to_dps_shifting(imu_h->sensor_data.gyr.x, 2000, 16) * 100) / 100; // values are remapped acording to chip orientation on pcb
+        imu_h->gyr.roll = roundf(lsb_to_dps_shifting(imu_h->sensor_data.gyr.y, 2000, 16) * 100) / 100;
+        imu_h->gyr.yaw = roundf(lsb_to_dps_shifting(imu_h->sensor_data.gyr.z, 2000, 16) * 100) / 100;
     }
     else {
         if (imu_h->last_err == IMU_WARN_ACC_READ_NOT_READY)  // if both acc and gyro are not ready
@@ -388,6 +389,13 @@ static float lsb_to_dps(int16_t val, float dps, uint8_t bit_width)
     float half_scale = (float)((pow((double)power, (double)bit_width) / 2.0f));
 
     return (dps / (half_scale)) * (val);
+}
+
+static float lsb_to_dps_shifting(int16_t val, float dps, uint8_t bit_width)
+{
+    float half_scale = (float)(1 << (bit_width - 1));
+
+    return (dps / half_scale) * (float)val;
 }
 
 void bmi2_error_codes_print_result(int8_t rslt)
