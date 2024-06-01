@@ -1,13 +1,16 @@
+/*
+ * Running on STM32F722ret6
+ * using expresslrs (RF-transmitter and RF-receiver) and dshot protocol (ESC protocol for controlling the motors)
+ * BMI270 IMU is used to get the gyro data of the drone, accelerometer data can be implemented in the future to increase the stability of the drone
+ *
+ * The code in this file combines all the files into one coherent program and a flying drone
+ */
+
 #include "mymain.h"
 
-#include <stdio.h>
-#include "math.h"
 #include "main.h"
-#include "misc.h"
+#include "math.h"
 #include "log.h"
-#include "cli.h"
-#include "dshot.h"
-#include "motors.h"
 #include "imu.h"
 #include "crsf.h"
 #include "pid_controller.h"
@@ -49,16 +52,12 @@ motor_output_t motor_output;
 
 uint64_t led_toggle_last_ms = 0;
 uint64_t cli_process_last_ms = 0;
-uint64_t pid_controller_test_ms = 0;
 uint64_t log_stats_last_ms = 0;
-uint64_t motors_process_last_ms = 0;
-uint64_t imu_process_last_ms = 0;
-uint64_t flight_ctrl_cycle_last_ms = 0;
+
 
 crsf_handle_t crsf_h;
 
 uint32_t received_data[16];
-
 bool is_armed_flag = false;
 
 
@@ -145,7 +144,7 @@ void mymain(void) {
 
         // ----- times sensitive flight control code goes here ----- //
 
-        //imu_process(&imu_h);
+
         flight_ctrl_cycle();
         motors_process(&motors_h);
 
@@ -181,16 +180,6 @@ static void flight_ctrl_cycle(void) {
         else
             is_armed_flag = false;
 
-        //see if arm and disarm work properly
-        static bool last_armed_state = false;
-        if(is_armed_flag != last_armed_state){
-            if(is_armed_flag){
-                //LOGI("Armed");
-            } else{
-                //LOGI("Disarmed");
-            }
-            last_armed_state = is_armed_flag;
-        }
 
 
         if(is_armed_flag == true) {
@@ -219,11 +208,10 @@ static void flight_ctrl_cycle(void) {
             s_points.roll_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.roll, (float) 0.1, (float) 0.2);
             s_points.pitch_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.pitch, (float) 0.1, (float) 0.2);
             s_points.yaw_set_point.sp = set_point_calculation(&pids_h.setp, channel_data.yaw, (float) 0.1, (float) 0.2);
-            //LOGD("Setpoints: roll=%d pitch=%d yaw=%d", s_points.roll_set_point.sp, s_points.pitch_set_point.sp, s_points.yaw_set_point.sp);
-             // update pid controllers
 
+             // update pid controllers
             set_pids(&pids_h, &imu_data, &s_points, &pid_vals);
-//            LOGD ("pid vals: yaw=%d roll=%d pitch=%d, throttle = %d", pid_vals.yaw_pid, pid_vals.roll_pid, pid_vals.pitch_pid, channel_data.thr);
+
 
             // update motor mixer
             motor_mixer_h.input.yaw = pid_vals.yaw_pid;
@@ -233,7 +221,7 @@ static void flight_ctrl_cycle(void) {
 
             mixing(&motor_mixer_h, &motor_output);
 
-            LOGD("motor output: motor1=%d motor2=%d motor3=%d motor4=%d", motor_output.motor1, motor_output.motor2,motor_output.motor3, motor_output.motor4);
+
             motor_set_throttle(&motors_h, 1, motor_output.motor1);
             motor_set_throttle(&motors_h, 2, motor_output.motor2);
             motor_set_throttle(&motors_h, 3, motor_output.motor3);
