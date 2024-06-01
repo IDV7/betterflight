@@ -1,13 +1,14 @@
-//
-// Created by Isaak on 2/20/2024.
-//
+/*
 
+  The log module is a layer above printf that allows for easy logging of messages with different levels of importance.
+
+ */
 #ifndef BETTERFLIGHT_LOG_H
 #define BETTERFLIGHT_LOG_H
 
-#define ANSI_COLOR(code) ((code) == 0 ? "" : "\033[" #code "m")
-#include "misc.h"
 #include <stdint.h>
+
+#include "misc.h"
 
 typedef enum {
     LOG_LEVEL_DEBUG = 0,
@@ -39,11 +40,23 @@ typedef enum {
 
 void log_init(log_level_t log_level, bool color);
 log_level_t get_log_level();
+
+// Log debug message
 void LOGD(const char *format, ...);
+
+// Log info message
 void LOGI(const char *format, ...);
+
+// Log warning message
 void LOGW(const char *format, ...);
+
+// Log error message
 void LOGE(const char *format, ...);
+
+// Log generic message (no prefix)
 void LOG(const char *format, ...);
+
+// Log asiic hex dump
 void LOG_ascii_hex_dump(char *data);
 
 #endif //BETTERFLIGHT_LOG_H

@@ -1,16 +1,12 @@
-//
-// Created by Isaak on 2/20/2024.
-//
+
 #include "log.h"
 
-#include <stdint.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 
 #include "misc.h"
 #include "mymain.h"
-#include "cli.h"
 
 log_handle_t logging;
 
@@ -21,25 +17,6 @@ void log_init(log_level_t log_level, bool color) {
 
 log_level_t get_log_level() {
     return logging.level;
-}
-
-uint8_t * get_log_level_color_attr(log_level_t log_level) {
-    if (logging.color) {
-        switch (log_level) {
-            case LOG_LEVEL_DEBUG:
-                (uint8_t*)ANSI_COLOR(COLOR_DEBUG);
-            case LOG_LEVEL_INFO:
-                (uint8_t*)ANSI_COLOR(COLOR_INFO);
-            case LOG_LEVEL_WARN:
-                (uint8_t*)ANSI_COLOR(COLOR_WARN);
-            case LOG_LEVEL_ERROR:
-                (uint8_t*)ANSI_COLOR(COLOR_ERROR);
-            default:
-                return (uint8_t*)"";
-        }
-    } else {
-        return (uint8_t*)"";
-    }
 }
 
 void log_msg(log_level_t log_level, const char *format, va_list args) {
@@ -66,6 +43,7 @@ void log_msg(log_level_t log_level, const char *format, va_list args) {
     vprintf((char*)format, args);
     printf("\n");
 }
+
 
 void LOGD(const char *format, ...) {
     if (cli_h.disable_log_opt) return; // to save cpu time when needed
