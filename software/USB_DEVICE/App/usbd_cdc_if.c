@@ -49,7 +49,7 @@
   */
 
 /* USER CODE BEGIN PRIVATE_TYPES */
-extern uint8_t cli_rx_buffer[64];
+extern cli_handle_t cli_h;
 /* USER CODE END PRIVATE_TYPES */
 
 /**
@@ -266,11 +266,11 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 
   /* Added code - makes received data available to cli.c global buffer & calls cli_rx_callback */
   uint8_t len = (uint8_t) *Len;
-  memset(cli_rx_buffer, '\0', sizeof(cli_rx_buffer));
-  memcpy(cli_rx_buffer, Buf, len);
+  memset(cli_h.cli_rx_buffer, '\0', sizeof(cli_h.cli_rx_buffer));
+  memcpy(cli_h.cli_rx_buffer, Buf, len);
   memset(Buf, '\0', len);
 
-  cli_rx_callback(); // handle received data in cli.c
+  cli_rx_callback(&cli_h); // handle received data in cli.c
 
   return (USBD_OK);
   /* USER CODE END 6 */
