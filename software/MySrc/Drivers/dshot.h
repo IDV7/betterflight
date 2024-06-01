@@ -2,7 +2,9 @@
 #define BETTERFLIGHT_DSHOT_H
 
 #include "main.h"
+
 #include "misc.h"
+
 
 
 #define MOTOR_BIT_0 240 // ~33% duty cycle
@@ -79,10 +81,23 @@ typedef struct {
     dshot_cmd_info_t *cmd_cnts; //cmd and its counters (note: cmd_cnts->send_count = -1 means cmd timeout)
 } dshot_handle_t;
 
+// initializes the dshot handle with the given timer, dma and tim channel
 void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleTypeDef *hdma, uint32_t tim_channel);
+
+/*
+  this function should be called every 1ms to keep the esc armed
+  it does the actual sending data to the esc over dshot300
+  it uses DMA to send the data, so it doesn't block while sending
+ */
 void dshot_process(dshot_handle_t *dshot_h);
+
+// sets the throttle value for the motor
 void dshot_set_throttle(dshot_handle_t *dshot_h, uint16_t throttle);
+
+// sets the throttle value to 0
 void dshot_stop(dshot_handle_t *dshot_h);
+
+// sends a special command to the motor
 void dshot_send_special_command(dshot_handle_t *dshot_h, dshot_cmd_t cmd);
 
 #endif //BETTERFLIGHT_DSHOT_H

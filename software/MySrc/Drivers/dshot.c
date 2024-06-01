@@ -6,10 +6,12 @@
 
 
 #include "dshot.h"
-#include "main.h"
-#include "log.h"
+
 #include "stm32f7xx_hal_tim.h"
 
+#include "log.h"
+
+#define DISABLE_DSHOT_SPECIAL_COMMANDS
 
 static void dshot_prepare_packet(uint32_t *dma_buffer ,uint16_t value);
 static void dshot_dma_complete_callback(DMA_HandleTypeDef *hdma);
@@ -40,7 +42,7 @@ const dshot_cmd_info_t DSHOT_CMD_SEND_INFO[] = {
         {DSHOT_CMD_SIGNAL_LINE_CONTINUOUS_ERPM_PERIOD_TELEMETRY, 6, 0}
 };
 
-
+// initializes the dshot handle with the given timer, dma and tim channel
 void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleTypeDef *hdma, uint32_t tim_channel) {
     dshot_h->htim = htim;
     dshot_h->hdma = hdma;
@@ -58,24 +60,25 @@ void dshot_init(dshot_handle_t *dshot_h, TIM_HandleTypeDef *htim, DMA_HandleType
 
 }
 
-// CALL EVERY 1MS or esc will disconnect
+/*
+  this function should be called every 1ms to keep the esc armed
+  it does the actual sending data to the esc over dshot300
+  it uses DMA to send the data, so it doesn't block while sending
+ */
 void dshot_process(dshot_handle_t * dshot_h) {
 
-    // warm user if dshot_process is not called every 2ms, esc might disarm if not send a new frame every so often
-//    static uint64_t last_time = 0;
-//    uint64_t current_time = millis;
-//    if (last_time != 0 && (current_time - last_time) > 2) {
-//        LOGW((uint8_t*)"More than 1ms has been past since DSHOT PROCESS has been called, motor may disconnect!");
-//    }
-//    last_time = current_time;
         /*
+          dshot special commands are used to change esc settings, let the motors beep, reverse motors.
+          this is not needed to just fly a quadcopter and since it is not working reliably yet, it's disabled for safety
+         */
+#ifndef DISABLE_DSHOT_SPECIAL_COMMANDS
     //cmd timeout
     if (dshot_h->cmd_cnts->send_count == -1) {
         dshot_h->cmd_cnts->delayms_after_cmd--;
         if (dshot_h->cmd_cnts->delayms_after_cmd <= 0) { //if delay is over, reset sent counter
             dshot_h->cmd_cnts->send_count = 0;
         }
-//        dshot_send(dshot_h, dshot_h->throttle_value);
+        dshot_send(dshot_h, dshot_h->throttle_value);
         return;
     }
 
@@ -88,12 +91,13 @@ void dshot_process(dshot_handle_t * dshot_h) {
         delay(260); //wait for beep to finish
         dshot_h->cmd_cnts->send_count--;
         return;
-    }*/
-
+    }
+#endif
     //send stored value to motor
     dshot_send(dshot_h, dshot_h->throttle_value);
 }
 
+// sets throttle value to 0
 void dshot_stop(dshot_handle_t *dshot_h) {
     dshot_h->throttle_value = 0;
 }
@@ -109,6 +113,7 @@ void dshot_set_throttle(dshot_handle_t *dshot_h, uint16_t throttle) {
     dshot_h->throttle_value = throttle - DSHOT_MIN_THROTTLE;
 }
 
+// send a special command to the esc
 void dshot_send_special_command(dshot_handle_t *dshot_h, dshot_cmd_t cmd) {
     dshot_cmd_info_t cmd_info = dshot_find_special_cmd_info(cmd);
 
@@ -140,6 +145,7 @@ static void dshot_send(dshot_handle_t *dshot_h, const uint16_t value) {
     // when dma is done, the dma callback function will disable the dma channel.
 }
 
+// takes a value and fills a buffer following the dshot300 spec.
 static void dshot_prepare_packet(uint32_t *dma_buffer ,uint16_t value) {
     uint16_t packet = 0;
     bool dshot_telemetry = false;
@@ -167,25 +173,15 @@ static void dshot_prepare_packet(uint32_t *dma_buffer ,uint16_t value) {
     dma_buffer[16] = 0;
     dma_buffer[17] = 0;
 
-//    //print the dma buffer if value is below 47
-//    if (value < 47 && value != 0) {
-//        for (int i = 0; i < DSHOT_FRAME_SIZE + 2; i++) {
-//            delay(10);
-//            LOGD((uint8_t*)"dma_buffer[%d]: %d", i, dma_buffer[i]);
-//        }
-//            delay(10);
-//    }
 }
 
 
-
+// dma callback function, disables dma channel for this dshot output
 static void dshot_dma_complete_callback(DMA_HandleTypeDef *hdma) {
-    TIM_HandleTypeDef *htim = (TIM_HandleTypeDef *)((DMA_HandleTypeDef *)hdma)->Parent;
-    // find the correct dma channel and disable it
     dshot_dma_enable(hdma, false);
 }
 
-// true for enable, false for disable
+// it enables or disables the dma channels | true for enable, false for disable
 static void dshot_dma_enable(DMA_HandleTypeDef *hdma, bool enable) {
     TIM_HandleTypeDef *htim = (TIM_HandleTypeDef *)((DMA_HandleTypeDef *)hdma)->Parent;
 
@@ -215,6 +211,7 @@ static void dshot_dma_enable(DMA_HandleTypeDef *hdma, bool enable) {
     }
 }
 
+// returns the address of the CCRx register of the given TIM channel
 static uint32_t dshot_find_ccrx(dshot_handle_t *dshot_h) {
     if (dshot_h->tim_channel == TIM_CHANNEL_1) {
         return (uint32_t)&dshot_h->htim->Instance->CCR1;
@@ -230,7 +227,7 @@ static uint32_t dshot_find_ccrx(dshot_handle_t *dshot_h) {
     }
 }
 
-
+// returns the special command info for the given command
 static dshot_cmd_info_t dshot_find_special_cmd_info(dshot_cmd_t cmd) {
     for (int i = 0; i < 19 ; i++) {
         if (DSHOT_CMD_SEND_INFO[i].cmd == cmd) {
