@@ -1,5 +1,3 @@
-**Note:** the main branch is OUT OF DATE, to see the latest changes check each individual branch (software, hardware & configurator) more info below.
-
 # Betterflight
 Quadcopter flight controller hardware, software and configurator.
 
