@@ -18,8 +18,7 @@ Quadcopter flight controller hardware, software and configurator.
 
 
 
-  ## Compatibility:
+## Compatibility:
 
-  - [Betaflight](https://betaflight.com/), the hardware is kept compatible with Betaflight, you have to flash it with the (foxeer v3 mini target)
-  - Software, our software is kept compatible with the [foxeer v3 mini f722](https://www.foxeer.com/foxeer-f722-v3-mini-flight-controller-20-20mm-betaflight-g-425) comercially available FC.
+- [Betaflight](https://betaflight.com/), the hardware is kept compatible with Betaflight, you have to flash it with the (foxeer v3 mini target)
   
