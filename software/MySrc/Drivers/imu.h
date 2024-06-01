@@ -5,8 +5,9 @@
 
 #endif //BETTERFLIGHT_IMU_H
 
-#include "spi_soft.h"
 #include "bmi270.h"
+
+#include "spi_soft.h"
 #include "common_structs.h"
 
 typedef enum {
@@ -33,16 +34,29 @@ typedef struct {
     IMU_err_t last_err; //this is the last error that occured in the imu_process function. instead of returning the error code it gets saved here to be handled
 } IMU_handle_t;
 
-// for implementation of imu.c
+//inits imu chip via spi and sets up the imu handle
 IMU_err_t imu_init(IMU_handle_t *imu_h);
+
+// reads sensor data from imu and saves it in the imu handle
 void imu_process(IMU_handle_t *imu_h);
+
+// logs the error code
 void log_imu_err(IMU_err_t err);
+
+// logs the imu data
 void log_imu_data(IMU_handle_t *imu_h);
 
+// (DEPRECATED DON'T USE) reads out data regs
 void imu_get_gyr_data(IMU_handle_t *imu_h);
 
-// bmi270 api needs access to these functions
+// spi_soft_trx conversion to api requested api receive function
 int8_t spi_trx_api_wrapper(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr); // function pointers with api from bmi270
+
+// spi_soft_rx conversion to api requested api write function
 int8_t spi_tx_api_wrapper(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr);
+
+// wraps around delay_us for api use
 void delay_us_api_wrapper(uint32_t period, void *intf_ptr);
+
+// it doens't do anything its just to give the api something to call (when it wants to delay which it is not allowed to do anymore after init)
 void imu_no_delay_wrapper(uint32_t period, void *intf_ptr);

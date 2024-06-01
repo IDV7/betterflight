@@ -1,19 +1,20 @@
 /*
  The BMI270 api from Bosch is used to interface with the BMI270 IMU sensor.
- This code is based on the example code provided by Bosch.
- -> https://github.com/boschsensortec/BMI270_SensorAPI/blob/master/bmi270_examples/accel_gyro/accel_gyro.c
+ This code is a modified version of the example code provided by Bosch.
+    -> https://github.com/boschsensortec/BMI270_SensorAPI/blob/master/bmi270_examples/accel_gyro/accel_gyro.c
 */
 
 
 
 #include "imu.h"
-#include "bmi270.h" //has bmi2.h included => has bmi2_defs.h included
-#include "bmi2.h"
+
 #include <math.h>
+
+#include "bmi270.h"
+#include "bmi2.h"
 
 #include "log.h"
 #include "spi_soft.h"
-#include "mymain.h"
 
 
 #define GRAVITY_EARTH  (9.80665f)
@@ -135,7 +136,7 @@ void imu_process(IMU_handle_t *imu_h) {
     }
 
     if (imu_h->sensor_data.status & BMI2_DRDY_GYR) {
-        imu_h->gyr.pitch = roundf(lsb_to_dps_shifting(imu_h->sensor_data.gyr.x, 2000, 16) * 100) / 100; // values are remapped acording to chip orientation on pcb
+        imu_h->gyr.pitch = roundf(lsb_to_dps_shifting(imu_h->sensor_data.gyr.x, 2000, 16) * 100) / 100; // values are remapped according to chip orientation on pcb
         imu_h->gyr.roll = roundf(lsb_to_dps_shifting(imu_h->sensor_data.gyr.y, 2000, 16) * 100) / 100;
         imu_h->gyr.yaw = roundf(lsb_to_dps_shifting(imu_h->sensor_data.gyr.z, 2000, 16) * 100) / 100;
     }
@@ -145,7 +146,6 @@ void imu_process(IMU_handle_t *imu_h) {
         else // if only gyro is not ready
             imu_h->last_err = IMU_WARN_GYRO_READ_NOT_READY;
     }
-    //LOGD("acc: %f | %f | %f, gyr: %.2f | %.2f | %.2f", imu_h->acc_x, imu_h->acc_y, imu_h->acc_z, imu_h->gyr_x, imu_h->gyr_y, imu_h->gyr_z);
 }
 
 #define BMI270_SPI_READ_MASK 0x80
@@ -153,7 +153,7 @@ void imu_process(IMU_handle_t *imu_h) {
 #define BMI270_GYR_START_REG 0x12
 #define BMI270_ACC_START_REG 0x0C
 
-
+// (DEPRECATED DON'T USE) reads out data regs
 void imu_get_gyr_data(IMU_handle_t *imu_h) {
     static uint8_t tx_buffer[8] = {BMI270_GYR_START_REG | BMI270_SPI_READ_MASK, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     uint8_t rx_buffer[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -213,10 +213,10 @@ int8_t spi_tx_api_wrapper(uint8_t reg_addr, const uint8_t *reg_data, uint32_t le
     return 0;
 }
 
-// delay_us has a max delay of 65535 us, compensate for this
+// alias for delay_us (to feed in bmi270 api)
 void delay_us_api_wrapper(uint32_t period, void *intf_ptr) {
     period += 3; //to insure the api is not too tight on its timings
-    if (period > 65500) { //for safety using 65500 instead of 65535
+    if (period > 65500) {
         uint32_t delay = period;
         while (delay > 65500) {
             delay -= 65500;
@@ -228,11 +228,12 @@ void delay_us_api_wrapper(uint32_t period, void *intf_ptr) {
     }
 }
 
-// since the bmi270 wants to to delays when it doesn't need to, we give it a dummy delay function for after init
+// since the bmi270 wants to do delays when it doesn't need to, we give it a dummy delay function for after init
 void imu_no_delay_wrapper(uint32_t period, void *intf_ptr) {
     // do nothing
 }
 
+// logs the IMU_err_t error
 void log_imu_err(IMU_err_t err) {
     switch (err) {
         case IMU_OK:
