@@ -2,14 +2,8 @@
 
 
 #include "spi_soft.h"
-#include "misc.h"
-#include "log.h"
 
-__attribute__((optimize("O0")))  void SPI_Delay(uint32_t cycles);
-static uint32_t calc_nops_spi_half_cycle(uint32_t mcu_clk_speed_hz, uint32_t spi_clock_speed_hz);
-
-
-
+// HAL is too slow, macros for controlling the spi related gpio pins via the BSRR register
 #define MOSI_HIGH spi_h->mosi.port->BSRR = (spi_h->mosi.pin)
 #define MOSI_LOW spi_h->mosi.port->BSRR = (spi_h->mosi.pin << 16)
 
@@ -20,11 +14,8 @@ static uint32_t calc_nops_spi_half_cycle(uint32_t mcu_clk_speed_hz, uint32_t spi
 #define CS_LOW spi_h->cs.port->BSRR = (spi_h->cs.pin << 16)
 
 
-// Initialize the SPI pins (requires the user to have configured the pins a bit already... (like clocks and stuff))
+// Initialize the SPI pins (fill in the SPI_handle_t struct with the correct GPIO pins)
 void SPI_soft_init(SPI_handle_t *spi_h) {
-
-    // calc number of NOPs to delay for half of the SPI clock cycle
-//    spi_h->nop_cnt = calc_nops_spi_half_cycle(get_mcu_clock_speed(), spi_speed_hz);
 
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
@@ -60,8 +51,7 @@ void SPI_soft_init(SPI_handle_t *spi_h) {
 
 }
 
-
-#define NOP_CNT 1 //5
+// transmits tx_data (of length len) and receives rx_data (of length len) over SPI (tx and rx happens in the same cycle)
 void SPI_soft_trx(SPI_handle_t *spi_h, const uint8_t *tx_data, uint8_t *rx_data, uint32_t len) {
 
     // turn off interrupts
@@ -69,7 +59,7 @@ void SPI_soft_trx(SPI_handle_t *spi_h, const uint8_t *tx_data, uint8_t *rx_data,
 
     // enable cs
     CS_LOW;
-    SPI_Delay(NOP_CNT);
+    __NOP();
 
     for (uint32_t i = 0; i < len; i++) { //for each byte
         uint8_t tx_byte = tx_data[i];
@@ -111,6 +101,7 @@ void SPI_soft_trx(SPI_handle_t *spi_h, const uint8_t *tx_data, uint8_t *rx_data,
     __enable_irq();
 }
 
+// transmits tx_data (of length len) over SPI
 void SPI_soft_tx(SPI_handle_t *spi_h, uint8_t *tx_data, uint32_t len) {
 
     // turn off interrupts
@@ -118,7 +109,7 @@ void SPI_soft_tx(SPI_handle_t *spi_h, uint8_t *tx_data, uint32_t len) {
 
     // enable cs
     CS_LOW;
-    SPI_Delay(NOP_CNT);
+    __NOP();
 
     for (uint32_t i = 0; i < len; i++) { //for each byte
         uint8_t tx_byte = tx_data[i];
@@ -136,10 +127,12 @@ void SPI_soft_tx(SPI_handle_t *spi_h, uint8_t *tx_data, uint32_t len) {
             tx_byte <<= 1;
 
             SCK_LOW;
-            SPI_Delay(NOP_CNT);
+            __NOP();
+
 
             SCK_HIGH;
-            SPI_Delay(NOP_CNT);
+            __NOP();
+
         }
         MOSI_LOW;
     }
@@ -149,75 +142,4 @@ void SPI_soft_tx(SPI_handle_t *spi_h, uint8_t *tx_data, uint32_t len) {
 
     // enable interrupts again
     __enable_irq();
-}
-
-void SPI_soft_burst_tx(SPI_handle_t *spi_h, uint8_t *tx_data, uint32_t len) {
-
-    // turn off interrupts
-    __disable_irq();
-
-    // enable cs
-    CS_LOW;
-    SPI_Delay(NOP_CNT);
-
-    for (uint32_t i = 0; i < len; i++) { //for each byte
-        uint8_t tx_byte = tx_data[i];
-
-        for (uint8_t j = 0; j < 8; j++) { //for each bit
-
-            // set mosi
-            if (tx_byte & 0x80) {
-                MOSI_HIGH;
-            } else {
-                MOSI_LOW;
-            }
-
-            // shift tx_byte
-            tx_byte <<= 1;
-
-            SCK_LOW;
-            SPI_Delay(NOP_CNT);
-
-            SCK_HIGH;
-            SPI_Delay(NOP_CNT);
-        }
-        MOSI_LOW;
-    }
-
-    // disable cs
-    CS_HIGH;
-
-    // enable interrupts again
-    __enable_irq();
-}
-
-void SPI_soft_cs_high(SPI_handle_t *spi_h) {
-    CS_HIGH;
-}
-
-void SPI_soft_cs_low(SPI_handle_t *spi_h) {
-    CS_LOW;
-}
-
-
-
-
-__attribute__((optimize("O0")))  void SPI_Delay(uint32_t cycles) {
-    while (cycles--) {__NOP();}
-}
-
-// calc delay in nop cycles for given spi speed and mcu speed
-uint32_t calc_nops_spi_half_cycle(uint32_t mcu_clk_speed_hz, uint32_t spi_clock_speed_hz) {
-    //calc period of spi clock in ns
-    uint32_t spiPeriodNs = 1000000000 / spi_clock_speed_hz;
-
-    //calc period of mcu clock in ns
-    uint32_t mcuCycleDurationNs = 1000000000 / mcu_clk_speed_hz;
-
-    //calc number of mcu cycles in one spi clock period
-    uint32_t nopCount = spiPeriodNs / mcuCycleDurationNs / 2;
-
-
-//    LOGD("nopCount: %d", nopCount);
-    return nopCount;
 }
