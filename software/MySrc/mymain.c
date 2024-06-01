@@ -54,7 +54,6 @@ uint64_t led_toggle_last_ms = 0;
 uint64_t cli_process_last_ms = 0;
 uint64_t log_stats_last_ms = 0;
 
-
 crsf_handle_t crsf_h;
 
 uint32_t received_data[16];
@@ -63,7 +62,7 @@ bool is_armed_flag = false;
 
 static void flight_ctrl_cycle(void);
 void tim_flight_cycle_init(void);
-void log_stats(void);
+static void log_stats(void);
 
 void myinit(void) {
     cli_h.halt_until_connected_opt = false; //set to false if you don't want to wait for a connection
@@ -124,19 +123,24 @@ static void S2_toggle(void) {
 #define FLIGHT_CYCLE_FREQUENCY 625 //us
 uint32_t flight_cycle_time = 0;
 
-void log_stats(void){
-    if (cli_h.cli_connected_flag) {
+
+// printing info in the fast main loop
+static void log_stats(void){
+    if (cli_h.cli_connected_flag) { // only if a connection is made to the debugger
         //LOGD("HAL_TIM_CNT: %d", __HAL_TIM_GET_COUNTER(&htim2));
         LOGI("Flight cycle time (target is 625us): %dus", flight_cycle_time);
-
        // LOGD("gyr: roll=%.2f pitch=%.2f yaw=%.2f (from imu_h)", imu_h.gyr.roll, imu_h.gyr.pitch, imu_h.gyr.yaw);
-//        LOGD("gyr: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
-//        LOGD("Armed: %d", is_armed_flag);
+       // LOGD("gyr: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
+       // LOGD("Armed: %d", is_armed_flag);
 
     }
 }
 
-
+/*
+ the flight cycle has to run every 625us (1.6kHz), this is the sample rate of the gyro (gyro is setup to sample at this speed)
+ first the flight cycle is ran, then if 2/3 of the time is left, the non-critical code is ran.
+ (if less time is left we don't take the risk to miss the next flight cycle target time)
+ */
 void mymain(void) {
     tim_flight_cycle_init();
     for(ever) {
@@ -144,10 +148,8 @@ void mymain(void) {
 
         // ----- times sensitive flight control code goes here ----- //
 
-
         flight_ctrl_cycle();
         motors_process(&motors_h);
-
 
         // ^^^^^ end of time sensitive flight control code ^^^^^ //
 
@@ -155,9 +157,11 @@ void mymain(void) {
             if (__HAL_TIM_GET_COUNTER(&htim_flight_cycle) < (FLIGHT_CYCLE_FREQUENCY - (FLIGHT_CYCLE_FREQUENCY / 3))) { // if we are not near the last 20% of wait_time_us, we can do other stuff. else don't take risk of missing next flight cycle
 
                 // ----- all non-critical code goes here ----- //
+
                 none_blocking_delay(1000, &led_toggle_last_ms, (callback_t) LED_toggle, NULL);
                 none_blocking_delay(25, &cli_process_last_ms, (callback_t) cli_process, &cli_h);
-//                none_blocking_delay(1000, &log_stats_last_ms, (callback_t) log_stats, NULL);
+                none_blocking_delay(1000, &log_stats_last_ms, (callback_t) log_stats, NULL);
+
                 // ^^^^^ all non-critical code goes here ^^^^^ //
 
             }
@@ -234,7 +238,7 @@ static void flight_ctrl_cycle(void) {
     }
 }
 
-
+// tim setup for the flight cycle time management
 void tim_flight_cycle_init(void)
 {
     __HAL_RCC_TIM3_CLK_ENABLE();
