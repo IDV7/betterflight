@@ -1,9 +1,16 @@
-
+/*
+ * crsf_process is called from the main loop during the flight control cycle
+ * crc8_calculate calculates the crc8 checksum
+ * unpack_channels uses the raw data(bytes) and puts it per 11 bits into the channels
+ * hal_uart_rxcpltcallback is called when an uart interrupt occurs
+*/
 
 #include "stm32f7xx.h"
 #include "stm32f7xx_hal_uart.h"
 #include "common_structs.h"
 #include "misc.h"
+#include "log.h"
+#include "stm32f7xx_hal.h"
 /*
 crsf notes:
 
@@ -106,7 +113,19 @@ typedef struct{
 
 
 void crsf_init(crsf_handle_t * hcrsf, UART_HandleTypeDef *huart);
-void crsf_process(crsf_handle_t * hcrsf, uint32_t * data, bool * crc8_confirmed_flag);
-void crsf_send_frame_test(UART_HandleTypeDef *huart);
-void crsf_tests(void);
 
+/*
+ * gets called from main loop
+ * 3 states posible
+ * wait_for_sync: waiting to receive address, length and type, calls HAL_UART_Receive_IT to receive the address, length and type
+ * receiving_data: receiving the channel data, calls HAL_UART_Receive_IT to receive the channel data
+ * processing_data: all the data is received and can be processed
+ * if processing is done the state is set to wait_for_sync and hal_uart_receive_it is called to receive the address, length and type
+ */
+void crsf_process(crsf_handle_t * hcrsf, uint32_t * data, bool * crc8_confirmed_flag);
+
+
+uint8_t crc8_calculate(uint8_t *data, uint8_t len);
+static void crsf_uart_setup(crsf_handle_t *crsf_h);
+// unpack_channels is modified code from  https://github.com/crsf-wg/crsf/wiki/CRSF_FRAMETYPE_RC_CHANNELS_PACKED
+static void unpack_channels(uint8_t const * payload, uint32_t * dest);

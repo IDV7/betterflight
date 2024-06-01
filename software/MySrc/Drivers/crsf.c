@@ -1,11 +1,13 @@
-#include "crsf.h"
-#include "main.h"
-#include "log.h"
+/*
+ * crsf_process is called from the main loop during the flight control cycle
+ * crc8_calculate calculates the crc8 checksum
+ * unpack_channels uses the raw data(bytes) and puts it per 11 bits into the channels
+ * hal_uart_rxcpltcallback is called when an uart interrupt occurs
+*/
 
-#include "stm32f7xx_hal_uart.h"
-#include "stm32f7xx_hal.h"
-#include "string.h"
-#include "common_structs.h"
+#include "crsf.h"
+
+
 
 
 
@@ -20,30 +22,16 @@ uint8_t frame_length;
 
 uint8_t crc8;
 uint8_t crc8_data_to_calc[25];
-uint8_t crc8_calculate(uint8_t *data, uint8_t len);
-static void crsf_uart_setup(crsf_handle_t *crsf_h);
-static void unpack_channels(uint8_t const * payload, uint32_t * dest);
 
 
-/*
- * gets called from main loop
- * 3 states posible
- * wait_for_sync: waiting to receive address, length and type
- * call HAL_UART_Receive_IT to receive the address, length and type
- * receiving_data: receiving the channel data
- * call HAL_UART_Receive_IT to receive the channel data
- * processing_data: all the data is received and can be processed
- * if processing is done the state is set to wait_for_sync and hal_uart_receive_it is called to receive the address, length and type
 
-
- */
 
 void crsf_process(crsf_handle_t * crsf_h, uint32_t *data, bool *crc8_confirmed_flag){
     if(state == processing_data){
 
         if(start_data_saved[2] == CRSF_FRAMETYPE_RC_CHANNELS_PACKED){
 
-            crc8_data_to_calc[0] = start_data_saved[2]; // we need frame time for crc8 calculation
+            crc8_data_to_calc[0] = start_data_saved[2]; // we need frame type for crc8 calculation
 
             //add the channel data to the crc8_data_to_calc array for crc8 calculation
             for (int i = 0; i < 22; i++) {
@@ -105,15 +93,13 @@ uint8_t crc8_calculate(uint8_t *data, uint8_t len) {
 
 
 
-
-
 static void unpack_channels(uint8_t const * payload, uint32_t * dest)
 {
 
 
     const unsigned inputChannelMask = (1 << CHANNEL_SIZE) - 1;
 
-    // code from BetaFlight rx/crsf.cpp / bitpacker_unpack
+
     uint8_t bitsMerged = 0;
     uint32_t readValue = 0;
     unsigned readByteIndex = 0;
@@ -137,7 +123,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
     if (huart->Instance == USART2) {
     if(state == wait_for_sync){
-        //HAL_UART_Receive_IT(huart, start_data, 3);
+
         if(start_data[0] == 0xC8){
 
             if(start_data[1] > 0 && start_data[1] < CRSF_MAX_PACKET_SIZE){
@@ -162,7 +148,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
     }
     else if(state == receiving_data){
 
-       //HAL_UART_Receive_IT(huart, incoming_data, frame_length);
+
 
        //dont need interupts when copying data
         __disable_irq();
