@@ -1,13 +1,6 @@
-//
-// Created by Maarten on 29-2-2024.
-//
+
 #include "pid.h"
 
-#include <stdio.h>
-
-#include "log.h"
-#include "misc.h"
-#include "stm32f7xx_hal.h"
 
 
 void  pid_controller_init(pid_handle_t *pid_h, float Kp, float Ki, float Kd, float T, int16_t min_output, int16_t max_output, int16_t min_input, int16_t max_input)
@@ -40,8 +33,8 @@ void  pid_controller_clear(pid_handle_t *pid_h)
     pid_h->differentiator = 0;
     pid_h->prev_measurement = 0;
     pid_h->output = 0;
-    pid_h->tau = 0;
 }
+
 
 int16_t pid_controller_update(pid_handle_t *pid_h, int16_t *pid, int16_t setp, int16_t measurement){
 
@@ -61,20 +54,16 @@ int16_t pid_controller_update(pid_handle_t *pid_h, int16_t *pid, int16_t setp, i
 
     pid_h->differentiator = (2.0f * pid_h->tau - pid_h->T)*pid_h->differentiator-(2.0f * pid_h->gains.Kd * ( (float)measurement - pid_h->prev_measurement) ); //d[n]
 
-
-    LOGD("proportional: %d, integrator: %f, differentiator: %f, first part diff: %f, second part diff: %f", proportional, pid_h->integrator, pid_h->differentiator,-(2.0f * pid_h->gains.Kd * ( (float)measurement - pid_h->prev_measurement),(2.0f * pid_h->tau - pid_h->T)*pid_h->differentiator) );
     *pid = (int16_t) ((float)proportional + (float) pid_h->integrator + (float)pid_h->differentiator); //u[n]
 
-    //LOGD("PID output(before limited): %d", pid_h->output);
-    //HAL_Delay(500);
+
     if (*pid > pid_h->limits.max_output){
         *pid = pid_h->limits.max_output;
     }
     else if (*pid < pid_h->limits.min_output){
        *pid = pid_h->limits.min_output;
     }
-    //LOGD("Error: %d, setp: %d, measurement %d, pid: %d", error, setp, measurement, *pid);
-    //delay(10);
+
     pid_h->prev_error = error;
     pid_h->prev_measurement = measurement;
 
