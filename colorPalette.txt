@@ -1,6 +1,0 @@
-Text: White
-Primary Detail: #009ecf (cyan ish)
-Background: #333333
-
-
-QProgressBar {\n    border: 2px solid white;\n    border-radius: 5px;\n    background: transparent;\n}\nQProgressBar::chunk {\n    background-color: #009ecf;\n}
