@@ -1,14 +1,8 @@
-//
-// Created by Isaak on 2/21/2024.
-//
-
 #ifndef BETTERFLIGHT_CLI_H
 #define BETTERFLIGHT_CLI_H
 
 #include "version.h"
 #include "misc.h"
-
-
 
 #define MAX_CMD_COUNT 64
 #define MAX_ARGS_COUNT 16
@@ -16,11 +10,14 @@
 #define CLI_RX_BUFF_SIZE 64
 #define CLI_TX_BUFF_SIZE 512
 
+// struct to hold a command string and its callback
 typedef struct {
     char cmd_str[MAX_CMD_STR_LEN];
     callback_t cmd_callback;
 }cli_cmd_t;
 
+
+// struct to hold all the CLI related data
 typedef struct {
     // flags/options
     bool halt_until_connected_opt; // set to true if you want to wait for a "connect" command before starting the main application (useful for debugging)
@@ -46,10 +43,16 @@ typedef struct {
     uint8_t last_args_count;
 } cli_handle_t;
 
+// cli_init initializes the CLI module, sets up the command list and waits for a connection when halt_until_connected_opt is set to true
 void cli_init(cli_handle_t *CLI_h);
+
+// cli_process manages send and receive data.
 void cli_process(void *arg);
 
+// HAL callback for received data
 void cli_rx_callback(cli_handle_t* CLI_h);
+
+// this function lets a dev easily add a new command
 void cli_add_cmd(cli_handle_t* CLI_h, char *cmd_str, callback_t cmd_callback);
 
 

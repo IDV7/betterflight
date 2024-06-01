@@ -1,19 +1,9 @@
-/*
 
-  This file is part of the CLI module.
-  It contains the functionality to handle everything related to the CLI (communicating with the qt application (configurator) over serial).
-  It manages incoming data and calls the appropriate callback functions in case a command has been detected in the incoming data.
-
-  For sending out data, LOG
-
-
-  Note: You should NOT ADD COMMANDS HERE. Use cli_cmd_callbacks.c instead.
-
- */
 
 #include "cli.h"
 
-#include <stdint.h>
+#include <sys/unistd.h>
+#include <sys/errno.h>
 
 #include "usbd_cdc_if.h"
 
@@ -21,16 +11,12 @@
 #include "version.h"
 #include "misc.h"
 #include "cli_cmd_callbacks.h"
-#include "main.h"
-#include <sys/errno.h>
-#include <sys/unistd.h>
-#include "main.h"
-#include "usbd_cdc_if.h"
 #include "mymain.h"
 
 
 void cli_handle_cmd(cli_handle_t *cli_h);
 
+// cli_process manages send and receive data.
 void cli_process(void *arg) {
     if (arg == NULL) {
         LOGE("cli_process: arg is NULL! Not processing cli... unsafe!");
@@ -42,17 +28,17 @@ void cli_process(void *arg) {
     if (CLI_h->new_data_flag) { // if new data data in buffer
         CLI_h->new_data_flag = false;
         LOG("-> %s", CLI_h->cli_rx_buffer);
-        cli_handle_cmd(CLI_h);
+        cli_handle_cmd(CLI_h); // handle the data
     }
 
     //write data (from buffer)
     if (CLI_h->enable_tx_buffering_opt && !CLI_h->tx_buff_empty_flag) { //if buffering is enabled and buffer is not empty
-        CDC_Transmit_FS((uint8_t*) CLI_h->cli_tx_buffer, CLI_h->tx_buffer_len);
+        CDC_Transmit_FS((uint8_t*) CLI_h->cli_tx_buffer, CLI_h->tx_buffer_len); // send the entire buffer
         CLI_h->tx_buff_empty_flag = true;
         CLI_h->tx_buffer_len = 0;
     }
 }
-
+// cli_init initializes the CLI module, sets up the command list and waits for a connection when halt_until_connected_opt is set to true
 void cli_init(cli_handle_t *CLI_h) {
     LOGD("CLI Init...");
 
@@ -97,9 +83,8 @@ void cli_init(cli_handle_t *CLI_h) {
     }
 }
 
+// cli_handle_cmd handles the incoming data, it splits the data into a command and arguments and calls the appropriate callback function
 void cli_handle_cmd(cli_handle_t *CLI_h) {
-    // find the command inde
-
     // take first word as command
     char *cmd_str = strtok((char *)CLI_h->cli_rx_buffer, " ");
 
@@ -124,26 +109,29 @@ void cli_handle_cmd(cli_handle_t *CLI_h) {
 
     int8_t cmd_index = -1;
 
+    // find the command in the command
     for (int8_t i = 0; i < MAX_CMD_COUNT; i++) {
         if (strcmp_ign(CLI_h->cmd_list[i].cmd_str, cmd_str) == 0) {
-            cmd_index = i;
+            cmd_index = i; // found the command, save its index
             break;
         }
     }
 
+    // tell the user if the command was not found
     if (cmd_index == -1) {
         LOGE("The command you entered does not exist: %s, try again", cmd_str);
         return;
     }
 
+    // call the command callback
     if (CLI_h->cmd_list[cmd_index].cmd_callback != NULL) {
         CLI_h->cmd_list[cmd_index].cmd_callback(CLI_h);
-    } else {
+    } else { // (command exists but no callback was set)
         LOGE("The command you entered (\"%s\") has no callback, it is most likely not implemented yet", cmd_str);
     }
 }
 
-
+// this function lets a dev easily add a new command
 void cli_add_cmd(cli_handle_t *CLI_h, char *cmd_str, callback_t cmd_callback) {
     //check if cmd_str is already an existing command
     for (size_t i = 0; i < MAX_CMD_COUNT; i++) {
@@ -172,7 +160,7 @@ void cli_add_cmd(cli_handle_t *CLI_h, char *cmd_str, callback_t cmd_callback) {
     LOGE("No empty slot found for command %s, Increase MAX_CMD_COUNT", cmd_str);
 }
 
-// cli_rx_callback gets called when cli_rx_buffer gets updated with new data
+// cli_rx_callback gets called by the HAL when cli_rx_buffer gets updated with new data
 void cli_rx_callback(cli_handle_t* CLI_h) {
     CLI_h->new_data_flag = true;
     // don't copy data here... will break receive function.
@@ -182,11 +170,13 @@ void cli_rx_callback(cli_handle_t* CLI_h) {
 #define RETRIES 5
 #define RETRY_DELAY_US 100 //us
 
+
+// this overrides the _write function printf uses to output data, its implemented here to send data via CDC (so vcom port serial)
 int _write(int file, char *ptr, int len) {
     if (cli_h.disable_log_opt) return 0; //return 0 "success but no bytes were sent"
 
     if (file == STDOUT_FILENO || file == STDERR_FILENO) {
-        if (cli_h.enable_tx_buffering_opt && cli_h.cli_connected_flag) {
+        if (cli_h.enable_tx_buffering_opt && cli_h.cli_connected_flag) { // if buffering is enabled and a user is connected via cli buffer data
             for (int i = 0; i < len; i++) {
                 if (cli_h.tx_buffer_len > CLI_TX_BUFF_SIZE - 1) {
                     break;
@@ -200,9 +190,9 @@ int _write(int file, char *ptr, int len) {
 
             cli_h.tx_buff_empty_flag = false;
         }
-        else if (cli_h.cli_connected_flag) {
+        else if (cli_h.cli_connected_flag) { // if no buffering is enabled, send data directly
             uint8_t rslt = CDC_Transmit_FS((uint8_t*)ptr, len);
-            if (rslt == USBD_BUSY){
+            if (rslt == USBD_BUSY){ // in case HAL tells us its already sending something try again a few times with a delay
                 for (int i = 0; i < RETRIES; i++){
                     delay_us(RETRY_DELAY_US);
                     rslt = CDC_Transmit_FS((uint8_t*)ptr, len);
