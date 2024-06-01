@@ -1,24 +1,22 @@
-//
-// Created by Isaak on 2/10/2024.
-//
 
 
 #include "misc.h"
 
 #include <stdarg.h>
-#include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <math.h>
-
 
 #include "main.h"
 #include "log.h"
 
 
 volatile uint32_t millis = 0;
+
 TIM_HandleTypeDef delay_timer_h;
+
+
 
 void LED_toggle(void)
 {
@@ -43,8 +41,7 @@ void LED_set(bool state)
         LED_off();
 }
 
-// TODO: potentially buggy, but works for now (I think it reverses the order of the pattern)
-/* LED_blink_pattern blinks the LED in a given pattern, saves space (lines of code) */
+// LED_blink_pattern blinks the LED in a given pattern, saves space (lines of code) */
 void LED_blink_pattern(uint8_t count, int num_durations, ...) {
     va_list durations;
     va_start(durations, num_durations);
@@ -80,7 +77,7 @@ void none_blocking_delay(uint32_t ms, uint64_t *last_millis, callback_t callback
     }
 }
 
-
+// clean_str removes all \n and \r from a string
 void clean_str(char *str) {
     char *src, *dst;
     for (src = dst = str; *src != '\0'; src++) {
@@ -91,7 +88,7 @@ void clean_str(char *str) {
     *dst = '\0';
 }
 
-// strcmp_ign (ign -> ignore) compares two strings, ignoring newlines and carriage returns
+// strcmp_ign (ign -> ignore) compares two strings, ignors \n and \r
 int8_t strcmp_ign(const char *str1, const char *str2) {
     // make copy to avoid modifying original strings
     char *copy1 = strdup(str1);
@@ -109,15 +106,17 @@ int8_t strcmp_ign(const char *str1, const char *str2) {
     return result;
 }
 
-/* will write DEADBEEE on a known location in RAM, and reset the MCU */
-/* it requires you to have code in the startup file to check for this magic data and if present goto the bootloader */
+/*
+  will write DEADBEEE on a known location in RAM, and reset the MCU
+  it requires you to have code in the startup file to check for this magic data and if present goto the bootloader
+ */
 void reboot_into_dfu() {
     *((uint32_t *)0x20000000) = 0xDEADBEEE; // magic data that is checked for in startup code
     NVIC_SystemReset(); // reset mcu
 }
 
 
-
+// converts a string to a uint16_t
 uint16_t char_to_uint16(char *str) {
     char *endptr;
     unsigned long num = strtoul(str, &endptr, 10);
@@ -130,6 +129,7 @@ uint16_t char_to_uint16(char *str) {
     return (uint16_t)num;
 }
 
+// gets the mcu clock speed
 uint32_t get_mcu_clock_speed(void) {
     SystemCoreClockUpdate();
     return SystemCoreClock;
@@ -137,7 +137,7 @@ uint32_t get_mcu_clock_speed(void) {
 
 // takes an 16 bit intiger and returns a string with the binary representation
 uint8_t* byte_to_binary_str(uint16_t x) {
-    static uint8_t b[17];
+    static uint8_t b[17]; //dirty static, was for debugging purposes and is not used anymore so not fixing in review
     // Ensure b is at least 17 characters long
     b[16] = '\0';
 
@@ -148,15 +148,17 @@ uint8_t* byte_to_binary_str(uint16_t x) {
     return b;
 }
 
+// blocks for x ms (alias for HAL_Delay)
 void delay(uint32_t ms) {
     HAL_Delay(ms);
 }
 
+// blocks for x nop opperations
 void delay_nop(uint32_t nops) {
     while (nops--) {__NOP();}
 }
 
-// for setting up tim3 for delay_us
+// for setting up tim12 for delay_us
 void setup_delay_us_tim() {
     __HAL_RCC_TIM12_CLK_ENABLE();
     delay_timer_h.Instance = TIM12;
@@ -168,8 +170,7 @@ void setup_delay_us_tim() {
     HAL_TIM_Base_Init(&delay_timer_h); //hal init
 }
 
-
-// delay_us uses tim3 to delay for x us (inaccurate at very low us values due to HAL, 1us -> ~3us, 10us -> ~11us, 100us -> ~100us)
+// delay_us uses tim12 to delay for x us (inaccurate at very low us values, 1us -> ~3us, 10us -> ~11us, 100us -> ~100us)
 void delay_us(uint16_t us) {
     __HAL_TIM_SET_COUNTER(&delay_timer_h , 0); //reset cnt
     HAL_TIM_Base_Start(&delay_timer_h);
@@ -177,6 +178,7 @@ void delay_us(uint16_t us) {
     HAL_TIM_Base_Stop(&delay_timer_h);
 }
 
+// maps a value from one range to another
 int16_t map(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t out_max) {
     if(x < in_min) {
        return out_min;
