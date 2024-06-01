@@ -17,7 +17,7 @@ void  pid_controller_init(pid_handle_t *pid_h, float Kp, float Ki, float Kd, flo
     pid_h->gains.Kd = Kd;
 
     pid_h->T = T;
-    pid_h->tau = 0.000625f; // has to be between 1x and 10x T (T is 0.000625, so between 0.000625 and 0.00625)
+    pid_h->tau = 0.000625f; // taus is a low pass filter for the D term // has to be between 1x and 10x T (T is 0.000625, so between 0.000625 and 0.00625)
     pid_h->limits.min_output = min_output;
     pid_h->limits.max_output = max_output;
 
