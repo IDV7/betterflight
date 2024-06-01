@@ -203,10 +203,9 @@ static void flight_ctrl_cycle(void) {
             // update imu data
             if (imu_h.last_err == IMU_OK) {
                 imu_process(&imu_h);
-                imu_data.roll = (int16_t) (-imu_h.gyr.roll); //invert roll => different coordinate system imu vs sticks //31/05   20:50
+                imu_data.roll = (int16_t) (imu_h.gyr.roll);
                 imu_data.pitch = (int16_t) (imu_h.gyr.pitch);
                 imu_data.yaw = (int16_t) (-imu_h.gyr.yaw); //invert yaw => different coordinate system imu vs sticks
-               // LOGD("gyr: roll=%d pitch=%d yaw=%d", imu_data.roll, imu_data.pitch, imu_data.yaw);
             }
 
             else {

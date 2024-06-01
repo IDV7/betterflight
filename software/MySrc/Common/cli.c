@@ -1,9 +1,13 @@
 /*
 
   This file is part of the CLI module.
-  It contains the functionallity to handle the CLI commands.
+  It contains the functionality to handle everything related to the CLI (communicating with the qt application (configurator) over serial).
+  It manages incoming data and calls the appropriate callback functions in case a command has been detected in the incoming data.
 
-  You should NOT ADD COMMANDS HERE. Use cli_cmd_callbacks.c instead.
+  For sending out data, LOG
+
+
+  Note: You should NOT ADD COMMANDS HERE. Use cli_cmd_callbacks.c instead.
 
  */
 
@@ -42,7 +46,7 @@ void cli_process(void *arg) {
     }
 
     //write data (from buffer)
-    if (CLI_h->enable_tx_buffering_opt && !CLI_h->tx_buff_empty_flag) { //if we are told there is data or if there is any data left
+    if (CLI_h->enable_tx_buffering_opt && !CLI_h->tx_buff_empty_flag) { //if buffering is enabled and buffer is not empty
         CDC_Transmit_FS((uint8_t*) CLI_h->cli_tx_buffer, CLI_h->tx_buffer_len);
         CLI_h->tx_buff_empty_flag = true;
         CLI_h->tx_buffer_len = 0;
@@ -68,7 +72,6 @@ void cli_init(cli_handle_t *CLI_h) {
     }
 
 
-    //TODO: memory leak/buffer overflow here... fix before uncommenting 'add_commands(CLI_h);'
     add_commands(CLI_h);
 
     //wait for connection
