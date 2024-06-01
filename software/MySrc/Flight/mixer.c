@@ -1,3 +1,4 @@
+
 #include "mixer.h"
 
 void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
@@ -130,7 +131,6 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
     }
 
 
-   // LOGD("Motor 1: %d, Motor 2: %d, Motor 3: %d, Motor 4: %d", motor_output->motor1, motor_output->motor2, motor_output->motor3, motor_output->motor4);
 
 
 }
