@@ -181,8 +181,11 @@ static void flight_ctrl_cycle(void) {
 
         if(ch5 > 1700)
             is_armed_flag = true;
-        else
+        else{
             is_armed_flag = false;
+            pids_clear(&pids_h);
+        }
+
 
 
 

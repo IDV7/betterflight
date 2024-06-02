@@ -3,7 +3,7 @@
 
 void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
     int16_t motor_low_limit = 200;
-    int16_t motor_high_limit = 1600;
+    int16_t motor_high_limit = 1900;
 
     float pitch_offset_compensation = -80; //compensation because cg is not in the center of the quadcopter (only for pitch)
 
@@ -133,12 +133,13 @@ void mixing(mixer_handle_t *mixer_h, motor_output_t *motor_output){
 
 
 
+
 }
 
 
 void init_mixer_percentages(mixer_handle_t *mixer_h){
     mixer_h->percentages.roll = 1;
     mixer_h->percentages.pitch = 1.1f; // our quadcopter is not symmetrical, on pitch motors are closer together then on the roll
-    mixer_h->percentages.yaw = 1;
+    mixer_h->percentages.yaw = 1.0f;
     mixer_h->percentages.throttle = 1;
 }

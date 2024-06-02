@@ -29,6 +29,6 @@ typedef struct{
 
 void set_pids(flight_pids_t *drone_pids, flight_axis_int16_t *flight_measurements, set_points_t *set_ps, pids_val_t *pid_vals);
 void pid_init(flight_pids_t *drone_pids);
-
+void  pids_clear(flight_pids_t *drone_pids);
 
 #endif //BETTERFLIGHT_PID_CONTROLLER_H
