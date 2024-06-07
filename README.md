@@ -15,7 +15,7 @@ Quadcopter flight controller hardware, software and configurator.
   - The configurator is PC software, written in C++ using the [QT Framework](https://www.qt.io/product/qt6) that allows the user to change basic settings on the FC, such as rates, motor direction, motor order, PID values, ...
   - It also contains features to speed up the development such as a serial montitor, a flash button that will handle dfu, gyro/pid debugger.
 
-  ### [hardware](https://github.com/IDV7/betterflight/tree/main/hardware)
+  ### [hardware](https://github.com/IDV7/betterflight/tree/main/hardware) :
   - This contains the Schematics & PCB files the code is written for.
   - The hardware is kept compatible with [betaflight](https://betaflight.com/)
 
