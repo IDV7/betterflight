@@ -1,6 +1,9 @@
 # Betterflight
 Quadcopter flight controller hardware, software and configurator.
 
+## HDZero DVR - Demo
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/X28wEhDEceY/0.jpg)](https://www.youtube.com/watch?v=X28wEhDEceY)
+
 ## Project layout :
 - 3 different main folders exist, hardware, software and configurator. Each with there respective documents and there respective branch. The latest "unstable" changes are in these sub-main branches. [Main](https://github.com/IDV7/betterflight) is stable.
 
